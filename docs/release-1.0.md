@@ -30,4 +30,6 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 
 각 capability의 요구 수준을 실제 구현과 대조하고 재현 가능한 Evidence를 연결한다. 부분 구현·완료·미검증을 구분한다. 모든 capability를 이름 그대로 Item으로 생성하지 말고, 발견된 gap에 대해 독립적인 delta Item을 만든다.
 
-현재 이 레포는 구현 레포와 live deployment를 검증하지 않았다. [Implementation Map 템플릿](../templates/implementation-map.md)의 미검증 상태를 완료로 해석하지 않는다. 1.0의 public contract 범위와 최종 release gate 세부 AC는 아직 명시적으로 결정할 필요가 있다.
+현재 검증 스냅샷과 기준 revision은 [Implementation Map](implementation-map.md)에 둔다. 2026-09-18 조사에서는 Canonical Content·Publishing·Presentation은 현재 1.0 boundary를 충족하고, Authoring·Extensibility·Delivery는 부분 충족, Automation은 미충족으로 판정했다. 이 판정은 Implementation Map의 revision에 고정되며 구현 레포가 진행되면 다시 검증한다.
+
+이 문서 자체는 **1.0 Definition을 확정하는 설계 Item의 Evidence**가 될 수 있지만, 1.0 구현 완료 Evidence는 아니다. 1.0의 public contract 범위·compatibility policy·최종 release gate AC는 아직 명시적으로 결정할 필요가 있다.

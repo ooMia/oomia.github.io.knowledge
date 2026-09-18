@@ -29,17 +29,27 @@ Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, E
 - **Quality Requirements**: 적용되는 성능·신뢰성·품질 제약. 근거 없는 수치를 만들지 않는다.
 - **Global Definition of Done**: AC 충족, 적용 품질 검증, 필요한 코드와 지속 문서 통합, 관련 자동 검사 통과, 재현 가능한 Evidence 연결.
 
-설계 문서는 설계 정의 작업의 Evidence가 될 수 있다. 기능 구현이나 배포 성공은 코드·PR·테스트·실행 결과·배포 URL 등 별도 증거가 필요하다. README만으로 Implementation Map을 완료 처리하지 않는다.
+### Evidence 규칙
+
+Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하게 보여주는 자료**다.
+
+- 설계·계획 정의 자체가 Outcome이면 이 레포의 canonical 문서가 Evidence가 될 수 있다. `Publishing Platform 1.0 Definition`, `Project Planning Model`처럼 장기 규칙을 확정하는 Item은 관련 문서의 **immutable commit/permalink**를 연결한다.
+- `main` 문서 링크는 현재 canonical reference를 찾는 데 사용하고, 완료 시점의 증거를 고정해야 할 때는 commit SHA가 포함된 permalink나 해당 변경 commit/PR을 우선한다.
+- 기능 구현, 품질 검증, 실제 발행, deployment 성공은 설계 문서로 증명하지 않는다. 코드·테스트·PR/commit·실행 결과·배포 URL 등 책임 레포의 Evidence가 필요하다.
+- [Implementation Map](implementation-map.md)은 여러 implementation Evidence를 1.0 capability에 대응시킨 검증 스냅샷이다. 기준 revision 이후 코드가 바뀌면 재검증하기 전까지 최신 상태라고 가정하지 않는다.
 
 ## Source of Truth
 
 | 정보 | 소유 위치 |
 |---|---|
 | 제품 경계·설계 방향·계획 규칙·필드 의미·전역 DoD | 이 레포의 docs |
+| 1.0 capability별 검증 스냅샷 | 이 레포의 [Implementation Map](implementation-map.md) |
 | Iteration Goal 및 회고 | GitHub Project Status Update |
 | Status / Iteration / Work Type / Scope / Target Release / Objective 값 | GitHub Project fields |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
 | 구현·테스트·구체적인 계약 | 책임을 소유한 구현 레포 |
+
+GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 knowledge repository에 두고 Project README에는 canonical 문서 링크와 Project 운영 원칙만 남긴다.
 
 ## 릴리스와 시간
 
