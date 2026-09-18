@@ -62,4 +62,4 @@
 
 ## 수집 한계
 
-GitHub Project 실제 설정 및 구현 소스는 미조회다. 최신 문서에 없는 초기 제안은 원문 아카이브에서만 유지한다. 아카이브는 향후 규칙 수정 시 출처 비교용이며 기본 Chat 통합본에 포함하지 않는다.
+초기 대화 수집 자체는 GitHub Project 실제 설정과 구현 소스를 검증하지 않았다. 이후 2026-09-18에 engine/docs/site 구현 레포를 별도로 조사했으며 그 결과는 [Implementation Map](../docs/implementation-map.md)에 기록한다. GitHub Project의 live 필드·Item·Status Update는 여전히 이 provenance 수집 범위가 아니다. 최신 문서에 없는 초기 제안은 원문 아카이브에서만 유지한다.
