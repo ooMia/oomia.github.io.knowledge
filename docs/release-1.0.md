@@ -30,6 +30,6 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 
 각 capability의 요구 수준을 실제 구현과 대조하고 재현 가능한 Evidence를 연결한다. 부분 구현·완료·미검증을 구분한다. 모든 capability를 이름 그대로 Item으로 생성하지 말고, 발견된 gap에 대해 독립적인 delta Item을 만든다.
 
-현재 검증 스냅샷과 기준 revision은 [Implementation Map](implementation-map.md)에 둔다. 2026-09-20 재점검에서는 Canonical Content·Publishing·Presentation은 현재 1.0 boundary를 충족하고, Authoring·Extensibility·Delivery는 부분 충족으로 유지했다. Automation은 explicit Publish trigger 구현까지 진행되어 부분 충족으로 갱신했지만, `main`에서 성공한 실제 publish와 새 docs/site revision Evidence가 없으므로 아직 충족으로 판정하지 않는다. 이 판정은 Implementation Map의 revision에 고정되며 구현 레포가 진행되면 다시 검증한다.
+현재 검증 스냅샷과 기준 revision은 [Implementation Map](implementation-map.md)에 둔다. 2026-09-20 재점검에서는 Canonical Content·Automation·Publishing·Presentation이 현재 1.0 boundary를 충족하고, Authoring·Extensibility·Delivery는 부분 충족으로 유지했다. Automation은 explicit Publish trigger가 기존 repository-owned `docs:publish`에 연결되고 성공·실패·중복 실행 semantics가 검증된 것으로 판정한다. 동일 production snapshot에서 새 revision이 생기지 않는 idempotent no-op은 정상 publish 결과이며, revision 생성을 Evidence 목적으로 강제하지 않는다. 이 판정은 Implementation Map의 revision에 고정되며 구현 레포가 진행되면 다시 검증한다.
 
 이 문서 자체는 **1.0 Definition을 확정하는 설계 Item의 Evidence**가 될 수 있지만, 1.0 구현 완료 Evidence는 아니다. 1.0의 public contract 범위·compatibility policy·최종 release gate AC는 아직 명시적으로 결정할 필요가 있다.
