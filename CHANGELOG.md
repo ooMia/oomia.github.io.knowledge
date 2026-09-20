@@ -2,11 +2,13 @@
 
 ## 2026-09-21
 
-- docs repository를 특정 `content/` schema가 아닌 자유로운 document directory/tree로 재정의하고 consumer-specific path convention만 최소화하도록 D026 추가.
-- Obsidian과 Fumadocs Editor를 모두 필수 client로 보던 D022를 supersede하고, 실제 content corpus integration으로 editor 역할을 결정하는 D027 추가.
-- synthetic 최소 fixture 대신 기존 작성 content corpus를 integration corpus로 우선 사용하는 D028 추가.
-- Obsidian CSS snippets/custom callout/plugin extension과 Fumadocs Editor/custom component를 비교하고, Obsidian-friendly Markdown을 Site-side remark/rehype transform으로 Fumadocs UI에 연결하는 경로를 architecture/contract에 추가.
-- Engine/Site의 in-place refactor뿐 아니라 greenfield rebuild를 migration option으로 열고 Phase A의 keep/adapt/retire evidence로 결정하도록 Open Questions/Transition Guide 갱신.
+- D026을 정정해 docs layout의 자유가 free-form만을 뜻하지 않고 strict directory/path/frontmatter convention을 의도적으로 강제하는 구현도 포함하도록 확정.
+- D027을 유지하되 기존 corpus가 이미 Obsidian 기반이라는 점을 반영해 basic Obsidian authoring 검증은 제외하고 Fumadocs Editor의 custom-component authoring 이점을 핵심 비교점으로 좁힘.
+- D028에 따라 synthetic 최소 fixture보다 기존 작성 content corpus를 Fumadocs/Site integration corpus로 우선 사용.
+- D029로 Obsidian-native custom syntax/CSS/plugin bridge를 1.0 핵심 고려사항에서 제외.
+- D030으로 JavaScript/TypeScript repository의 전역 toolchain entry point를 Vite+ `vp`로 확정하고 [Development Toolchain](docs/development-toolchain.md) 추가.
+- D031로 monorepo-ready/package-light repository policy를 확정하고 [Repository Design & Maintenance](docs/repository-design.md) 추가.
+- D032로 Engine은 legacy tree를 계속 다듬는 방식이 아니라 same-history greenfield scratch build를 기본 migration 전략으로 확정.
 - 급진적 architecture 변경의 context-switch 비용을 줄이기 위해 [Architecture Transition](docs/architecture-transition.md)을 Active migration directive로 추가하고 Engine/Site/Docs의 stop/keep/adapt/retire 규칙, phased migration, #13/#14 처리 기준을 명문화.
 - CONTEXT/AGENTS/README/Project README template에서 migration 작업이 transition guide를 먼저 읽도록 routing을 변경.
 - Project Fields의 Persistence/Publishing/Publishable Projection 정의를 Git-backed workspace와 canonical docs revision 기준으로 수정하고, field name `Publishable Projection`이 generated docs ownership을 뜻하지 않음을 명시.
@@ -14,7 +16,7 @@
 - Planning Model의 SoT에 local working tree와 durable docs Git revision을 추가하고 Active transition 중 Item이 migration safety rule을 따르도록 명시.
 - D025로 새 vertical slice 검증 전 big-bang legacy 제거를 금지하고, 기존 Issue/branch를 현재 Knowledge와 reconcile한 뒤 진행하도록 결정.
 - canonical content architecture를 Git-backed local filesystem workspace로 전환하고 `ooMia/oomia.github.io.docs`를 generated projection에서 durable canonical content remote로 승격(D021).
-- 1.0 authoring client를 Obsidian + Fumadocs Editor로 확정하고 Engine을 Payload/PostgreSQL CMS가 아닌 workspace validation/Git/publishing orchestrator로 재정의(D022).
+- 1.0 authoring client를 Obsidian + Fumadocs Editor로 두는 초기 D022를 기록했으며, 같은 날 후속 검토에서 D027이 이를 supersede해 editor 역할을 다시 열어둠.
 - publishing을 DB snapshot/export에서 workspace validation → Site consumer verification → docs commit/push/revision linkage로 변경(D023).
 - Fumadocs built-in component/editor capability를 우선 재사용하며 독립 `@oomia/content-components` React library bootstrap을 1.0 선행 과제에서 제거(D024).
 - Release 1.0, Content Authoring Contract, Implementation Map, Open Questions, Project Orchestration, README/CONTEXT/handoff를 새 filesystem architecture에 맞춰 재정렬.
