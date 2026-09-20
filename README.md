@@ -18,6 +18,8 @@
 | Markdown/MDX 저장·편집·발행 수준 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
 | MDX component manifest 계획 | [Content Component Manifest Schema](docs/content-component-schema.md) |
 | 목표·Item·Issue·완료 판정 | [Planning Model](docs/planning-model.md) |
+| Issue activation / Project·Development 자동화 | [Project Orchestration](docs/project-orchestration.md) |
+| Issue/PR label taxonomy | [Labels](docs/labels.md) |
 | Scope / Objective / Work Type 선택 | [Fields](docs/fields.md) |
 | 1.0 제품 경계와 제외 범위 | [Release 1.0](docs/release-1.0.md) |
 | 실제 구현과 1.0 gap | [Implementation Map](docs/implementation-map.md) |
