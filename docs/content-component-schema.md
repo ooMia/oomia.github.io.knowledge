@@ -13,6 +13,17 @@
 
 manifest의 JSON 형태는 [content-component-manifest.schema.json](../schemas/content-component-manifest.schema.json)으로 검증한다.
 
+## Package surface 경계
+
+public package는 최소한 다음 두 surface를 구분한다.
+
+1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
+2. **Renderer surface**: Site가 실제 MDX를 렌더링하기 위한 implementation을 제공할 수 있다. framework-specific dependency는 이 surface에 한정한다.
+
+Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
+
+초기 rollout은 Site repository 안에서 package boundary와 renderer consumption을 먼저 검증하고, Engine adoption은 별도 Issue/PR로 나눌 수 있다. 이 순서는 canonical source/save-path 작업과 public component contract 작업을 독립적으로 진행하기 위한 의도된 경계다.
+
 ## 최소 정보
 
 각 component는 다음을 기술한다.
