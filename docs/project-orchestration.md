@@ -22,7 +22,7 @@ Repository 내부 Development branch 생성에는 PAT을 사용하지 않는다.
 | `oomia.github.io.knowledge` | 사용 | `main` | 작은 문서·정책 정리는 `main` 직접 반영 가능. 큰 변화는 PR 사용. branch가 필요 없는 Item은 `development: false` |
 | `oomia.github.io.engine` | 사용 | `develop` | 일반 implementation Issue |
 | `oomia.github.io` | 사용 | `develop` | Site implementation Issue도 pre-main integration branch인 `develop`에서 시작 |
-| `oomia.github.io.docs` | 미사용 | - | generated projection이며 개발 Issue를 소유하지 않음 |
+| `oomia.github.io.docs` | 기본적으로 미사용 | - | canonical content remote. 일반 Article/content edit는 Git content revision으로 관리하고, repository-level tooling/policy 변경이 생길 때만 implementation Issue 필요 여부를 별도 판단 |
 
 Site repository에는 verified-signature repository rule이 적용되어 있어 automation 파일 자체도 서명된 commit으로 반영해야 한다.
 
@@ -68,6 +68,7 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 - 역할: GitHub GraphQL `createLinkedBranch`로 현재 repository에 Issue-linked Development branch 생성
 - knowledge base: `main`
 - engine/site base: `develop`
+- docs는 일반 content edit를 위해 Issue-linked branch를 자동 생성하지 않는다. canonical content branch/PR workflow가 필요해질 경우 Q016의 Git publish semantics 결정에 따라 별도 설계한다.
 - `project-seed.development === false`이면 생략
 
 Project PAT은 이 job에 전달하지 않는다.
