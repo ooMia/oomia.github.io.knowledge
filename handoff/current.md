@@ -152,7 +152,7 @@ Updated: 2026-09-20 (Asia/Seoul)
 
 ## Next safe action
 
-1. 독립 repository의 GitHub owner/name/visibility를 확정한다. 우선 후보는 public [`ooMia/content-components`](https://github.com/ooMia/content-components)다.
+1. 독립 repository의 GitHub owner/name/visibility를 확정한다. 우선 후보 이름은 `ooMia/content-components`이며 아직 repository가 존재한다고 가정하지 않는다.
 2. package export surface를 확정한다. 현재 우선 설계는 framework-neutral root contract + React renderer subpath + manifest subpath다.
 3. initial version과 pre-1.0 compatibility policy, release trigger/transport를 확정한다.
 4. repository를 생성한 뒤 기존 프로젝트의 generic orchestration Action/branch 규칙 중 재사용 가치가 있는 부분만 이관한다.
