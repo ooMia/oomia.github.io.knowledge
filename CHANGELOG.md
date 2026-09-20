@@ -2,6 +2,11 @@
 
 ## 2026-09-21
 
+- docs repository를 특정 `content/` schema가 아닌 자유로운 document directory/tree로 재정의하고 consumer-specific path convention만 최소화하도록 D026 추가.
+- Obsidian과 Fumadocs Editor를 모두 필수 client로 보던 D022를 supersede하고, 실제 content corpus integration으로 editor 역할을 결정하는 D027 추가.
+- synthetic 최소 fixture 대신 기존 작성 content corpus를 integration corpus로 우선 사용하는 D028 추가.
+- Obsidian CSS snippets/custom callout/plugin extension과 Fumadocs Editor/custom component를 비교하고, Obsidian-friendly Markdown을 Site-side remark/rehype transform으로 Fumadocs UI에 연결하는 경로를 architecture/contract에 추가.
+- Engine/Site의 in-place refactor뿐 아니라 greenfield rebuild를 migration option으로 열고 Phase A의 keep/adapt/retire evidence로 결정하도록 Open Questions/Transition Guide 갱신.
 - 급진적 architecture 변경의 context-switch 비용을 줄이기 위해 [Architecture Transition](docs/architecture-transition.md)을 Active migration directive로 추가하고 Engine/Site/Docs의 stop/keep/adapt/retire 규칙, phased migration, #13/#14 처리 기준을 명문화.
 - CONTEXT/AGENTS/README/Project README template에서 migration 작업이 transition guide를 먼저 읽도록 routing을 변경.
 - Project Fields의 Persistence/Publishing/Publishable Projection 정의를 Git-backed workspace와 canonical docs revision 기준으로 수정하고, field name `Publishable Projection`이 generated docs ownership을 뜻하지 않음을 명시.
