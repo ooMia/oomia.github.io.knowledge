@@ -1,6 +1,6 @@
 # Publishing Platform 1.0
 
-상태: 2026-09-21 Git-backed content workspace와 Obsidian + Fumadocs Editor authoring 모델을 반영한 1.0 제품 경계.
+상태: 2026-09-21 Git-backed document workspace와 editor-selection/integration 검증 방향을 반영한 1.0 제품 경계.
 
 ## Release Goal
 
@@ -10,8 +10,8 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
-| Authoring | Obsidian과 Fumadocs Editor가 같은 local content workspace를 편집할 수 있다. Visual Editor가 표현하지 못하는 source는 Obsidian/IDE 등 Source path에서 손실 없이 유지할 수 있다. |
-| Canonical Content | Markdown/MDX body, frontmatter metadata, assets가 Git-backed filesystem workspace에 존재한다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
+| Authoring | 선택된 authoring workflow가 자유로운 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. Obsidian은 primary candidate이고 Fumadocs Editor는 component-aware visual candidate이며, 최종 editor 선택은 실제 corpus integration evidence로 결정한다. |
+| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. 특정 subtree에 consumer-specific convention을 둘 수 있지만 docs repository 전체에 단일 Article/path schema를 강제하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
 | Extensibility | Fumadocs built-in content component를 우선 재사용하고 custom component가 필요한 경우 source semantics와 editor/renderer integration을 명시할 수 있다. Visual adapter 유무가 canonical support를 결정하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
 | Publishing | local workspace를 검증하고 실제 Site consumer build를 통과시킨 뒤 canonical docs revision으로 확정한다. DB → Markdown export나 Visual Editor codec round-trip을 publish prerequisite로 요구하지 않는다. |
@@ -25,8 +25,8 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 ```text
 Obsidian ──────────┐
                    │
-Fumadocs Editor ───┼──> local Git content workspace
-                   │             │
+Fumadocs Editor ───┼──> local Git document workspace
+                   │      (editor role under evaluation)
 IDE / Agent ───────┘             │ validate / commit / push
                                  ▼
                         oomia.github.io.docs
@@ -39,7 +39,7 @@ IDE / Agent ───────┘             │ validate / commit / push
                            GitHub Pages
 ```
 
-Engine은 workspace validation, Git/publish orchestration, Site consumer verification을 담당하는 containerizable tool/runtime이다.
+Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 containerizable tool/runtime이다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
