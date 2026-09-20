@@ -21,7 +21,7 @@
 | 레포 | 책임 |
 |---|---|
 | `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
-| `oomia.github.io.docs` | 변형 가능한 document directory/tree와 assets의 durable Git remote 및 shared revision history. consumer별 path convention은 허용하지만 repository 자체의 고정 application schema는 강제하지 않음 |
+| `oomia.github.io.docs` | document directory/tree와 assets의 durable Git remote 및 shared revision history. layout은 자유 tree부터 strict path/schema까지 구현 목적에 맞게 선택 가능하며 현재 Knowledge가 한 형태를 선결하지 않음 |
 | `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
@@ -29,7 +29,7 @@
 
 ## Canonical content workspace
 
-1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository는 특정 framework나 route 구조를 위해 설계된 고정 `content/` tree가 아니라, 다양한 Markdown-like 문서와 관련 자산을 담을 수 있는 유연한 directory tree다.
+1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository의 directory/path/layout 정책은 아직 확정하지 않는다. 완전 자유 tree, consumer별 discovery convention, strict application-specific layout 모두 유효한 구현 선택지다.
 
 ```text
 Obsidian ──────────────┐
@@ -52,22 +52,29 @@ Source editor / Agent ┘      frontmatter / assets
 
 - local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다.
 - 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
-- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있지만 모든 docs path가 Article schema를 따라야 하는 것은 아니다.
-- consumer가 필요하면 특정 subtree/path에 frontmatter 또는 naming convention을 요구할 수 있다. 이 규약은 consumer contract이지 docs repository 전체의 절대 layout contract가 아니다.
+- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있다.
+- consumer 또는 repository 자체가 필요하면 subtree 또는 repository-wide directory/path/frontmatter convention을 강제할 수 있다. 핵심은 어떤 layout도 사전에 금지하지 않고 실제 integration/maintenance 비용을 근거로 선택하는 것이다.
 - asset은 workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
 - Git history가 content revision history, diff, rollback의 기본 수단이다.
 - PostgreSQL/Payload state를 canonical content로 사용하지 않는다.
 
 ## Authoring boundary
 
-authoring client 선택은 아직 확정하지 않는다. 현재 핵심은 특정 Editor를 제품 경계로 고정하는 것이 아니라 **동일한 자유로운 docs workspace를 여러 authoring/rendering tool이 손실 없이 공유하는 integration framework**를 검증하는 것이다.
+authoring client 선택은 아직 확정하지 않는다. 기존 content corpus는 이미 Obsidian에서 작성되어 왔으므로 **Obsidian에서 기본 Markdown/file authoring이 가능한가**는 1.0의 주요 불확실성이 아니다.
+
+현재 비교의 핵심은 다음이다.
+
+- Obsidian을 primary editor로 유지했을 때 전체 authoring UX가 충분한가.
+- Fumadocs Editor가 custom MDX component를 더 쉽게 주입·편집하는 데 실질적인 우위를 제공하는가.
+- 선택한 editor와 Site/Fumadocs rendering layer가 동일 filesystem source를 불필요한 conversion 없이 공유할 수 있는가.
+- editor 선택이 docs repository의 layout이나 canonical source를 과도하게 제한하지 않는가.
 
 ```text
                          Git-backed docs workspace
                       /              |              \
                      /               |               \
                Obsidian        Fumadocs Editor      IDE / Agent
-             broad file UX      MDX-aware visual      source UX
+             proven source UX   component-aware UX    source UX
                      \               |               /
                       \              |              /
                           integration boundary
@@ -76,13 +83,9 @@ authoring client 선택은 아직 확정하지 않는다. 현재 핵심은 특�
                            Site consumer
 ```
 
-- **Obsidian**은 현재 primary editor 후보다. file navigation, Markdown/source editing, Properties/frontmatter, Live Preview, CSS snippets/theme/plugin ecosystem을 활용할 수 있다.
-- **Fumadocs Editor**는 MDX와 Fumadocs/custom component를 구조적으로 visual-edit하는 데 강점이 있는 후보다. editor 자체가 필수 architecture component라는 뜻은 아니다.
-- Obsidian의 CSS snippets와 custom callout은 스타일/Markdown primitive 확장에는 충분히 강력하지만, CSS만으로 arbitrary MDX/JSX component semantics를 구현하지는 못한다. 필요한 경우 Obsidian plugin Markdown post-processing 같은 별도 extension이 필요하다.
-- 따라서 가능한 경우 portable Markdown/Obsidian-friendly syntax를 canonical source로 두고 Site/Fumadocs 쪽 remark/rehype transformation으로 richer UI를 만드는 경로를 우선 검토한다.
-- 특정 authoring client가 지원하지 않는 syntax를 canonical workspace에서 삭제하거나 제한하는 근거로 사용하지 않는다.
-- 실제 editor 선정은 기존 content corpus를 import한 integration spike에서 authoring UX, component extensibility, source preservation, Site rendering 비용을 비교한 뒤 확정한다.
-- Engine은 full CMS나 editor framework를 재구현하지 않는다.
+Obsidian-specific custom syntax/CSS bridge는 1.0 필수 고려사항이 아니다. 향후 필요하면 별도 extension 문제로 다룬다.
+
+Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
@@ -133,15 +136,14 @@ Site revision linkage / delivery
 
 ## Fumadocs boundary
 
-Fumadocs는 **Site presentation/content processing**에서는 적극적인 재사용 후보이고, **authoring editor**로서는 Obsidian과 비교 중인 후보다.
+Fumadocs는 **Site presentation/content processing**의 주요 재사용 후보이며, authoring에서는 custom component 주입과 structured visual editing의 편의 때문에 Obsidian과 비교 중인 후보다.
 
-- Fumadocs UI/Core/MDX가 Site의 layout, search, Markdown/MDX processing, built-in components를 단순화하면 우선 활용한다.
-- Fumadocs MDX는 custom remark/rehype plugin을 허용하므로, Obsidian-friendly source syntax를 Site에서 richer component로 변환하는 adapter layer를 만들 수 있다.
-- Fumadocs Editor는 files를 source of truth로 유지하고 custom component specs를 제공하므로 component-aware visual editing이 실제 요구가 될 때 가치가 크다.
-- 반면 일반 document/file authoring과 styling만 필요하다면 Obsidian의 Live Preview, CSS snippets, custom callout, plugin ecosystem으로 충분할 수 있다.
-- 따라서 Fumadocs Editor를 1.0 필수 editor로 두지 않는다. Site integration과 Editor selection을 서로 분리해 판단한다.
+- Fumadocs UI/Core/MDX가 Site의 layout, search, Markdown/MDX processing, built-in/custom components를 단순화하면 우선 활용한다.
+- Fumadocs Editor는 files를 source of truth로 유지하고 custom component specs를 제공하므로 Oomia-specific component authoring이 늘어날 경우 중요한 이점이 될 수 있다.
+- Obsidian 기반 기존 corpus의 일반 authoring 호환성은 이미 확보되어 있으므로 1.0 spike의 초점은 Fumadocs integration과 editor 역할 결정에 둔다.
+- Fumadocs Editor를 1.0 필수 editor로 미리 확정하지 않는다.
 
-Fumadocs 자체 API가 canonical content contract는 아니다. canonical source는 자유로운 filesystem document tree와 consumer별 최소 contract다.
+Fumadocs 자체 API가 canonical content contract는 아니다. canonical source와 docs layout은 editor 선택과 분리한다.
 
 ## Component contract
 
