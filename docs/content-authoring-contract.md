@@ -8,7 +8,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 공식 정책:
 
-> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs repository 전체에 단일 application layout을 강제하지 않으며 consumer별 최소 convention만 둔다. authoring editor는 아직 확정하지 않고 Obsidian/Fumadocs Editor/IDE가 동일 source를 다룰 수 있는 integration을 우선 검증한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
+> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
 이 문서는 **Editing, Storage, Canonical Revision, Publishing**을 분리해 정의한다.
 
@@ -46,7 +46,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 canonical content의 물리적 표현은 local Git working tree의 files다.
 
 - Markdown/MDX-like document source는 파일 내용 자체다.
-- frontmatter는 publishable Article-like documents의 유력 metadata representation이지만 docs repository의 모든 파일에 공통 schema로 강제하지 않는다.
+- frontmatter는 publishable Article-like documents의 유력 metadata representation이다. repository 또는 consumer가 strict schema를 선택할 수 있고, 반대로 일부 path는 schema 밖에 둘 수도 있다. 어느 형태를 택할지는 layout decision에 따른다.
 - asset은 workspace-relative file 또는 정책상 허용된 durable external reference로 표현한다.
 - uncommitted working tree는 작성 중 draft state다.
 - 다른 환경과 공유·재현하는 durable canonical state는 `ooMia/oomia.github.io.docs`의 commit SHA다.
@@ -107,42 +107,50 @@ Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아�
 
 editor는 아직 확정하지 않는다. 1.0의 고정 계약은 **filesystem source가 editor보다 우선한다**는 점이다.
 
-### Obsidian — primary candidate
+### Obsidian
 
-Obsidian은 현재 가장 강한 primary-editor 후보다.
+기존 content corpus가 이미 Obsidian 기반으로 작성되어 있으므로 basic Markdown/file authoring compatibility는 1.0의 주요 불확실성이 아니다.
 
-- arbitrary directory tree를 vault로 직접 열 수 있다.
-- Markdown source, YAML Properties, file create/rename/delete, Live Preview를 제공한다.
-- CSS snippets와 CSS variables로 editor/reading appearance를 크게 조정할 수 있다.
-- `cssclasses` frontmatter로 document-level styling hook을 줄 수 있다.
-- custom callout을 CSS만으로 추가·스타일링할 수 있다.
-- plugin API의 Markdown post processor / code-block processor를 사용하면 CSS를 넘어 custom rendered elements도 만들 수 있다.
+Obsidian은 다음 경우 primary editor 후보로 충분하다.
 
-그러나 CSS는 **presentation layer**다. arbitrary MDX/JSX component의 props/children semantics를 CSS만으로 해석하지는 못한다. component-like syntax가 필요하면 portable Markdown primitive, Obsidian plugin, 또는 Site-side transformation이 필요하다.
+- 일반 Markdown/source 작성
+- file navigation / rename / create / delete
+- Properties/frontmatter
+- 기존 사용자 authoring workflow 유지
 
-### Fumadocs Editor — component-aware candidate
+Obsidian-native custom syntax, CSS snippet, plugin-based rich rendering은 향후 확장 수단일 수 있지만 **1.0 필수 contract가 아니다**.
 
-Fumadocs Editor는 visual MDX authoring과 custom component specs에 강점이 있다.
+### Fumadocs Editor
 
-- Markdown/MDX files를 source of truth로 직접 편집한다.
-- Fumadocs built-in/custom component의 structured visual editing을 제공한다.
-- external file changes와 merge하는 workflow를 지원한다.
-- embedded UI로 확장할 수 있다.
+Fumadocs Editor는 custom MDX component 주입과 structured visual editing을 쉽게 제공할 수 있다는 점 때문에 중요한 후보다.
 
-반면 Obsidian이 일반 authoring/file management/style UX를 충분히 해결한다면 Fumadocs Editor는 특정 MDX/component authoring gap을 채우는 optional tool이 될 수 있다.
+검증할 핵심:
 
-### Site-side bridge
+- 기존 Obsidian corpus를 같은 filesystem source로 다룰 수 있는가
+- custom component를 정의하고 authoring UI에 노출하는 비용이 낮은가
+- external edit와 visual edit 사이에서 source loss나 과도한 normalization이 없는가
+- Obsidian을 primary editor로 유지하는 경우보다 실제 UX/DX가 개선되는가
 
-authoring syntax와 final presentation을 같은 UI component syntax로 강제하지 않는다.
+Fumadocs Editor 내부 state는 canonical source를 대체하지 않는다.
 
-예를 들어 Obsidian-friendly callout/code-fence/directive를 canonical source로 유지하고, Site의 remark/rehype plugin에서 Fumadocs UI component로 변환하는 방식이 가능하다. Fumadocs MDX는 custom remark/rehype plugins를 지원하므로 이 경계를 실제 corpus로 검증한다.
+### Site integration
+
+Site presentation은 Fumadocs UI/Core/MDX를 적극 재사용할 수 있다. authoring editor와 Site renderer는 같은 product choice일 필요가 없다.
+
+예:
+
+- Obsidian primary editor + Fumadocs Site
+- Obsidian + optional Fumadocs Editor + Fumadocs Site
+- Fumadocs Editor 중심 + Fumadocs Site
+
+중 어떤 구성이 적합한지는 existing corpus와 custom component authoring evidence로 결정한다.
 
 ### Engine
 
-Engine은 1.0에서 full CMS나 editor host가 아니다.
+Engine은 1.0에서 full CMS나 editor framework가 아니다.
 
 - workspace discovery / validation
-- consumer-specific convention 검사
+- selected layout/convention validation
 - Git status / revision linkage
 - explicit publish action
 - Site consumer verification
@@ -150,9 +158,11 @@ Engine은 1.0에서 full CMS나 editor host가 아니다.
 
 를 담당한다.
 
+Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존 실험/legacy implementation으로만 취급한다.
+
 ## Metadata contract
 
-publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. 다만 docs repository 전체에 동일 frontmatter schema를 강제하지 않는다.
+publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. docs layout 결정에 따라 repository-wide 또는 subtree-specific schema를 강제할 수 있다.
 
 최소 공통 예:
 
@@ -165,7 +175,7 @@ draft: true
 ---
 ```
 
-정확한 required/optional field schema는 해당 consumer subtree의 implementation contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
+정확한 required/optional field schema와 적용 범위는 선택된 docs layout/consumer contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
 
 외부 source에서 import할 경우 canonical frontmatter로 normalize할 수 있지만 import adapter의 source-specific metadata를 장기 SoT로 유지하지 않는다.
 
