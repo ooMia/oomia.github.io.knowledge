@@ -24,6 +24,7 @@ Updated: 2026-09-20 (Asia/Seoul)
 - Docs `ooMia/oomia.github.io.docs`
   - generated projection으로 취급하며 Issue activation automation 대상이 아니다.
 - Knowledge `ooMia/oomia.github.io.knowledge`
+  - repository visibility는 현재 `public`이다.
   - 작은 문서·정책 변경은 `main` 직접 반영 가능하고, 큰 변화는 PR을 사용한다.
   - Issue activation의 Development base는 `main`이다.
 
@@ -48,6 +49,7 @@ Updated: 2026-09-20 (Asia/Seoul)
 - Scope가 실제 multi-select로 적용되었는지 확인한다.
 - 실제 Target Release option / 현재 Iteration / 현재 Goal은 사용 시점에 Project에서 확인한다.
 - Project README가 canonical index 형태로 실제 적용되어 있는지 확인한다.
+- public Knowledge repository에 raw `provenance/conversations.json`을 계속 둘지 결정한다.
 
 ## Reverify before changing live state
 
