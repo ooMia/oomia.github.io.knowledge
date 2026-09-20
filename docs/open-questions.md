@@ -9,7 +9,7 @@
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | public content-component package의 실제 이름, registry, release transport, semantic compatibility policy | architecture는 versioned public package를 요구하지만 npm registry/package name/version coupling은 구현 시 결정 |
+| Q011 | public content-component package의 실제 이름, registry, initial version, release transport, semantic compatibility policy | public npm registry가 현재 우선 후보다. anonymous install이 가능하고 GitHub Actions Trusted Publishing/OIDC + provenance를 사용할 수 있다. GitHub Packages npm registry는 public package install에도 인증이 필요해 consumer friction이 더 크다. 최종 package scope/name, registry, initial version, release trigger, compatibility policy는 사용자 결정 필요 |
 | Q012 | component manifest schema의 최종 runtime API | [planning schema](content-component-schema.md)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
