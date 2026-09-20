@@ -2,42 +2,79 @@
 
 GitHub repository Issue가 활성화될 때 [Publishing Platform Project #11](https://github.com/users/ooMia/projects/11)의 Item과 Development branch를 자동으로 초기화한다.
 
+## Authentication
+
+Project #11은 user-owned Project이므로 Actions의 repository-scoped `GITHUB_TOKEN`으로 접근할 수 없다. 각 Issue-owning repository에 classic PAT을 `PROJECT_TOKEN` secret으로 저장한다.
+
+현재 automation에 필요한 classic PAT scope는 다음 두 개다.
+
+- `project`: Project #11 조회·Item 추가·custom field 수정
+- `repo`: private repository Issue를 Project item으로 조회하고 필요한 repository 리소스에 접근
+
+`workflow`, `admin:*`, `user`, `packages` scope는 현재 runtime automation에 필요하지 않다. PAT로 workflow 파일 자체를 생성·수정하는 self-modifying workflow는 구현하지 않는다.
+
+Repository 내부 Development branch 생성에는 PAT을 사용하지 않는다. 각 workflow의 `GITHUB_TOKEN`에 최소 권한만 부여한다.
+
 ## Repository policy
 
 | Repository | Issue activation Action | Development base | 비고 |
 |---|---|---|---|
-| `oomia.github.io.knowledge` | 사용 | `main` | cross-repo coordination Issue도 소유 가능 |
+| `oomia.github.io.knowledge` | 사용 | `main` | 설계/coordination Issue. branch가 필요 없는 Item은 `development: false` |
 | `oomia.github.io.engine` | 사용 | `develop` | 일반 implementation Issue |
-| `oomia.github.io` | 미사용 | `main` | Issues가 비활성화되어 cross-repo linked branch/PR 대상으로만 사용 |
+| `oomia.github.io` | 사용 | `main` | Issues 활성화됨. Site implementation Issue도 동일 lifecycle 사용 |
 | `oomia.github.io.docs` | 미사용 | - | generated projection이며 개발 Issue를 소유하지 않음 |
 
-## Secret
+Site repository에는 verified-signature repository rule이 적용되어 있어 automation 파일 자체도 서명된 commit으로 반영해야 한다.
 
-Issue를 Project #11에 추가하고 custom field를 수정하려면 각 Action 실행 repository에 `PROJECTS_TOKEN` secret을 추가한다.
+## Workflow와 Node script의 역할
 
-초기 구현은 GitHub 공식 Projects Actions 문서와 호환되는 **classic PAT**를 기준으로 한다.
+GitHub Actions workflow 정의는 `.github/workflows/*.yml`이 소유한다. YAML은 trigger, runner, job permission, secret 전달을 정의한다.
 
-- `project`: user-owned Project #11 조회/수정
-- `repo`: private repository Issue와 cross-repository Development branch 접근
+복잡한 GraphQL/JSON 처리는 repository script로 분리하고 YAML의 `run`에서 Node로 실행한다.
 
-PAT는 Project/Development orchestration step에만 주입한다. build, test, publish, deploy job에는 전달하지 않는다.
+```text
+issue-activated.yml
+├─ project job
+│  └─ node .github/scripts/sync-project.mjs
+└─ development job
+   └─ node .github/scripts/create-development-branch.mjs
+```
 
-`PROJECTS_TOKEN`이 없으면 Project #11 동기화와 cross-repository branch 생성은 warning 후 skip한다. 현재 repository 내부 Development branch는 workflow의 `GITHUB_TOKEN`으로 생성할 수 있다.
+이는 GitHub Actions의 별도 파일 형식이 아니라 workflow가 runner에서 repository script를 실행하는 일반적인 방식이다.
 
-## Activation trigger
+## Issue activation
 
-workflow는 Issue의 `opened`, `reopened`, `edited`를 관찰한다.
+workflow는 `opened`, `reopened`, `edited` 및 수동 `workflow_dispatch`를 지원한다.
 
-실행 조건:
+자동 실행 조건:
 
-1. Issue가 `open` 상태다.
+1. Issue가 open 상태다.
 2. 제목이 `draft:`로 시작하지 않는다.
 
-따라서 connector fallback draft가 생성 순간 잠시 open이어도 Development branch가 생성되지 않는다. 제목 제거와 reopen의 순서가 달라도 최종적으로 active 상태가 되면 idempotent하게 수렴한다.
+따라서 fallback draft가 생성 순간 잠시 open이어도 Project 등록과 branch 생성이 발생하지 않는다.
+
+### Project job
+
+- secret: `PROJECT_TOKEN`
+- Project: `ooMia/projects/11`
+- 역할: Item 추가 및 Status / Iteration / Work Type / Scope / Objective / Target Release 초기화
+- field ID와 option ID는 runtime에 이름으로 조회
+- 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
+
+### Development job
+
+- token: repository `GITHUB_TOKEN`
+- permissions: `contents: write`, `issues: write`
+- 역할: GitHub GraphQL `createLinkedBranch`로 현재 repository에 Issue-linked Development branch 생성
+- knowledge/site base: `main`
+- engine base: `develop`
+- `project-seed.development === false`이면 생략
+
+Project PAT은 이 job에 전달하지 않는다.
 
 ## Project seed
 
-사람이 읽는 `Work Metadata`도 fallback으로 지원하지만, 새 Issue는 hidden JSON을 canonical initialization seed로 사용한다.
+새 Issue는 hidden JSON을 Project 초기화 seed로 가진다.
 
 ```md
 <!-- project-seed
@@ -52,52 +89,37 @@ workflow는 Issue의 `opened`, `reopened`, `edited`를 관찰한다.
 -->
 ```
 
-이 값은 **초기화 seed**이며 활성화 이후 Project field의 SoT는 Project #11이다.
+지원 키:
 
-지원 field:
+- `status`
+- `iteration`
+- `workType`
+- `scope`
+- `objective`
+- `targetRelease`
+- `branch` — 기본 branch naming을 override할 때만 사용
+- `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
 
-- Status
-- Iteration
-- Work Type
-- Scope
-- Target Release
-- Objective
+seed는 activation 초기값 전달용이다. 활성화 이후 Project field의 canonical state는 Project #11이다.
 
-field ID와 option ID는 실행 시 이름으로 조회한다. Project schema가 바뀌었는데 seed가 존재하면 조용히 무시하지 않고 Action을 실패시켜 drift를 드러낸다.
+## Development branch naming
 
-## Development branch
-
-기본적으로 Issue repository에 다음 규칙으로 linked branch를 생성한다.
+기본 형식:
 
 ```text
-<issue-number>-<work-type>-<slug>
+<issue-number>-<conventional-type>-<title-slug>
 ```
 
-repository별 base branch는 workflow에서 정의한다.
+예:
 
-cross-repository coordination은 seed에 `development`를 추가한다.
-
-```json
-{
-  "development": [
-    {
-      "repository": "ooMia/oomia.github.io.engine",
-      "base": "develop",
-      "branch": "2-feat-project-orchestration-automation"
-    },
-    {
-      "repository": "ooMia/oomia.github.io",
-      "base": "main",
-      "branch": "2-feat-project-orchestration-automation"
-    }
-  ]
-}
+```text
+13-feat-decouple-canonical-source-from-visual-editor-constraints
 ```
 
-GitHub의 `createLinkedBranch` mutation은 기존 branch를 Issue에 사후 연결할 수 없으므로 **Issue 활성화 전에 branch를 만들지 않는 규칙**이 중요하다. 이미 존재하지만 연결되지 않은 branch를 발견하면 Action은 새 branch를 만들지 않고 migration warning을 남긴다.
+branch는 Issue 활성화 전 미리 만들지 않는다. GitHub `createLinkedBranch`로 생성해야 Development 관계도 함께 만들어진다.
+
+이미 같은 이름의 branch가 존재하지만 Issue와 연결되어 있지 않다면 automation은 이를 자동 재사용하지 않고 migration error를 낸다.
 
 ## Manual replay
 
-PAT을 나중에 추가했거나 Project field를 다시 초기화해야 하면 Actions UI의 `workflow_dispatch`에서 Issue 번호를 전달한다.
-
-Project item 추가는 GitHub API 자체가 existing item ID를 반환하므로 idempotent하고, field update와 linked branch 검사는 재실행 가능한 형태로 작성한다.
+PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상태를 확인하려면 Actions UI에서 `Issue activation` workflow를 수동 실행하고 `issue_number`를 전달한다.
