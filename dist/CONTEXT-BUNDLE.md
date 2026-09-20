@@ -20,7 +20,7 @@ Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 tr
 
 - canonical Article content는 Git-backed local filesystem workspace의 Markdown/MDX + frontmatter/assets로 보존한다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
-- Obsidian과 Fumadocs Editor는 동일 content workspace를 편집하는 authoring client다.
+- authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
 - Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
 - storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
 - Fumadocs built-in component/tooling을 우선 재사용하며 custom component/shared package는 실제 필요가 생길 때만 도입한다.
@@ -55,10 +55,10 @@ Content 관련 구현을 계획하거나 수정할 때:
 3. Fumadocs Editor가 표현하지 못하는 syntax를 삭제/정규화해서 손실시키기보다 Obsidian/IDE Source path를 유지한다.
 4. uncommitted working tree와 committed docs canonical revision을 구분한다.
 5. publish는 DB export보다 validation / Git revision / Site consumer verification에 집중한다.
-6. Fumadocs built-in component를 우선 사용하고 custom wrapper/library를 불필요하게 만들지 않는다.
+6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. Obsidian-native source syntax와 Site-side remark/rehype mapping을 먼저 검토한다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine/Site를 greenfield로 다시 세우는 안도 Phase A evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 
 ## 프로젝트 협업·응답 원칙
@@ -176,10 +176,11 @@ IDE / Agent ───────┘             │ validate / commit / push
 
 ### Authoring
 
-- Obsidian과 Fumadocs Editor는 동일 working tree를 편집하는 1급 authoring client다.
+- editor는 아직 확정하지 않는다. Obsidian은 broad file/Markdown UX의 primary candidate이고, Fumadocs Editor는 MDX/custom-component-aware visual editing candidate다.
+- 핵심 검증 대상은 두 editor를 모두 필수로 만드는 것이 아니라, 동일 docs workspace를 authoring tool과 Site가 손실 없이 공유하는 integration framework다.
 - Fumadocs Editor가 표현하지 못하는 source 때문에 canonical syntax 범위를 줄이지 않는다.
-- Source-level editing은 Obsidian/IDE/Agent로 유지한다.
-- full CMS를 직접 재구현하지 않는다.
+- Source-level editing은 Obsidian/IDE/Agent로 항상 가능해야 한다.
+- full CMS나 자체 editor framework를 직접 재구현하지 않는다.
 
 ### Engine
 
@@ -221,9 +222,9 @@ Docs repository는 ownership이 가장 크게 바뀐다.
 > generated document projection
 
 현재:
-> canonical content Git remote + durable revision history
+> 자유롭게 변형 가능한 document directory/tree + durable Git revision history
 
-일반 Article edit 자체를 repository implementation Issue로 다룰 필요는 없다. 다만 layout/schema/tooling/policy 변경은 구현 작업으로 추적할 수 있다.
+Docs는 특정 `content/` path, Article schema, route 구조를 repository 전체에 강제하지 않는다. Site/Engine 같은 consumer가 필요한 subtree/path convention은 정의할 수 있지만 이는 consumer contract다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
 
 ## 4. Repository별 migration impact
 
@@ -331,26 +332,21 @@ Site 구현자가 과거 component-package 계획을 보고 별도 library부터
 - Site의 docs consumption 방식 조사
 - 현재 publish workflow에서 generic 부분과 Payload coupling 분리
 
-### Phase B — Prove the new workspace
+### Phase B — Prove the authoring/rendering integration
 
-동일 fixture를 하나 만든다.
+synthetic 최소 fixture를 먼저 설계하지 않는다. 기존에 작성한 실제 content corpus를 docs workspace로 import하여 다양한 Markdown 구조, frontmatter, links, assets, code blocks, legacy syntax를 한 번에 노출시킨다.
 
-최소 포함:
+검증 목표:
 
-- YAML frontmatter
-- 일반 Markdown
-- Fumadocs built-in component 최소 1개
-- workspace-relative asset
-- intentionally broken draft
-- Visual Editor가 완전히 처리하지 못할 수 있는 source fixture
+- existing corpus를 Obsidian vault로 열었을 때 별도 migration 없이 유용한 authoring UX가 나오는가
+- Obsidian의 Properties / Live Preview / CSS snippets / custom callout만으로 필요한 visual authoring 수준을 어디까지 충족하는가
+- arbitrary MDX/custom component가 필요할 때 Obsidian plugin extension과 Fumadocs Editor 중 어느 쪽이 더 단순한가
+- Fumadocs UI/Core/MDX가 동일 source를 Site에서 자연스럽게 소비하는가
+- Obsidian-friendly Markdown syntax를 remark/rehype adapter로 richer Fumadocs UI에 mapping할 수 있는가
+- external edits가 source loss나 강제 normalization을 일으키지 않는가
+- docs tree의 기존 자유도를 유지하면서 consumer-specific path convention만 최소로 둘 수 있는가
 
-검증:
-
-- Obsidian에서 edit/create/rename/delete 가능
-- Fumadocs Editor에서 지원 content visual edit 가능
-- 한 client의 외부 변경을 다른 client가 source loss 없이 받아들임
-- draft source가 publish 전까지 보존됨
-- Site build가 canonical workspace를 소비함
+synthetic fixture는 intentionally broken source, edge-case component, encoding/path edge case처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
 
 ### Phase C — Rewire publishing
 
@@ -376,6 +372,8 @@ Site 구현자가 과거 component-package 계획을 보고 별도 library부터
 - **Silent normalization 금지**: Fumadocs/Obsidian 간 이동에서 unsupported source가 조용히 손실되면 migration 실패다.
 - **Site verification 생략 금지**: file parse 성공만으로 Publishable 판정을 내리지 않는다.
 - **Framework rewrite 금지**: Fumadocs 도입을 이유로 Astro 등 이미 동작하는 Site 기반을 불필요하게 전면 교체하지 않는다.
+- **Editor lock-in 금지**: Obsidian/Fumadocs Editor 중 하나를 integration evidence 없이 canonical editor로 고정하지 않는다.
+- **Repository layout overconstraint 금지**: docs 전체에 단일 application-specific directory/frontmatter schema를 강제하지 않는다.
 - **Legacy sunk-cost bias 금지**: 과거 구현 유지가 새 모델을 더 복잡하게 만들면 제거를 우선 검토한다.
 - **Unverified convenience assumption 금지**: Obsidian plugin/Fumadocs 기능을 문서나 실제 spike 없이 canonical capability로 가정하지 않는다.
 
@@ -385,22 +383,38 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 1. 이 문서
 2. Architecture (`docs/architecture.md`)
-3. Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)
-4. Release 1.0 (`docs/release-1.0.md`)
-5. Implementation Map (`docs/implementation-map.md`)
-6. Current Handoff (`handoff/current.md`)
-7. 변경 대상 repository의 최신 Issue/branch/code/test
+3. Open Questions (`docs/open-questions.md`)에서 editor / layout / rebuild decision gate 확인
+4. Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)
+5. Release 1.0 (`docs/release-1.0.md`)
+6. Implementation Map (`docs/implementation-map.md`)
+7. Current Handoff (`handoff/current.md`)
+8. 변경 대상 repository의 최신 Issue/branch/code/test
 
 과거 Issue body나 branch code가 위 문서와 충돌하면 **현재 canonical Knowledge가 목표를 소유하고, 과거 구현은 migration input**으로 취급한다.
 
 단, 실제 live repository state와 미push local work는 임의로 덮어쓰지 않는다.
+
+## 10.5 Greenfield rebuild option
+
+Engine 또는 Site를 기존 구조에서 점진적으로 뜯어고치는 것만이 정답은 아니다.
+
+다음 조건이면 **새 target을 기준으로 greenfield skeleton을 만들고 legacy에서 필요한 부분만 가져오는 방식**을 허용한다.
+
+- legacy abstraction을 제거하는 비용이 새 구현보다 크다.
+- Payload/PostgreSQL coupling 때문에 workspace boundary를 검증하기 어렵다.
+- 재사용 가능한 코드가 command runner, evidence, Git verification처럼 작고 독립적이다.
+- 기존 테스트 대부분이 target behavior보다 legacy implementation detail을 고정한다.
+
+반대로 Site처럼 이미 canonical docs rendering/delivery Evidence가 있고 새 target과 구조적 충돌이 적다면 incremental migration을 우선한다.
+
+greenfield 여부는 아직 결정되지 않았다. Phase A에서 repository별 keep/adapt/retire 비율과 dependency graph를 확인한 뒤 결정한다.
 
 ## 11. Transition completion criteria
 
 다음이 모두 충족되면 이 transition guide를 Active에서 Completed/Archived 상태로 바꿀 수 있다.
 
 - Docs repository가 canonical content remote로 실제 운영된다.
-- Obsidian + Fumadocs Editor가 같은 workspace에서 검증된다.
+- 선택된 authoring workflow가 실제 기존 content corpus에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
 - Engine target path가 Payload/PostgreSQL 없이 workspace를 검증·publish할 수 있다.
 - Site가 새 canonical content revision을 실제 build/deploy한다.
 - publish Evidence가 docs SHA + Engine/Site revision + delivery result로 연결된다.
@@ -417,7 +431,7 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 # Architecture
 
-상태: 2026-09-21 Git-backed content workspace와 Obsidian + Fumadocs Editor authoring 모델을 반영.
+상태: 2026-09-21 Git-backed document workspace와 editor/integration 재검토 방향을 반영.
 
 ## 원칙
 
@@ -438,7 +452,7 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 | 레포 | 책임 |
 |---|---|
 | `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
-| `oomia.github.io.docs` | canonical Markdown/MDX content와 metadata/assets의 durable Git remote 및 shared revision history |
+| `oomia.github.io.docs` | 변형 가능한 document directory/tree와 assets의 durable Git remote 및 shared revision history. consumer별 path convention은 허용하지만 repository 자체의 고정 application schema는 강제하지 않음 |
 | `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
@@ -446,7 +460,7 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 ## Canonical content workspace
 
-1.0의 canonical content representation은 **Git-backed filesystem workspace**다.
+1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository는 특정 framework나 route 구조를 위해 설계된 고정 `content/` tree가 아니라, 다양한 Markdown-like 문서와 관련 자산을 담을 수 있는 유연한 directory tree다.
 
 ```text
 Obsidian ──────────────┐
@@ -469,34 +483,37 @@ Source editor / Agent ┘      frontmatter / assets
 
 - local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다.
 - 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
-- Article body는 Markdown/MDX source 자체다.
-- title, description, author, draft 등 문서 단위 metadata는 1.0에서 frontmatter를 canonical representation으로 사용한다.
-- asset은 content workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
+- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있지만 모든 docs path가 Article schema를 따라야 하는 것은 아니다.
+- consumer가 필요하면 특정 subtree/path에 frontmatter 또는 naming convention을 요구할 수 있다. 이 규약은 consumer contract이지 docs repository 전체의 절대 layout contract가 아니다.
+- asset은 workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
 - Git history가 content revision history, diff, rollback의 기본 수단이다.
 - PostgreSQL/Payload state를 canonical content로 사용하지 않는다.
 
 ## Authoring boundary
 
-Obsidian과 Fumadocs Editor는 같은 canonical workspace를 바라보는 서로 다른 authoring client다.
+authoring client 선택은 아직 확정하지 않는다. 현재 핵심은 특정 Editor를 제품 경계로 고정하는 것이 아니라 **동일한 자유로운 docs workspace를 여러 authoring/rendering tool이 손실 없이 공유하는 integration framework**를 검증하는 것이다.
 
 ```text
-                   Git-backed content workspace
-                         /               \
-                        /                 \
-                 Obsidian             Fumadocs Editor
-              source/file UX          visual MDX UX
-                        \                 /
-                         \               /
-                           Engine shell
-                   validate / publish / Git
+                         Git-backed docs workspace
+                      /              |              \
+                     /               |               \
+               Obsidian        Fumadocs Editor      IDE / Agent
+             broad file UX      MDX-aware visual      source UX
+                     \               |               /
+                      \              |              /
+                          integration boundary
+                                |
+                                v
+                           Site consumer
 ```
 
-- **Obsidian**은 file navigation, Markdown/source editing, frontmatter Properties 등 source-oriented authoring을 담당할 수 있다.
-- **Fumadocs Editor**는 지원되는 Markdown/MDX와 component를 구조적으로 편집하는 visual authoring surface다.
-- 두 client는 별도의 content database를 유지하지 않고 동일한 filesystem source를 수정한다.
-- Visual Editor가 표현하지 못하는 source는 Obsidian 또는 다른 source editor에서 그대로 유지할 수 있어야 한다.
+- **Obsidian**은 현재 primary editor 후보다. file navigation, Markdown/source editing, Properties/frontmatter, Live Preview, CSS snippets/theme/plugin ecosystem을 활용할 수 있다.
+- **Fumadocs Editor**는 MDX와 Fumadocs/custom component를 구조적으로 visual-edit하는 데 강점이 있는 후보다. editor 자체가 필수 architecture component라는 뜻은 아니다.
+- Obsidian의 CSS snippets와 custom callout은 스타일/Markdown primitive 확장에는 충분히 강력하지만, CSS만으로 arbitrary MDX/JSX component semantics를 구현하지는 못한다. 필요한 경우 Obsidian plugin Markdown post-processing 같은 별도 extension이 필요하다.
+- 따라서 가능한 경우 portable Markdown/Obsidian-friendly syntax를 canonical source로 두고 Site/Fumadocs 쪽 remark/rehype transformation으로 richer UI를 만드는 경로를 우선 검토한다.
 - 특정 authoring client가 지원하지 않는 syntax를 canonical workspace에서 삭제하거나 제한하는 근거로 사용하지 않는다.
-- Engine은 full CMS를 재구현하지 않는다. 필요한 경우 file discovery, create/rename/delete, validation, Git/publish action 같은 얇은 workspace shell만 제공한다.
+- 실제 editor 선정은 기존 content corpus를 import한 integration spike에서 authoring UX, component extensibility, source preservation, Site rendering 비용을 비교한 뒤 확정한다.
+- Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
@@ -506,7 +523,7 @@ Engine의 1.0 목표는 DB-backed CMS가 아니라 **containerizable workspace o
 Engine container
 ├─ workspace discovery
 ├─ content/frontmatter validation
-├─ optional Fumadocs Editor integration
+├─ authoring-tool integration hooks
 ├─ publish validation
 ├─ Git/revision linkage
 └─ Site consumer verification
@@ -547,14 +564,15 @@ Site revision linkage / delivery
 
 ## Fumadocs boundary
 
-Fumadocs는 현재 두 책임에서 우선 재사용한다.
+Fumadocs는 **Site presentation/content processing**에서는 적극적인 재사용 후보이고, **authoring editor**로서는 Obsidian과 비교 중인 후보다.
 
-1. **Fumadocs Editor**: visual Markdown/MDX authoring.
-2. **Fumadocs UI / content tooling**: Site에서 문서/content rendering과 관련 기능을 구현할 때 우선 고려하는 presentation layer.
+- Fumadocs UI/Core/MDX가 Site의 layout, search, Markdown/MDX processing, built-in components를 단순화하면 우선 활용한다.
+- Fumadocs MDX는 custom remark/rehype plugin을 허용하므로, Obsidian-friendly source syntax를 Site에서 richer component로 변환하는 adapter layer를 만들 수 있다.
+- Fumadocs Editor는 files를 source of truth로 유지하고 custom component specs를 제공하므로 component-aware visual editing이 실제 요구가 될 때 가치가 크다.
+- 반면 일반 document/file authoring과 styling만 필요하다면 Obsidian의 Live Preview, CSS snippets, custom callout, plugin ecosystem으로 충분할 수 있다.
+- 따라서 Fumadocs Editor를 1.0 필수 editor로 두지 않는다. Site integration과 Editor selection을 서로 분리해 판단한다.
 
-Fumadocs 자체 API가 canonical content contract는 아니다. canonical source는 Markdown/MDX + frontmatter/filesystem contract다.
-
-built-in component는 우선 그대로 사용하고, 실제 custom component가 필요해질 때만 별도 shared profile/adapter를 추가한다. 과거 계획했던 독립 `@oomia/content-components` React component library는 1.0 선행 과제가 아니다.
+Fumadocs 자체 API가 canonical content contract는 아니다. canonical source는 자유로운 filesystem document tree와 consumer별 최소 contract다.
 
 ## Component contract
 
@@ -575,8 +593,8 @@ Content Component Manifest Schema (`docs/content-component-schema.md`)는 custom
 | Content workspace / authoring / storage / publish 정책 | knowledge repository |
 | Canonical content revision | `oomia.github.io.docs` Git history |
 | Workspace validation / Git / publish orchestration | engine |
-| Visual MDX authoring | Fumadocs Editor integration |
-| Source-oriented authoring | Obsidian / filesystem clients |
+| Authoring UX | editor selection 미확정: Obsidian primary candidate, Fumadocs Editor component-aware candidate, IDE/Agent source client |
+| Authoring/Site integration | shared filesystem source + 필요한 parser/remark/rehype/plugin adapters |
 | final rendering / consumer compatibility | site |
 | custom component shared contract | 필요 시 별도 profile/package |
 | 구현별 API·테스트·runtime details | 해당 구현 repository |
@@ -592,7 +610,7 @@ Engine을 container image로 배포하는 방향은 이 architecture와 정합�
 
 # Content Authoring & Publishing Contract
 
-상태: 2026-09-21 Git-backed filesystem workspace + Obsidian + Fumadocs Editor architecture를 canonical policy로 반영.
+상태: 2026-09-21 Git-backed document workspace와 editor-selection/integration 재검토 방향을 canonical policy로 반영.
 
 ## 목적
 
@@ -600,7 +618,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 공식 정책:
 
-> Canonical content는 Markdown/MDX + frontmatter/assets로 구성된 Git-backed filesystem workspace에 보존한다. Obsidian과 Fumadocs Editor는 동일 source를 편집하는 authoring client이며, durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별한다. Publishability는 특정 editor의 round-trip 가능 여부가 아니라 content contract와 실제 Site consumer 검증으로 판정한다.
+> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs repository 전체에 단일 application layout을 강제하지 않으며 consumer별 최소 convention만 둔다. authoring editor는 아직 확정하지 않고 Obsidian/Fumadocs Editor/IDE가 동일 source를 다룰 수 있는 integration을 우선 검증한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
 이 문서는 **Editing, Storage, Canonical Revision, Publishing**을 분리해 정의한다.
 
@@ -628,8 +646,8 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 기본 원칙:
 
-- Obsidian/IDE/Agent 같은 Source editing은 **Exact**를 우선한다.
-- Fumadocs Editor에서 실제 수정한 부분은 **Normalized 허용**이다.
+- source-oriented editing은 **Exact**를 우선한다.
+- visual/editor-specific tooling에서 실제 수정한 부분은 **Normalized 허용**일 수 있으나, editor 채택 전에 normalization behavior를 실제 corpus로 검증한다.
 - Markdown/MDX 문법 오류나 현재 Site가 지원하지 않는 expression은 draft file로 저장할 수 있고 publish 단계에서 Blocked될 수 있다.
 - storage contract는 DB schema나 rich-text serialization compatibility를 요구하지 않는다.
 
@@ -637,8 +655,8 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 canonical content의 물리적 표현은 local Git working tree의 files다.
 
-- Markdown/MDX body는 파일 내용 자체다.
-- title, description, author, draft 등 문서 metadata는 1.0에서 YAML frontmatter를 canonical representation으로 사용한다.
+- Markdown/MDX-like document source는 파일 내용 자체다.
+- frontmatter는 publishable Article-like documents의 유력 metadata representation이지만 docs repository의 모든 파일에 공통 schema로 강제하지 않는다.
 - asset은 workspace-relative file 또는 정책상 허용된 durable external reference로 표현한다.
 - uncommitted working tree는 작성 중 draft state다.
 - 다른 환경과 공유·재현하는 durable canonical state는 `ooMia/oomia.github.io.docs`의 commit SHA다.
@@ -677,7 +695,7 @@ Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아�
 
 | 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
 |---|---|---|---|---|
-| 기본 Markdown | Visual + Source | Exact / Normalized | Publishable | Obsidian과 Fumadocs Editor가 같은 file을 편집할 수 있어야 한다. |
+| 기본 Markdown | Source + 필요 시 Visual | Exact / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
 | 일반 GFM table | Visual 또는 Source | Exact / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
 | Fumadocs Editor가 표현하지 못하는 Markdown | Source | Exact | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
 | 임의 code fence language | Visual 또는 Source | Exact | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
@@ -685,7 +703,8 @@ Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아�
 | workspace-relative asset | Visual 또는 Source | Exact | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
 | durable external asset URL | Visual 또는 Source | Exact | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
 | raw HTML | Source | Exact | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
-| Fumadocs built-in MDX component | Visual 또는 Source | Exact / Normalized | Publishable | Fumadocs Editor/Site 지원을 우선 활용한다. |
+| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Exact / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
+| Fumadocs built-in MDX component | Visual 또는 Source | Exact / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
 | custom MDX component + visual spec | Visual | Normalized | Publishable | 명시된 component contract와 Site consumer 검증을 통과해야 한다. |
 | custom MDX component + visual spec 없음 | Source | Exact | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
 | contract에 없는 MDX component | Source | Exact | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
@@ -696,44 +715,54 @@ Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아�
 
 ## Authoring clients
 
-### Obsidian
+editor는 아직 확정하지 않는다. 1.0의 고정 계약은 **filesystem source가 editor보다 우선한다**는 점이다.
 
-Obsidian은 source/file-oriented authoring client다.
+### Obsidian — primary candidate
 
-- canonical workspace를 vault로 직접 열 수 있다.
-- Markdown source와 YAML frontmatter를 직접 수정한다.
-- file navigation, rename/create/delete, properties UX를 활용할 수 있다.
-- Obsidian 전용 metadata/database를 canonical platform state로 요구하지 않는다.
-- Obsidian-specific syntax/plugin 기능을 canonical syntax로 승격할 때는 Site/Fumadocs compatibility를 별도 검증한다.
+Obsidian은 현재 가장 강한 primary-editor 후보다.
 
-### Fumadocs Editor
+- arbitrary directory tree를 vault로 직접 열 수 있다.
+- Markdown source, YAML Properties, file create/rename/delete, Live Preview를 제공한다.
+- CSS snippets와 CSS variables로 editor/reading appearance를 크게 조정할 수 있다.
+- `cssclasses` frontmatter로 document-level styling hook을 줄 수 있다.
+- custom callout을 CSS만으로 추가·스타일링할 수 있다.
+- plugin API의 Markdown post processor / code-block processor를 사용하면 CSS를 넘어 custom rendered elements도 만들 수 있다.
 
-Fumadocs Editor는 visual MDX authoring client다.
+그러나 CSS는 **presentation layer**다. arbitrary MDX/JSX component의 props/children semantics를 CSS만으로 해석하지는 못한다. component-like syntax가 필요하면 portable Markdown primitive, Obsidian plugin, 또는 Site-side transformation이 필요하다.
 
-- canonical workspace의 Markdown/MDX file을 직접 편집한다.
-- 지원되는 Markdown/MDX component를 structured visual editing으로 제공한다.
-- external file changes와 공존할 수 있어야 한다.
-- Fumadocs Editor 내부 state는 canonical source를 대체하지 않는다.
-- custom component editing이 필요한 경우 Fumadocs component spec을 우선 활용한다.
+### Fumadocs Editor — component-aware candidate
+
+Fumadocs Editor는 visual MDX authoring과 custom component specs에 강점이 있다.
+
+- Markdown/MDX files를 source of truth로 직접 편집한다.
+- Fumadocs built-in/custom component의 structured visual editing을 제공한다.
+- external file changes와 merge하는 workflow를 지원한다.
+- embedded UI로 확장할 수 있다.
+
+반면 Obsidian이 일반 authoring/file management/style UX를 충분히 해결한다면 Fumadocs Editor는 특정 MDX/component authoring gap을 채우는 optional tool이 될 수 있다.
+
+### Site-side bridge
+
+authoring syntax와 final presentation을 같은 UI component syntax로 강제하지 않는다.
+
+예를 들어 Obsidian-friendly callout/code-fence/directive를 canonical source로 유지하고, Site의 remark/rehype plugin에서 Fumadocs UI component로 변환하는 방식이 가능하다. Fumadocs MDX는 custom remark/rehype plugins를 지원하므로 이 경계를 실제 corpus로 검증한다.
 
 ### Engine
 
-Engine은 1.0에서 full CMS가 아니다.
+Engine은 1.0에서 full CMS나 editor host가 아니다.
 
-- workspace discovery / file-level validation
-- content/frontmatter/component validation
+- workspace discovery / validation
+- consumer-specific convention 검사
 - Git status / revision linkage
 - explicit publish action
 - Site consumer verification
-- 필요 시 얇은 file operation UI
+- 필요한 경우 authoring-tool launcher/integration hook
 
 를 담당한다.
 
-Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존 실험/legacy implementation으로만 취급한다.
-
 ## Metadata contract
 
-1.0 Article metadata는 frontmatter에 둔다.
+publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. 다만 docs repository 전체에 동일 frontmatter schema를 강제하지 않는다.
 
 최소 공통 예:
 
@@ -746,7 +775,7 @@ draft: true
 ---
 ```
 
-정확한 required/optional field schema는 implementation contract에서 정의하되, DB field와 frontmatter를 서로 변환하는 dual-SoT 모델을 만들지 않는다.
+정확한 required/optional field schema는 해당 consumer subtree의 implementation contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
 
 외부 source에서 import할 경우 canonical frontmatter로 normalize할 수 있지만 import adapter의 source-specific metadata를 장기 SoT로 유지하지 않는다.
 
@@ -1054,7 +1083,7 @@ Authoring Experience는 CMS UI에 한정되지 않는다. Obsidian, Fumadocs Edi
 
 # Publishing Platform 1.0
 
-상태: 2026-09-21 Git-backed content workspace와 Obsidian + Fumadocs Editor authoring 모델을 반영한 1.0 제품 경계.
+상태: 2026-09-21 Git-backed document workspace와 editor-selection/integration 검증 방향을 반영한 1.0 제품 경계.
 
 ## Release Goal
 
@@ -1064,8 +1093,8 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
-| Authoring | Obsidian과 Fumadocs Editor가 같은 local content workspace를 편집할 수 있다. Visual Editor가 표현하지 못하는 source는 Obsidian/IDE 등 Source path에서 손실 없이 유지할 수 있다. |
-| Canonical Content | Markdown/MDX body, frontmatter metadata, assets가 Git-backed filesystem workspace에 존재한다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
+| Authoring | 선택된 authoring workflow가 자유로운 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. Obsidian은 primary candidate이고 Fumadocs Editor는 component-aware visual candidate이며, 최종 editor 선택은 실제 corpus integration evidence로 결정한다. |
+| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. 특정 subtree에 consumer-specific convention을 둘 수 있지만 docs repository 전체에 단일 Article/path schema를 강제하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
 | Extensibility | Fumadocs built-in content component를 우선 재사용하고 custom component가 필요한 경우 source semantics와 editor/renderer integration을 명시할 수 있다. Visual adapter 유무가 canonical support를 결정하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
 | Publishing | local workspace를 검증하고 실제 Site consumer build를 통과시킨 뒤 canonical docs revision으로 확정한다. DB → Markdown export나 Visual Editor codec round-trip을 publish prerequisite로 요구하지 않는다. |
@@ -1079,8 +1108,8 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 ```text
 Obsidian ──────────┐
                    │
-Fumadocs Editor ───┼──> local Git content workspace
-                   │             │
+Fumadocs Editor ───┼──> local Git document workspace
+                   │      (editor role under evaluation)
 IDE / Agent ───────┘             │ validate / commit / push
                                  ▼
                         oomia.github.io.docs
@@ -1093,7 +1122,7 @@ IDE / Agent ───────┘             │ validate / commit / push
                            GitHub Pages
 ```
 
-Engine은 workspace validation, Git/publish orchestration, Site consumer verification을 담당하는 containerizable tool/runtime이다.
+Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 containerizable tool/runtime이다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
@@ -1129,7 +1158,7 @@ Engine은 workspace validation, Git/publish orchestration, Site consumer verific
 
 기준일: 2026-09-21. 이 문서는 Publishing Platform 1.0의 **현재 Product Boundary**를 기존 검증 revision과 대조한 revision-bound snapshot이다.
 
-2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem workspace + Obsidian + Fumadocs Editor**로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
+2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + editor/integration 재검토**로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
 
 ## 기준 revision
 
@@ -1160,9 +1189,10 @@ Site
 현재 target:
 
 ```text
-Obsidian / Fumadocs Editor
+Obsidian / Fumadocs Editor / IDE
           ↓
-local Git content workspace
+local Git document workspace
+(editor role under evaluation)
           ↓
 validation + commit/push
           ↓
@@ -1180,9 +1210,9 @@ Site
 
 | Capability | 상태 | 현재 Evidence | 새 target에 남은 delta |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 동일 Git workspace를 Obsidian과 Fumadocs Editor에서 편집하는 workflow, external edit interoperability, source fallback을 검증해야 한다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. frontmatter metadata, workspace layout, Git revision semantics를 구현하고 DB dual-SoT를 제거해야 한다. |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Fumadocs built-in component 우선 정책으로 재구성하고, 필요한 custom component만 Editor spec + Site semantics로 검증한다. 별도 component package는 실제 필요 전까지 만들지 않는다. |
+| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 작성 content corpus를 실제 docs workspace에 import하고 Obsidian 중심 workflow와 Fumadocs Editor의 component-aware workflow를 비교해야 한다. 핵심 Evidence는 source preservation, authoring UX, Site/Fumadocs rendering integration 비용이다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. docs 전체를 단일 application layout으로 고정하지 않고 consumer-specific subtree/path convention만 최소화하며 Git revision semantics를 확정해야 한다. |
+| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Obsidian-native callout/CSS/plugin extension과 Fumadocs MDX/custom component 중 source portability가 더 높은 경로를 실제 corpus로 비교한다. Fumadocs built-in/UI는 Site에서 우선 재사용하되 별도 component package는 실제 필요 전까지 만들지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | trigger를 Payload endpoint에서 Git workspace publish action으로 옮기고 validation→commit/push→Site verification 흐름을 재검증해야 한다. |
 | Publishing | **부분 충족** | DB snapshot을 docs repo에 반영하고 실제 Site sync/lint/test/typecheck/build를 통과시키는 workflow가 있다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate를 제거하고 canonical workspace 자체를 검증한 뒤 docs commit으로 확정하는 publish path가 필요하다. 기존 downstream Site verification은 재사용 가능성이 높다. |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | Fumadocs UI/content tooling 도입은 UX/DX 개선 과제로 진행할 수 있으나 canonical docs content를 렌더한다는 1.0 기본 결과는 이미 충족한다. |
@@ -1214,15 +1244,17 @@ Site
 
 우선순위는 다음과 같다.
 
-1. **Workspace Contract**
+1. **Workspace / Docs Contract**
    - docs repository를 canonical content remote로 재정의
-   - local checkout/mount 위치와 directory/frontmatter contract 정의
+   - docs tree의 자유도를 보존하고 consumer-specific path/frontmatter convention만 필요한 범위에 한정
    - working tree draft vs committed canonical revision 구분
 
-2. **Authoring Clients**
-   - 동일 fixture를 Obsidian과 Fumadocs Editor에서 편집
-   - create/update/rename/delete, frontmatter, external edit, unsupported source preservation 확인
-   - 필요 최소 수준에서만 Engine shell 추가
+2. **Authoring + Site Integration**
+   - 기존 작성 content corpus를 docs workspace에 import
+   - Obsidian의 source/file UX, Properties, Live Preview, CSS snippets/custom callout/plugin extension 검증
+   - Fumadocs Editor의 MDX/component-aware visual editing 이점과 비용 비교
+   - Obsidian-friendly Markdown → Fumadocs Site UI transformation을 remark/rehype adapter로 구현 가능한지 검증
+   - 최종 editor 역할을 evidence로 결정
 
 3. **Engine Simplification**
    - Payload/PostgreSQL 의존 경로를 target implementation에서 제거
@@ -1235,12 +1267,17 @@ Site
    - docs commit/push와 revision linkage
    - idempotent publish semantics
 
-5. **Fumadocs Integration**
-   - Fumadocs Editor component support
-   - Site에서 Fumadocs UI/content tooling을 재사용할 범위 검증
+5. **Fumadocs / Obsidian Integration**
+   - Site에서 Fumadocs UI/Core/MDX를 재사용할 범위 검증
+   - Obsidian-native source syntax를 Site에서 richer UI로 변환하는 plugin/remark boundary 검증
+   - Fumadocs Editor가 실제로 필요한 component-aware editing gap만 식별
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
-6. **Regression / Migration**
+6. **Migration strategy decision**
+   - Engine/Site 각각 in-place refactor와 greenfield rebuild 비용 비교
+   - keep/adapt/retire 비율과 dependency graph를 근거로 선택
+
+7. **Regression / Migration**
    - legacy DB content가 있다면 canonical files로 일회성 migration
    - 기존 Site delivery chain 유지
    - obsolete Payload/PostgreSQL code와 infra 제거
@@ -1333,10 +1370,13 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D019 | content-component source repository는 public `ooMia/content-components`로 둔다. npm organization scope `@oomia`와 GitHub owner를 억지로 일치시키지 않고, 기존 프로젝트 repository ownership과 일관성을 우선한다 | **대체됨: D024**, 사용자 위임에 따른 agent 결정, 2026-09-21 | 별도 GitHub organization으로 즉시 이동하거나 Site/Engine 내부 package로 유지 |
 | D020 | React content components는 semantic markup과 optional baseline CSS를 제공한다. 기본 스타일은 `@oomia/content-components/styles.css`를 소비자가 명시적으로 import하고, CSS custom properties·stable class/data hooks·`className`/`style` passthrough로 override한다 | **대체됨: D024**, 사용자 요구 + Fumadocs/Nextra/Docusaurus 패턴 조사, 2026-09-21 | CSS 자동 주입, Tailwind/runtime theme 강제, 완전 unstyled-only package |
 | D021 | canonical Article content는 Markdown/MDX와 frontmatter/assets로 구성된 Git-backed filesystem workspace다. local working tree는 authoring/draft state이고 `ooMia/oomia.github.io.docs`의 commit이 durable shared canonical revision이다 | 사용자 명시, 2026-09-21 | D002의 generated projection 모델; PostgreSQL을 canonical content store로 사용하는 모델 |
-| D022 | 1.0 기본 authoring client는 Obsidian과 Fumadocs Editor다. 둘은 같은 local content workspace를 직접 편집하며 Engine은 DB-backed CMS가 아니라 workspace validation/publishing orchestration을 담당한다 | 사용자 명시, 2026-09-21 | Payload + PostgreSQL + Lexical을 1.0 CMS/persistence로 유지 |
+| D022 | 1.0 기본 authoring client는 Obsidian과 Fumadocs Editor다. 둘은 같은 local content workspace를 직접 편집하며 Engine은 DB-backed CMS가 아니라 workspace validation/publishing orchestration을 담당한다 | **대체됨: D027**, 사용자 명시, 2026-09-21 | Payload + PostgreSQL + Lexical을 1.0 CMS/persistence로 유지 |
 | D023 | publishing은 DB를 Markdown으로 export하는 작업이 아니라 content workspace를 검증하고 canonical docs revision으로 commit/push한 뒤 실제 Site consumer build/delivery를 검증하는 흐름이다 | D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
 | D024 | Fumadocs의 built-in UI/Editor component capability를 우선 재사용한다. 독립 `@oomia/content-components` React library는 1.0 선행 과제에서 제거하고, 실제 custom component가 생겨 cross-repository contract가 필요할 때 얇은 profile/adapter package를 도입한다 | 사용자 방향 전환 및 오버엔지니어링 회피, 2026-09-21 | D018–D020의 독립 renderer/component library 선행 구축 |
 | D025 | architecture migration은 새 Git-backed vertical slice를 먼저 검증한 뒤 legacy Payload/PostgreSQL path를 단계적으로 retire한다. 과거 Issue/branch는 현재 Knowledge와 reconciliation 후에만 계속하며 미병합 작업을 먼저 보존한다 | 사용자 요청에 따른 migration context/정합성 강화, 2026-09-21 | 기존 구현 중단 상태를 그대로 재개하거나 새 path 검증 전에 big-bang delete |
+| D026 | `oomia.github.io.docs`는 특정 application용 고정 schema repository가 아니라 변형 가능한 문서 directory/tree를 표현하는 canonical content repository다. consumer별 path convention은 둘 수 있지만 repository 전체에 불필요한 layout 제약을 강제하지 않는다 | 사용자 명시, 2026-09-21 | 고정된 `content/` layout이나 단일 frontmatter schema를 repository 자체의 절대 규약으로 취급 |
+| D027 | 1.0 editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware/visual candidate로 비교하며 핵심 과제는 두 도구와 Site가 동일 filesystem workspace를 공유하는 integration framework를 검증하는 것이다 | 사용자 명시 + 조사 결과, 2026-09-21 | Obsidian과 Fumadocs Editor를 동등한 필수 1급 client로 미리 확정 |
+| D028 | authoring/integration 검증은 synthetic 최소 fixture보다 기존 작성 content corpus를 우선 import해 실제 구조·문법·스타일 충돌을 빠르게 드러낸다. 최소 fixture는 edge-case regression에만 보조적으로 사용한다 | 사용자 명시, 2026-09-21 | 최소 fixture 자체를 핵심 migration outcome으로 삼는 접근 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -1345,7 +1385,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021–D023이 현재 1.0 persistence/authoring/publishing 기준이며, D024에 따라 Fumadocs가 제공하는 component/editor capability를 먼저 사용한다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D028이 현재 1.0 persistence/authoring/integration 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -1369,9 +1409,11 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q010 | 미디어 공개 범위·asset 저장 위치 | workspace-relative asset과 durable external URL을 허용하는 방향. public/private 범위와 large/binary asset policy는 추가 결정 필요 |
 | Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
 | Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
-| Q015 | canonical file extension/layout convention | Markdown/MDX + frontmatter/filesystem 원칙은 확정. Obsidian interoperability와 Fumadocs component 사용을 고려해 `.md` / `.mdx` 선택 및 directory naming을 implementation spike에서 확정 |
+| Q015 | consumer-specific path/file convention | docs repository 전체는 자유로운 document tree로 유지. Site/Engine이 소비하는 subtree에서만 `.md` / `.mdx`, frontmatter, route/path naming을 어디까지 요구할지 integration spike에서 최소화해 결정 |
 | Q016 | Git publish semantics | durable canonical revision은 docs commit으로 확정. Engine이 auto-commit/push할지, 사용자 commit을 publish 입력으로 받을지, branch/PR를 사용할지 세부 UX 결정 필요 |
-| Q017 | Fumadocs Editor embedding 수준 | standalone Studio를 기본으로 쓸지 Engine shell에 `@fumadocs-editor/ui`를 embed할지는 최소 구현을 먼저 검증한 뒤 결정 |
+| Q017 | 실제 authoring editor 역할 분담 | Obsidian을 primary editor로 충분히 사용할 수 있는지, Fumadocs Editor가 component-aware visual editing을 위해 별도로 필요한지 기존 content corpus integration으로 결정. Fumadocs Studio vs embedded UI는 Fumadocs Editor 채택 시 하위 결정 |
+| Q018 | Obsidian ↔ Site component/style bridge | Obsidian CSS snippets/custom callout은 styling과 Markdown primitive 확장에 강하지만 arbitrary MDX semantics는 CSS만으로 제공하지 못한다. Obsidian plugin Markdown post-processing, portable callout/code-fence syntax, Site remark/rehype transform 중 최소 구현을 비교해야 함 |
+| Q019 | Engine/Site migration 방식 | 기존 소스를 in-place refactor할지 새 target skeleton을 greenfield로 만들고 generic code만 이식할지 미결. repository별 keep/adapt/retire 비율과 dependency graph를 Phase A에서 확인한 뒤 결정 |
 
 ## 분리 원칙
 
