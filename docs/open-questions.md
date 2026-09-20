@@ -14,6 +14,7 @@
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
+| Q016 | raw conversation provenance의 공개·보존 정책 | Knowledge repository는 현재 public이고 `provenance/conversations.json`에 원문 archive가 있다. archive 유지, 제거/축소, repository visibility 변경 중 어떤 정책을 사용할지 결정 필요 |
 
 ## 분리 원칙
 
