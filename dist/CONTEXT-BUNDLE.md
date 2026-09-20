@@ -1919,11 +1919,12 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 ## 1.0 Target Architecture
 
 ```text
-Obsidian ──────────┐
-                   │
-Fumadocs Editor ───┼──> local Git document workspace
-                   │      (editor role under evaluation)
-IDE / Agent ───────┘             │ validate / commit / push
+selected editor / IDE / Agent
+              │
+              ▼
+local Git document workspace
+(editor role under evaluation)
+              │ validate / commit / push
                                  ▼
                         oomia.github.io.docs
                          canonical revision
