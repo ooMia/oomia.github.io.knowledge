@@ -44,7 +44,7 @@ issue-activated.yml
 
 ## Issue activation
 
-workflow는 `opened`, `reopened`, `edited` 및 수동 `workflow_dispatch`를 지원한다.
+workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 자동 실행 조건:
 
