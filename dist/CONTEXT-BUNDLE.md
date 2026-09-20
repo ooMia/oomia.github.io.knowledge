@@ -1,9 +1,8 @@
 # Publishing Platform — Chat Context Bundle
 
 GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.
-생성 기준일: 2026-09-18. Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
-상대 링크는 원본 레포 기준입니다. 템플릿과 대화 원문 아카이브는 별도로 참조합니다.
-
+생성 기준일: 2026-09-20. Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
+상대 링크는 원본 레포 기준입니다. JSON Schema, 템플릿과 대화 원문 아카이브는 별도로 참조합니다.
 
 ---
 
@@ -13,26 +12,50 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 
 ## 먼저 이해할 것
 
-이 저장소는 Publishing Platform의 제품·아키텍처·계획 지식에 대한 canonical source다. 설계가 존재한다는 사실과 구현 완료를 구분한다. 구현 수준은 Implementation Map (`docs/implementation-map.md`)의 기준 revision과 실제 구현 레포를 확인하고, 확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다.
+이 저장소는 Publishing Platform의 제품·아키텍처·계획 지식에 대한 canonical source다. 설계가 존재한다는 사실과 구현 완료를 구분한다.
+
+콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
+
+- canonical Article source는 CMS/Visual Editor와 독립적으로 보존한다.
+- storage / visual editing / publishing 가능성을 동일시하지 않는다.
+- 공식 MDX component는 versioned public content-component contract를 공유하고 CMS는 authoring adapter, Site는 rendering consumer로 취급한다.
+- 실제 구현 수준은 Implementation Map (`docs/implementation-map.md`)의 기준 revision과 책임 레포 Evidence로 판정한다.
+
+확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다.
 
 ## 작업별 읽기
 
 | 작업 | 읽을 문서 |
 |---|---|
 | 전체 이해 | Architecture (`docs/architecture.md`), Release 1.0 (`docs/release-1.0.md`) |
+| Markdown/MDX authoring·storage·publish 정책 | Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`) |
+| MDX component package / Agent-readable manifest | Content Component Manifest Schema (`docs/content-component-schema.md`), JSON Schema (`schemas/content-component-manifest.schema.json`) |
 | 현재 1.0 구현 수준·gap | Implementation Map (`docs/implementation-map.md`) → 기준 revision의 구현 레포 코드·테스트 |
 | Item 작성·분류·완료 검토 | Planning (`docs/planning-model.md`), Fields (`docs/fields.md`), 관련 release, 실제 Item의 Outcome/AC/Evidence |
-| 구현 논의 | Architecture → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
+| 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
 | 주간 계획·발표 | Operating Rhythm (`docs/operating-rhythm.md`), 실제 Project Status Update, 실제 Evidence |
 | 설계 수정 | 해당 원본 문서, Decisions (`docs/decisions.md`), CONTRIBUTING (`CONTRIBUTING.md`) |
 | GitHub Project README 정리 | Project README 템플릿 (`templates/project-readme.md`) |
 | 과거 발언 확인 | provenance/README.md의 source/turn → provenance/conversations.json |
 
+## Agent 작업 원칙
+
+Content 관련 구현을 계획하거나 수정할 때:
+
+1. CMS editor capability를 canonical syntax requirement로 확대하지 않는다.
+2. unsupported Visual syntax를 삭제/정규화해서 손실시키기보다 Source fallback을 우선한다.
+3. 저장 가능성과 publishability를 분리한다.
+4. 공식 MDX component 변경은 Site가 소유하는 shared component contract의 영향부터 확인한다.
+5. TypeScript type만으로 runtime contract가 충분하다고 가정하지 않는다. 필요한 경우 component manifest/schema를 사용한다.
+6. 최종 Publishability는 실제 Site consumer 검증을 포함해 판단한다.
+
 ## 사용할 요청 예시
 
-> CONTEXT.md에 따라 필요한 문서를 읽고 다음 Item의 Scope, Objective, AC를 검토해줘. 실제 구현과 설계 의도를 구분해줘.
+> Content Authoring & Publishing Contract에 따라 이 Markdown/MDX 표현의 Editing, Storage, Publishing 수준을 판정하고 필요한 구현 delta를 나눠줘.
 
 > Implementation Map의 기준 revision보다 구현 레포가 진행되었는지 확인하고, 1.0 capability 상태와 남은 delta를 갱신해줘.
+
+> 공식 MDX component를 추가할 때 Site package contract, Engine authoring adapter, consumer build Evidence를 각각 어떤 Item/Issue로 나눌지 검토해줘.
 
 > 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
 
@@ -40,14 +63,13 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 
 <!-- END SOURCE: CONTEXT.md -->
 
-
 ---
 
 <!-- BEGIN SOURCE: docs/architecture.md -->
 
 # Architecture
 
-상태: 사용자 명시 사항 및 이후 README 기준을 종합. 출처: S2 `138f8f89`, `4c1f839e`, `d7815342`; S3 `924e880a` (전체 ID는 출처 색인).
+상태: 사용자 명시 사항 및 이후 README 기준을 종합. 2026-09-20 Content Authoring & Publishing Contract를 반영.
 
 ## 원칙
 
@@ -56,32 +78,308 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 - 핵심이 아닌 문제는 검증된 도구를 우선 활용한다.
 - 안정된 경계가 필요해질 때까지 설계 선택의 변경 가능성을 유지한다.
 - 레포와 프레임워크를 영구적인 제품 경계로 취급하지 않는다.
+- canonical source는 특정 CMS/Visual Editor의 표현 능력에 종속되지 않는다.
+- 저장 가능성, authoring surface의 편집 가능성, 실제 Site의 publishability를 서로 다른 계약으로 취급한다.
 
 ## 레포의 역할
 
 유일한 최상위 구현 레포는 없다. 이 지식 레포도 다른 레포를 포함하는 super-repository가 아니다.
 
-| 레포 | 대화에서 설명된 책임 |
+| 레포 | 책임 |
 |---|---|
-| `oomia.github.io.engine` | 로컬에서 콘텐츠를 생성·수정하기 위한 환경과 처리 기능 |
+| `oomia.github.io.engine` | canonical content를 다루는 authoring 환경과 CMS adapter, persistence 접근, publishing workflow orchestration |
 | `oomia.github.io.docs` | downstream이 소비할 계약된 generated document set |
-| `oomia.github.io` | generated documents를 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io` | generated documents를 소비해 사이트를 빌드하고 GitHub Pages로 전달하며, 공식 Article MDX content component의 rendering implementation을 소유 |
 
-`mono`는 사용자가 로컬에서 붙인 별칭이며 실제 레포 이름의 일부가 아니다. 대화 당시 docs는 engine과 사이트 양쪽의 submodule이었다. 현재 checkout을 검사한 사실로 해석하지 않는다.
+`mono`는 사용자가 로컬에서 붙인 별칭이며 실제 레포 이름의 일부가 아니다. docs는 현재 engine과 site 사이의 generated projection으로 사용된다.
 
 ```text
-Authoring → Canonical Content → Generated Documents → Site Output → Live Site
-                    engine         docs                 site
+Authoring Adapter → Canonical Content → Generated Documents → Site Output → Live Site
+      engine              engine              docs              site
 ```
 
-Canonical content가 콘텐츠의 권위 있는 상태다. docs는 재생성 가능한 projection이며 수동 수정이 canonical state를 대체하지 않는다. 대화에는 PostgreSQL이 현재 canonical 저장소라는 설명이 있지만 제품 수준 계약은 특정 DB/프레임워크를 강제하지 않는다.
+Canonical content가 콘텐츠의 권위 있는 상태다. Article body는 Markdown/MDX raw source string으로 보존하고, CMS editor state는 derived/virtual representation으로 취급한다. docs는 재생성 가능한 projection이며 수동 수정이 canonical state를 대체하지 않는다.
 
-## 경계의 발전 방향
+제품 수준 계약은 특정 DB/CMS를 강제하지 않는다. 현재 구현이 PostgreSQL과 Payload를 사용하더라도 해당 구현 선택이 canonical content syntax를 제한하는 근거가 되어서는 안 된다.
 
-source-level 결합보다 명시적인 artifact/runtime contract를 우선한다. engine을 container image 등으로 배포하는 것은 가능한 방향이며 확정된 구현 과제가 아니다. API, generated documents, extensions 등의 계약 세부사항은 소유 레포에 둔다. 이 레포에서 코드의 구현 여부를 추론하지 않는다.
+## Authoring boundary
+
+Authoring surface는 canonical content의 adapter다.
+
+```text
+                canonical raw source
+                       |
+          +------------+------------+
+          |                         |
+    Visual Editor               Source Editor
+  supported subset             lossless fallback
+```
+
+- Visual Editor가 무손실로 표현 가능한 content에는 구조화 편집을 제공할 수 있다.
+- Visual Editor가 표현하지 못하는 content는 Source mode로 fallback할 수 있어야 한다.
+- unsupported source를 Visual Editor가 조용히 삭제하거나 재작성해서는 안 된다.
+- 최종 Site와 동일한 WYSIWYG Preview는 authoring contract의 필수조건이 아니다.
+- 자세한 수준 정의와 정책 테이블은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다.
+
+## Official MDX component boundary
+
+공식 Article MDX component의 계약은 Site repository에서 소스 변경을 소유하고, versioned public content-component package를 통해 공유하는 방향을 canonical architecture로 둔다.
+
+```text
+                 public content-component package
+                     contract + implementation
+                         /             \
+                        /               \
+               Engine / CMS          Site
+              authoring adapter   rendering consumer
+```
+
+책임은 다음과 같이 나눈다.
+
+- **Site repository**: component source, rendering implementation, public component contract 변경을 소유한다.
+- **Site**: package의 runtime implementation을 사용한다.
+- **Engine**: rendering implementation에 직접 결합하지 않고 exported type/runtime contract를 참조해 Payload authoring adapter를 구성한다.
+- **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
+- **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
+
+현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 그대로 공개 계약으로 승격하지 않는다. Article MDX에서 허용할 content component surface는 일반 Site UI와 별도 경계로 둔다. 실제 package name, registry, release transport는 구현 단계에서 확정한다.
+
+## Contract surfaces
+
+source-level 결합보다 명시적인 artifact/runtime contract를 우선한다.
+
+| Surface | 소유 위치 |
+|---|---|
+| Content authoring/storage/publish 정책 | knowledge repository |
+| 공식 MDX component 의미와 버전 | versioned content-component package |
+| Payload-specific authoring adapter | engine |
+| generated document set | docs |
+| final rendering / consumer compatibility | site |
+| 구현별 API·테스트·runtime details | 해당 구현 repository |
+
+TypeScript type은 compile-time contract로 사용하고, Agent/runtime가 component surface를 읽어야 할 경우 machine-readable manifest를 함께 둘 수 있다. 계획용 초안은 Content Component Manifest Schema (`docs/content-component-schema.md`)에 둔다.
+
+engine을 container image 등으로 배포하는 것은 가능한 방향이며 확정된 구현 과제가 아니다. API와 generated document의 세부 runtime contract는 소유 레포에 두고, 이 레포에서 코드 구현 여부를 추론하지 않는다.
 
 <!-- END SOURCE: docs/architecture.md -->
 
+---
+
+<!-- BEGIN SOURCE: docs/content-authoring-contract.md -->
+
+# Content Authoring & Publishing Contract
+
+상태: 2026-09-20 사용자 승인 방향을 canonical policy로 정리.
+
+## 목적
+
+Publishing Platform의 canonical content는 특정 CMS나 Visual Editor의 표현 능력에 종속되지 않는다.
+
+공식 정책:
+
+> Canonical source는 CMS와 독립적으로 보존한다. 공식 MDX component의 계약은 versioned public component package가 소유하며, CMS는 그 계약의 authoring adapter이고 Site는 rendering consumer다. Visual adapter가 없는 공식 component도 Source로 편집할 수 있으며, 최종 Publish 가능 여부는 Site가 소비하는 component contract와 실제 consumer build가 결정한다.
+
+이 문서는 **저장 가능성, CMS 편집 가능성, 실제 발행 가능성**을 분리해 정의한다.
+
+## 세 가지 독립된 판정 축
+
+### Editing
+
+| 수준 | 보장 |
+|---|---|
+| Visual | CMS의 구조화된 Visual Editor에서 생성·수정할 수 있다. |
+| Source | Visual Editor가 표현하지 못해도 raw Markdown/MDX source로 안전하게 수정할 수 있다. |
+| Unsupported | 해당 authoring surface에서는 편집 대상으로 제공하지 않는다. |
+
+Visual 지원 실패가 콘텐츠 지원 실패를 뜻하지 않는다. Visual adapter가 없거나 무손실 왕복이 불가능한 문서는 Source editor로 fallback할 수 있어야 한다.
+
+### Storage
+
+| 수준 | 보장 |
+|---|---|
+| Exact | 사용자가 저장한 raw source를 의미 없는 재작성 없이 보존한다. |
+| Normalized | Visual Editor에서 실제 내용을 수정한 경우 의미를 유지하는 범위에서 Markdown/MDX formatting normalization을 허용한다. |
+| Reject | 문자열/크기/플랫폼 불변식 등 storage contract 자체를 만족하지 못한 경우에만 저장을 거부한다. |
+
+기본 원칙은 **Source에서 직접 저장한 content는 Exact**, Visual Editor에서 실제 수정한 content는 **Normalized 허용**이다.
+
+문법 오류나 현재 renderer가 지원하지 않는 표현은 storage rejection의 기본 사유가 아니다. 작성 중 source는 저장할 수 있고 publish 단계에서 차단될 수 있다.
+
+### Publishing
+
+| 수준 | 보장 |
+|---|---|
+| Publishable | generated docs 생성과 실제 Site consumer 검증을 통과해 발행할 수 있다. |
+| Blocked | canonical source에는 보존되지만 현재 publishing contract로는 발행하지 않는다. 실패 이유를 관찰 가능하게 제공한다. |
+
+Visual Editor compatibility는 Publishability의 필수조건이 아니다.
+
+## 1.0 목표 정책 테이블
+
+| 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
+|---|---|---|---|---|
+| 기본 Markdown | Visual | Exact / Normalized | Publishable | Visual 편집 전 원문을 보존하고, 실제 Visual 수정 후 normalization을 허용한다. |
+| 일반 GFM table | Visual | Normalized | Publishable | CMS가 구조적으로 편집 가능한 범위는 Visual을 제공한다. |
+| Visual Editor가 지원하지 않는 일반 Markdown 표현 | Source | Exact | Publishable | CMS 한계 때문에 저장·발행 범위를 줄이지 않는다. 실제 Site가 지원하면 발행한다. |
+| 임의 code fence language | Visual 또는 Source | Exact | Publishable | syntax highlighting 지원 여부와 저장/발행 가능성을 분리한다. |
+| 일반 Markdown image | Visual 또는 Source | Exact | Publishable | Payload Media 모델로 강제 변환하지 않는다. asset resolution 규칙은 별도 contract로 발전시킬 수 있다. |
+| Site가 허용하는 raw HTML | Source | Exact | Publishable | Visual 지원은 요구하지 않는다. 실제 consumer/build가 허용해야 한다. |
+| 실행·보안상 허용하지 않는 HTML | Source | Exact | Blocked | source 보존과 실행 허용을 분리한다. |
+| HTML comment 등 비렌더링 source 정보 | Source | Exact | Publishable | Visual Editor가 표현하지 못하더라도 삭제하지 않는다. |
+| 공식 MDX component + Visual adapter | Visual | Normalized | Publishable | shared component contract를 기준으로 구조화 편집한다. |
+| 공식 MDX component + Visual adapter 없음 | Source | Exact | Publishable | 공식 component임을 CMS visual support와 별개로 인정한다. |
+| 공식 contract에 없는 MDX component | Source | Exact | Blocked | source는 보존하되 현재 consumer contract에 없으면 발행하지 않는다. |
+| 잘못된 component props | Source | Exact | Blocked | source 저장은 허용하고 component contract 검증에서 차단한다. |
+| arbitrary JavaScript expression | Source | Exact | Blocked by default | 명시적으로 지원 계약이 추가되기 전에는 executable content를 publish contract 밖에 둔다. |
+| 문서 내부 MDX import/export | Source | Exact | Blocked by default | Article이 임의 module dependency를 소유하지 않도록 기본 차단한다. |
+| 문법 오류가 있는 draft | Source | Exact | Blocked | 작성 중 상태는 저장할 수 있지만 publish validation을 통과해야 한다. |
+
+## Canonical source와 metadata
+
+Article body의 canonical representation은 Markdown/MDX raw source string이다. CMS editor state는 derived/virtual representation이며 canonical source를 대체하지 않는다.
+
+title, description, author 등 구조화 metadata와 import된 frontmatter의 상세 매핑 정책은 별도 결정 대상이다. generated document의 frontmatter는 canonical DB state에서 생성되는 projection으로 취급한다.
+
+## Visual Editor contract
+
+Visual Editor는 authoring convenience layer다.
+
+- Visual Editor가 source를 무손실로 표현할 수 있을 때 구조화 편집을 제공한다.
+- 표현할 수 없는 source를 조용히 삭제하거나 변경해서는 안 된다.
+- 문서 전체가 안전하게 왕복되지 않는 경우 Source mode로 fallback하는 것을 1.0의 허용 가능한 UX로 본다.
+- 최종 Site와 동일한 WYSIWYG Preview는 Visual Editing contract에 포함하지 않는다.
+- registered component를 Payload Block으로 편집할 수 있어도 실제 Site renderer의 preview 제공은 별도 capability다.
+
+## Official MDX component contract
+
+공식 MDX component는 Site repository에서 소스와 rendering implementation을 관리하고, **versioned public component package**를 통해 계약을 배포한다.
+
+논리적 의존 방향:
+
+```text
+                versioned component contract
+                         /           \
+                        /             \
+               Engine / CMS       Site / renderer
+              authoring adapter    runtime consumer
+```
+
+- Site repository가 component implementation과 contract의 변경을 소유한다.
+- Site는 package의 runtime component implementation을 사용한다.
+- Engine은 가능한 한 rendering implementation 대신 exported type/runtime contract만 사용해 Payload authoring adapter를 구성한다.
+- 공식 component인데 Visual adapter가 아직 없어도 Source mode로 authoring할 수 있다.
+- package version compatibility와 실제 Site build가 최종 Publishability를 결정한다.
+- 일반 Site UI package 전체를 공개 계약으로 만들지 않는다. Article MDX에서 사용할 content component surface만 별도 경계로 둔다.
+- 실제 package name, registry, release transport는 구현 결정으로 남긴다.
+
+## Component contract에 필요한 정보
+
+TypeScript type만으로는 runtime validation이나 Agent automation을 수행할 수 없으므로, 공식 package는 장기적으로 다음 두 surface를 제공하는 것을 목표로 한다.
+
+1. TypeScript types: 구현자와 CMS adapter의 compile-time contract.
+2. Machine-readable manifest: component name, block/inline kind, props, children policy 등 runtime/Agent가 읽을 수 있는 최소 계약.
+
+knowledge repository의 Content Component Manifest Schema (`schemas/content-component-manifest.schema.json`)는 이 manifest의 계획용 draft다. 실제 published package API가 확정되기 전에는 implementation contract로 간주하지 않는다.
+
+## Publish validation 원칙
+
+Publish validation은 Visual Editor round-trip 여부가 아니라 **canonical source가 현재 publishable projection과 Site consumer에서 유효한가**를 판정해야 한다.
+
+최종 검증 흐름의 목표:
+
+```text
+canonical raw source
+        ↓
+component / content contract validation
+        ↓
+generated docs
+        ↓
+Site sync / typecheck / build
+        ↓
+publishable result
+```
+
+따라서 현재 CMS codec의 무손실 round-trip 검사는 장기적으로 **Visual editability 판별**에 사용될 수 있지만, 모든 source의 storage/publishing gate로 사용하지 않는다.
+
+## 1.0 비목표
+
+- 모든 Markdown/MDX 표현의 Visual Editing
+- complete WYSIWYG preview
+- arbitrary JavaScript execution in Article MDX
+- 문서가 임의 module import를 소유하는 모델
+- 모든 Site UI component를 Article content contract로 노출
+- 범용 CMS-independent visual editor framework 구현
+
+<!-- END SOURCE: docs/content-authoring-contract.md -->
+
+---
+
+<!-- BEGIN SOURCE: docs/content-component-schema.md -->
+
+# Content Component Manifest Schema
+
+상태: 2026-09-20 planning draft. Agent와 구현 작업의 공통 어휘를 제공하기 위한 schema이며 아직 published package API는 아니다.
+
+## 목적
+
+공식 MDX component contract를 TypeScript 타입에만 의존하면 runtime과 Agent가 component surface를 안정적으로 조사하기 어렵다.
+
+따라서 public content-component package가 장기적으로 다음 두 표현을 함께 제공할 수 있도록 계획한다.
+
+- TypeScript types: compile-time contract
+- component manifest: runtime/Agent-readable contract
+
+manifest의 JSON 형태는 content-component-manifest.schema.json (`schemas/content-component-manifest.schema.json`)으로 검증한다.
+
+## 최소 정보
+
+각 component는 다음을 기술한다.
+
+| 필드 | 의미 |
+|---|---|
+| name | MDX source에서 사용하는 공식 component 이름 |
+| kind | block 또는 inline |
+| props | 공개 prop 이름, 타입, required 여부, enum 값 |
+| children | none / text / markdown / mdx 중 허용 children model |
+
+이 정보는 rendering implementation을 설명하지 않는다. CSS, React/Astro 내부 구조, Payload field implementation은 manifest 밖이다.
+
+## Agent 사용 예
+
+Agent가 새로운 component를 추가할 때:
+
+1. Site repository의 component implementation을 수정한다.
+2. package의 TypeScript contract와 manifest를 함께 수정한다.
+3. schema validation을 통과시킨다.
+4. Engine의 Payload adapter가 필요한 경우 같은 manifest/type을 기준으로 구현한다.
+5. 실제 Site consumer build로 Publishability를 검증한다.
+
+Agent가 Article source를 분석할 때:
+
+1. source에서 사용된 공식 MDX component를 식별한다.
+2. 현재 package manifest에 존재하는지 확인한다.
+3. props/children contract 위반을 진단한다.
+4. CMS Visual adapter 유무와 관계없이 공식 component 여부를 판정한다.
+5. 최종 Site build 결과를 publish gate로 사용한다.
+
+## 의도적으로 포함하지 않는 정보
+
+- Payload 전용 field config
+- React/Astro component import path
+- CSS/theme 정보
+- final preview renderer
+- arbitrary JavaScript expression semantics
+- deployment state
+
+이 정보까지 manifest에 넣으면 shared content contract가 특정 authoring/rendering framework에 다시 결합된다.
+
+## 버전 정책
+
+manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 semantic version을 가진다.
+
+정확한 package compatibility policy와 registry/publishing 방식은 아직 미결이며 Open Questions (`docs/open-questions.md`)에서 추적한다.
+
+<!-- END SOURCE: docs/content-component-schema.md -->
 
 ---
 
@@ -147,7 +445,6 @@ Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리거
 `System view`는 과거에 제안된 사용자 정의 View 이름이다. Scope별 변경 이력을 보는 `By Scope`라는 이름으로 정리하며, 실제 View가 생성되어 있다는 의미는 아니다.
 
 <!-- END SOURCE: docs/planning-model.md -->
-
 
 ---
 
@@ -225,14 +522,13 @@ Authoring Experience는 CMS UI에 한정되지 않는다. CLI, IDE, form, agent-
 
 <!-- END SOURCE: docs/fields.md -->
 
-
 ---
 
 <!-- BEGIN SOURCE: docs/release-1.0.md -->
 
 # Publishing Platform 1.0
 
-상태: 사용자가 제공한 README와 명시적 요구사항을 최신 용어로 정리. 출처: S2 `4c1f839e`, `3e786a51`; S3 `924e880a`, `5a382a65`.
+상태: 2026-09-20 Content Authoring & Publishing Contract를 반영한 1.0 제품 경계.
 
 ## Release Goal
 
@@ -242,13 +538,15 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
-| Authoring | Article을 생성·수정할 실용적인 UX 또는 DX가 있다. raw data의 도움 없는 직접 편집만으로 끝나지 않는다. |
-| Canonical Content | Article을 API로 생성·조회·수정할 수 있고 authoritative state가 canonical content로 지속된다. |
-| Extensibility | 명시적인 extension contract를 통해 custom logic과 component를 사용하고 작성자가 결과를 합리적으로 예측할 수 있다. |
+| Authoring | Article을 생성·수정할 실용적인 UX 또는 DX가 있다. 지원되는 content는 Visual Editor에서 편집할 수 있고, Visual Editor가 무손실로 표현하지 못하는 source는 손실 없는 Source editing path로 다룰 수 있다. 최종 Site와 동일한 WYSIWYG Preview는 필수가 아니다. |
+| Canonical Content | Article을 생성·조회·수정할 수 있고 authoritative raw Markdown/MDX source가 CMS editor state와 독립적으로 지속된다. Visual Editor의 표현 한계가 canonical source의 저장 가능 범위를 결정하지 않는다. |
+| Extensibility | 공식 MDX component가 명시적인 versioned content-component contract를 통해 정의된다. Site는 rendering consumer이고 CMS는 authoring adapter이며, Visual adapter가 없어도 공식 source는 보존·발행할 수 있다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 실제 publishing process에 참여한다. |
-| Publishing | canonical content를 계약된 generated document set으로 결정적으로 투영한다. docs는 generated projection이다. |
-| Presentation | generated documents를 최종 사용자용 사이트로 렌더링한다. 프레임워크는 구현 레포에서 결정한다. |
-| Delivery | 콘텐츠 변경이 발행 경로를 거쳐 실제 GitHub Pages 사이트 업데이트로 이어진다. |
+| Publishing | canonical content를 계약된 generated document set으로 결정적으로 투영한다. Publishability는 CMS Visual Editor round-trip이 아니라 content/component contract와 실제 Site consumer 검증으로 판정한다. |
+| Presentation | generated documents와 공식 content components를 최종 사용자용 사이트로 렌더링한다. 프레임워크는 구현 레포에서 결정한다. |
+| Delivery | 검증된 publishable 결과가 발행 경로를 거쳐 실제 GitHub Pages 사이트에 배포되고 성공 Evidence를 남길 수 있다. |
+
+세부 Markdown/MDX 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다.
 
 ## 명시적 제외 범위
 
@@ -257,17 +555,19 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 - advanced agent orchestration
 - full-featured visual CMS
 - complete WYSIWYG preview
+- 모든 Markdown/MDX 표현의 Visual Editing
+- arbitrary JavaScript execution 또는 문서별 임의 module import를 기본 MDX contract로 지원
+- 일반 Site UI 전체를 Article content component contract로 공개
 
 ## 검증
 
 각 capability의 요구 수준을 실제 구현과 대조하고 재현 가능한 Evidence를 연결한다. 부분 구현·완료·미검증을 구분한다. 모든 capability를 이름 그대로 Item으로 생성하지 말고, 발견된 gap에 대해 독립적인 delta Item을 만든다.
 
-현재 검증 스냅샷과 기준 revision은 Implementation Map (`docs/implementation-map.md`)에 둔다. 2026-09-18 조사에서는 Canonical Content·Publishing·Presentation은 현재 1.0 boundary를 충족하고, Authoring·Extensibility·Delivery는 부분 충족, Automation은 미충족으로 판정했다. 이 판정은 Implementation Map의 revision에 고정되며 구현 레포가 진행되면 다시 검증한다.
+현재 검증 스냅샷과 기준 revision은 Implementation Map (`docs/implementation-map.md`)에 둔다. 2026-09-20 authoring/content contract를 구체화하면서 일부 기존 capability 판정을 재평가했다. 상태 하향은 구현 regression이 아니라 **1.0 요구 수준이 CMS-independent canonical source와 consumer-based publishability까지 명시적으로 확장된 결과**일 수 있다.
 
-이 문서 자체는 **1.0 Definition을 확정하는 설계 Item의 Evidence**가 될 수 있지만, 1.0 구현 완료 Evidence는 아니다. 1.0의 public contract 범위·compatibility policy·최종 release gate AC는 아직 명시적으로 결정할 필요가 있다.
+이 문서 자체는 **1.0 Definition을 확정하는 설계 Item의 Evidence**가 될 수 있지만, 1.0 구현 완료 Evidence는 아니다. 실제 구현 상태는 Implementation Map과 책임 레포의 immutable Evidence로 판정한다.
 
 <!-- END SOURCE: docs/release-1.0.md -->
-
 
 ---
 
@@ -275,48 +575,61 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 
 # Implementation Map
 
-기준일: 2026-09-18. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **검증 스냅샷**이다. 설계 정의는 Release 1.0 (`docs/release-1.0.md`)을 따르고, 상태 판정은 아래 기준 revision의 코드·테스트·커밋만 근거로 한다.
+기준일: 2026-09-20. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **검증 스냅샷**이다. 설계 정의는 Release 1.0 (`docs/release-1.0.md`)과 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)를 따르고, 상태 판정은 아래 revision과 연결된 immutable Evidence를 근거로 한다.
 
 ## 기준 revision
 
 | 역할 | Repository | Revision |
 |---|---|---|
-| Authoring / canonical state / publishing | [`ooMia/oomia.github.io.engine`](https://github.com/ooMia/oomia.github.io.engine) | [`2f696f9c73863d0473acc0c4a66a67f66d8ad745`](https://github.com/ooMia/oomia.github.io.engine/commit/2f696f9c73863d0473acc0c4a66a67f66d8ad745) |
+| Authoring / canonical state / publishing | [`ooMia/oomia.github.io.engine`](https://github.com/ooMia/oomia.github.io.engine) | [`6ba2f950a78eef18c2efa305b96a1c8d0443252e`](https://github.com/ooMia/oomia.github.io.engine/commit/6ba2f950a78eef18c2efa305b96a1c8d0443252e) |
 | Generated documents | [`ooMia/oomia.github.io.docs`](https://github.com/ooMia/oomia.github.io.docs) | [`50d89a4cb1c5d6476444e29454e12b523e99231b`](https://github.com/ooMia/oomia.github.io.docs/commit/50d89a4cb1c5d6476444e29454e12b523e99231b) |
 | Presentation / delivery | [`ooMia/oomia.github.io`](https://github.com/ooMia/oomia.github.io) | [`a3b2e182563458636b7b8186a4cd2201894b2a65`](https://github.com/ooMia/oomia.github.io/commit/a3b2e182563458636b7b8186a4cd2201894b2a65) |
 
 `oomia.github.io`의 package name은 `oomia.github.io.mono`이고 engine 문서에서는 이를 `mono`라고 부른다. 별도 원격 `oomia.github.io.mono` 레포가 있다는 뜻은 아니다.
 
+## 이번 재평가의 의미
+
+2026-09-20에 두 가지 기준 변화와 새로운 Evidence를 반영했다.
+
+1. canonical raw source를 CMS Visual Editor의 표현 능력에서 분리하고, storage / editing / publishing을 독립 계약으로 정의했다.
+2. 공식 MDX component의 장기 경계를 versioned public content-component package로 정의했다.
+3. site revision `a3b2e182...`에 대한 GitHub Pages run [35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484)에서 build와 deploy가 모두 성공했고, [Pages artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312)가 생성된 것을 확인했다.
+
+따라서 일부 capability의 상태가 바뀐다. Canonical Content와 Publishing의 하향은 코드 regression이 아니라 **1.0 contract가 더 강하게 정의된 결과**다. Delivery의 상향은 실제 deployment Evidence가 추가된 결과다.
+
 ## 1.0 capability 상태
 
-상태는 **미검증 / 미충족 / 부분 충족 / 충족**만 사용한다. `충족`은 현재 1.0 Product Boundary (`docs/release-1.0.md`)의 요구를 충족한다는 의미이며, 전체 제품 완성이나 production-grade 품질을 뜻하지 않는다.
+상태는 **미검증 / 미충족 / 부분 충족 / 충족**만 사용한다. `충족`은 현재 1.0 Product Boundary의 요구를 충족한다는 의미이며, 전체 제품 완성이나 production-grade 품질을 뜻하지 않는다.
 
 | Capability | 상태 | 확인한 Evidence | 남은 delta |
 |---|---|---|---|
-| Authoring | **부분 충족** | Payload self-hosted CMS에서 로그인, 시각적 작성, 저장, 재편집, 재조회가 E2E로 검증되어 있다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/e2e.ts), [Payload config](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/src/payload.config.ts) | 전체 필수 표현의 시각 편집·무손실 왕복, 로컬 preview, draft/public 분리 등 작성 경험의 필수 gap이 남아 있다. |
-| Canonical Content | **충족** | Payload collection이 create/read/update를 허용하고 실제 통합 테스트가 create → PostgreSQL 저장 → findByID → update를 검증한다. 본문은 PostgreSQL 문자열 원본으로 지속되고 virtual editor state는 DB SoT가 아니다. [integration.ts](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/integration.ts), [Payload config](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/src/payload.config.ts) | Revision, 휴지통, 충돌 검출 등은 후속 기능이며 현재 1.0 capability 문구의 필수 조건으로 정의되어 있지 않다. |
-| Extensibility | **부분 충족** | 등록된 MDX `Callout`을 CMS 변환 계약과 site renderer 양쪽에서 opt-in 처리하며 실제 consumer build에서 렌더를 검증한다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/docs-workflow.ts), [site renderer commit](https://github.com/ooMia/oomia.github.io/commit/75a3235068dc77b0d99cc8b5391f4a84329177aa) | 단일 등록 블록의 검증을 넘어 custom logic/component의 안정된 public extension contract와 지원 범위를 명시해야 한다. |
-| Automation | **미충족** | `docs:publish`는 검증·commit·push를 묶은 **수동 CLI workflow**다. Agent/worker 타입과 TODO는 있으나 실제 publishing process에 참여하는 automated 또는 agent-assisted 실행 Evidence는 확인되지 않았다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/docs-workflow.ts), [TODO](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/TODO.md) | 실제 콘텐츠 발행 과정에 참여하는 최소 하나의 scheduled/triggered/agent-assisted workflow와 재현 Evidence가 필요하다. |
-| Publishing | **충족** | 운영 DB snapshot을 검증해 결정적인 md/mdx + manifest를 만들고, 실제 Astro consumer build를 통과시킨 뒤 docs를 commit/push하고 site와 engine이 같은 docs SHA를 기록한다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/docs-workflow.ts), [docs snapshot `50d89a4`](https://github.com/ooMia/oomia.github.io.docs/commit/50d89a4cb1c5d6476444e29454e12b523e99231b), [site consume commit](https://github.com/ooMia/oomia.github.io/commit/a3b2e182563458636b7b8186a4cd2201894b2a65) | 1.0 public artifact contract와 compatibility policy는 별도로 확정할 필요가 있다. |
-| Presentation | **충족** | site가 docs submodule의 md/mdx를 Astro content collection으로 읽고 article page에서 렌더한다. engine의 격리 통합 검증은 실제 site build와 등록 Callout HTML까지 확인한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts), [article page](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/pages/articles/%5B...id%5D.astro), [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/2f696f9c73863d0473acc0c4a66a67f66d8ad745/apps/cms-lab/scripts/docs-workflow.ts) | 현재 1.0 boundary의 렌더 요구는 충족한다. 추가 UI 완성도는 별도 delta로 다룬다. |
-| Delivery | **부분 충족** | site main push 시 GitHub Pages build/deploy를 실행하는 workflow가 있고, verified docs SHA를 소비하는 site commit까지 존재한다. [deploy workflow](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/.github/workflows/deploy.yaml), [site consume commit](https://github.com/ooMia/oomia.github.io/commit/a3b2e182563458636b7b8186a4cd2201894b2a65) | 해당 content revision이 실제 Pages에 성공적으로 반영되었다는 deployment URL/run Evidence는 이번 조사에서 확인하지 못했다. |
+| Authoring | **부분 충족** | Payload self-hosted CMS에서 로그인, 시각적 작성, 저장, 재편집, 재조회가 E2E로 검증되어 있다. 현재 Article body는 hidden string이고 editor는 virtual RichText다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts), [Payload config](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/src/payload.config.ts) | 현재 일반 save path는 raw `body` 직접 저장을 거부하고 모든 편집 문서를 Lexical round-trip 가능한 subset으로 제한한다. Visual에서 무손실 표현할 수 없는 Markdown/MDX를 위한 Source editing fallback과 안전한 capability 판별이 필요하다. |
+| Canonical Content | **부분 충족** | PostgreSQL에는 Article `body`가 문자열로 저장되고 virtual editor state는 DB 열이 아니다. metadata-only update와 기존 raw body 보존도 integration test로 검증되어 있다. [integration.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/integration.ts), [content contract](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/src/content-contract.ts) | 저장소 내부 표현은 raw string이지만 public/application save contract는 editor state를 요구하고 direct raw update를 차단한다. CMS-independent raw source create/update path와 Exact preservation contract를 구현해야 한다. |
+| Extensibility | **부분 충족** | 등록된 MDX `Callout`을 CMS 변환 계약과 site renderer 양쪽에서 opt-in 처리하며 실제 consumer build에서 렌더를 검증한다. [engine editor](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/src/editor.ts), [site renderer commit](https://github.com/ooMia/oomia.github.io/commit/75a3235068dc77b0d99cc8b5391f4a84329177aa) | component spec이 engine/site에 분산되어 있다. Site가 소유하는 versioned public content-component package와 shared type/runtime manifest를 도입하고, Visual adapter 유무와 공식 component 여부를 분리해야 한다. |
+| Automation | **충족** | Payload Admin의 명시적 `사이트 발행` action이 `POST /api/publish`를 통해 기존 `vp run docs:publish`를 호출한다. 중복 실행 거부와 non-zero 실패 전파가 테스트되었고 실제 path가 main-only guard까지 도달했다. 동일 snapshot의 idempotent no-op도 정상 publishing result다. [Publish action](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/src/components/PublishAction.tsx), [publish adapter](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/src/publish.ts), [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 현재 1.0 boundary의 최소 triggered automation 요구는 충족한다. |
+| Publishing | **부분 충족** | 운영 DB snapshot을 결정적인 md/mdx + manifest로 만들고 실제 Astro consumer의 sync/lint/test/typecheck/build를 통과시킨 뒤 docs/site/engine revision을 필요한 경우 갱신하는 verified workflow가 존재한다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts), [docs snapshot](https://github.com/ooMia/oomia.github.io.docs/commit/50d89a4cb1c5d6476444e29454e12b523e99231b) | publish 전에 모든 DB body를 CMS codec으로 decode/encode해 Visual Editor representability를 사실상 gate로 사용한다. 이를 content/component contract + actual consumer build 기반 검증으로 분리해 Source-only지만 Site에서 지원되는 content도 publish 가능하게 해야 한다. |
+| Presentation | **충족** | site가 docs submodule의 md/mdx를 Astro content collection으로 읽고 article page에서 렌더한다. engine의 격리 통합 검증은 실제 site build와 등록 Callout HTML까지 확인한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts), [article page](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/pages/articles/%5B...id%5D.astro) | 일반 Site UI와 Article content component의 package boundary를 분리하는 것은 Extensibility delta에서 다룬다. |
+| Delivery | **충족** | verified docs SHA를 소비하는 site main revision이 존재하고, 해당 revision `a3b2e182...`에 대한 GitHub Pages run [35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484)에서 build와 deploy가 모두 성공했다. [Pages artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312)도 생성되었다. | 현재 1.0 boundary의 실제 deployment Evidence 요구는 충족한다. 향후 content delta가 있는 publish에 대한 end-to-end deployment 관찰은 regression/evidence 강화 항목이다. |
 
 ## 현재 1.0 gap
 
-구현 delta로 우선 추적할 필요가 있는 것은 다음과 같다.
+우선 추적할 구현 delta는 다음과 같다.
 
-1. **Automation:** 실제 publishing process에 참여하는 최소 하나의 automated/agent-assisted workflow.
-2. **Authoring:** 1.0에서 요구할 작성 표현 범위와 preview/draft-public 경계를 확정하고 해당 범위를 완료.
-3. **Extensibility:** 현재 Callout proof를 일반화한 명시적 extension contract.
-4. **Delivery:** verified docs → site commit → GitHub Pages의 실제 성공 deployment Evidence.
-5. **Release gate:** 1.0 public contract 목록, compatibility policy, 최종 release gate AC.
+1. **Canonical Authoring Contract:** raw Markdown/MDX source를 CMS adapter와 독립적으로 create/update하고 Source mode에서 Exact 보존할 수 있게 한다.
+2. **Editing compatibility:** Visual round-trip 가능 여부를 storage/publish gate가 아니라 authoring capability로 분리하고 안전한 Source fallback을 제공한다.
+3. **Content Component Contract:** Site repository가 소유하는 versioned public content-component package의 최소 surface를 만들고 engine/site가 같은 계약을 소비하게 한다.
+4. **Publishing validation:** CMS codec round-trip을 global publish gate에서 제거하고 component/content contract + real Site consumer validation으로 책임을 이동한다.
+5. **Release gate:** package compatibility policy, generated document public contract, 최종 1.0 release gate AC를 확정한다.
+
+draft/public lifecycle, preview 고도화, revision history는 위 contract를 안정화한 뒤 독립 delta로 다룬다.
 
 ## 갱신 규칙
 
 구현 상태를 말할 때는 이 문서의 기준 revision을 먼저 확인한다. 구현 레포의 `main`이 기준 revision보다 진행되었으면 최신 코드·테스트를 다시 조사한 뒤 이 문서를 갱신한다. 설계 문서만으로 구현 상태를 올리지 않으며, `충족` 판정에는 재현 가능한 코드·테스트·commit·deployment 등의 Evidence가 필요하다.
 
-<!-- END SOURCE: docs/implementation-map.md -->
+Product Boundary 자체가 변경되면 기존 구현이 그대로여도 capability 판정이 바뀔 수 있다. 이 경우 regression과 contract 강화에 따른 재평가를 구분해 기록한다.
 
+<!-- END SOURCE: docs/implementation-map.md -->
 
 ---
 
@@ -350,7 +663,6 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 <!-- END SOURCE: docs/operating-rhythm.md -->
 
-
 ---
 
 <!-- BEGIN SOURCE: docs/decisions.md -->
@@ -372,15 +684,21 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D009 | Project README는 canonical 문서의 짧은 인덱스로 유지한다 | 사용자 명시, 2026-09-18 | Product Boundary·Planning Model·필드 정의를 README에 중복 보관 |
 | D010 | 설계 정의 Item은 canonical 문서의 immutable permalink를 Evidence로 사용할 수 있다 | 사용자 명시, 2026-09-18 | 설계 정의 완료에도 별도 산출물을 중복 생성 |
 | D011 | 1.0 구현 수준은 revision이 고정된 Implementation Map으로 관리한다 | 사용자 요청 + 구현 레포 검증, 2026-09-18 | 설계 문서 또는 대화만으로 구현 완료 여부 추론 |
+| D012 | canonical Article source는 CMS/Visual Editor와 독립적인 raw Markdown/MDX string으로 보존한다 | 사용자 승인, 2026-09-20 | Visual Editor가 무손실 표현 가능한 Markdown subset을 canonical 저장 범위로 취급 |
+| D013 | Storage, Editing, Publishing 가능성을 서로 독립된 계약으로 판정한다 | 사용자 승인, 2026-09-20 | 저장 가능 = Visual 편집 가능 = 발행 가능으로 묶는 모델 |
+| D014 | 공식 MDX component contract는 Site 쪽에서 소스 변경을 소유하는 versioned public content-component package로 공유한다 | 사용자 제안 및 승인, 2026-09-20 | engine과 site가 component spec을 각각 암묵적으로 복제 |
+| D015 | CMS는 공식 component의 authoring adapter이고 Site는 rendering consumer다. Visual adapter 유무는 publishability를 결정하지 않는다 | 사용자 승인, 2026-09-20 | CMS registry가 플랫폼 전체 MDX 지원 범위를 결정 |
+| D016 | Publishability는 CMS codec round-trip이 아니라 content/component contract와 실제 Site consumer 검증으로 판정한다 | D012–D015의 구현 원칙, 2026-09-20 | 모든 DB body에 Visual Editor representability를 요구하는 global publish gate |
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
 
 D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현·품질·배포 성공은 구현 레포의 코드·테스트·commit/PR·실행/deployment Evidence가 별도로 필요하다.
 
-D011의 최초 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. 구현 레포의 `main`이 진행되면 재검증하기 전까지 기존 판정을 최신 상태로 확대 해석하지 않는다.
+D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
+
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. machine-readable component manifest는 현재 planning schema (`docs/content-component-schema.md`) 단계이며 published package API가 확정되었다는 뜻은 아니다.
 
 <!-- END SOURCE: docs/decisions.md -->
-
 
 ---
 
@@ -388,37 +706,45 @@ D011의 최초 기준 revision과 capability 판정은 Implementation Map (`docs
 
 # Open Questions / Verification Gaps
 
+현재 canonical 정책과 구현 검증에서 아직 확정되지 않은 항목만 유지한다. 완료되거나 다른 문서에서 확정된 과거 질문은 이 목록에서 제거하고 Decision Log / Implementation Map에 남긴다.
+
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q001 | GitHub Project #11의 실제 필드·옵션·View·Item·Status Update | GitHub Project live 상태는 knowledge repo와 분리. 현재 플러그인 surface에서는 ProjectV2 README/필드 전체를 직접 검증·수정하지 못함 |
+| Q001 | GitHub Project #11의 실제 필드·옵션·View·Item·Status Update | GitHub Project live 상태는 knowledge repo와 분리. 현재 plugin surface에서 ProjectV2 전체 설정을 직접 검증·수정하는 기능은 제한적 |
 | Q002 | Scope 다중 선택 및 Delivery 옵션의 실제 적용 | 최신 설계에 포함, 실제 Project 설정 미확인 |
-| Q003 | 1.0 public contract 목록·compatibility policy·release gate | Implementation Map에서 Publishing 구현은 확인했으나 공개 계약 범위와 최종 gate는 별도 결정 필요 |
-| Q004 | 각 capability의 구현 수준과 재현 증거 | 2026-09-18 기준 최초 Implementation Map (`docs/implementation-map.md`) 작성. 기준 revision 이후 변경은 재검증 필요 |
+| Q003 | 1.0 public contract 목록·compatibility policy·release gate | Content authoring/component 방향은 확정. generated document public contract, package compatibility, 최종 release gate는 추가 결정 필요 |
+| Q004 | 각 capability의 구현 수준과 재현 증거 | Implementation Map (`docs/implementation-map.md`)에서 revision-bound snapshot으로 관리. 기준 revision 이후 변경은 재검증 필요 |
 | Q005 | 실제 Target Release 옵션·Iteration 일정·현재 Goal | Project 운영 상태에서 조회 필요; 예시를 실데이터로 만들지 않음 |
 | Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | 명시적으로 확정할 필요 있음 |
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
-| Q009 | knowledge remote 및 Project README 연결 | `ooMia/oomia.github.io.knowledge` private remote는 설정 완료. Project README 실제 교체는 아직 미확인; 템플릿 (`templates/project-readme.md`) 제공 |
+| Q009 | Project README 실제 canonical index 적용 여부 | knowledge remote는 설정 완료. 템플릿 (`templates/project-readme.md`)은 제공되어 있으나 Project README live 상태는 별도 확인 필요 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | Delivery의 실제 live deployment 성공 Evidence | site workflow 정의와 content-consuming commit은 확인. 해당 revision의 Pages 성공 run/URL은 이번 조사에서 검증하지 못함 |
-| Q012 | Automation 1.0 최소 경로 | 수동 `docs:publish`는 존재하지만 automated/agent-assisted publishing workflow는 확인되지 않아 미충족 |
+| Q011 | public content-component package의 실제 이름, registry, release transport, semantic compatibility policy | architecture는 versioned public package를 요구하지만 npm registry/package name/version coupling은 구현 시 결정 |
+| Q012 | component manifest schema의 최종 runtime API | planning schema (`docs/content-component-schema.md`)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
+| Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
+| Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
+| Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
 
-## 구현 검증 범위
+## 현재 구현 검증 기준
 
-2026-09-18에 다음 `main` revision을 직접 조사했다.
+2026-09-20 Implementation Map은 다음 implementation revision을 기준으로 한다.
 
-- engine: `2f696f9c73863d0473acc0c4a66a67f66d8ad745`
+- engine: `6ba2f950a78eef18c2efa305b96a1c8d0443252e`
 - docs: `50d89a4cb1c5d6476444e29454e12b523e99231b`
 - site (`package.json` name: `oomia.github.io.mono`): `a3b2e182563458636b7b8186a4cd2201894b2a65`
 
-상세 판정과 Evidence는 Implementation Map (`docs/implementation-map.md`)에 둔다. 별도 원격 `oomia.github.io.mono` 레포는 확인되지 않았으며, 현재 `mono`는 site 레포를 가리키는 로컬/문서상의 이름으로 취급한다.
+site revision에 대한 GitHub Pages run `35472028484`의 build/deploy 성공과 artifact `10593195312`를 확인했으므로 과거의 “Delivery 성공 Evidence 미확인” 질문은 종료했다.
+
+Issue #8의 explicit Publish trigger도 idempotent no-op semantics를 포함한 완료 Evidence로 닫혔으므로 과거의 “Automation 최소 경로 미충족” 질문은 종료했다.
+
+상세 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 둔다. 별도 원격 `oomia.github.io.mono` 레포는 없으며, `mono`는 site 레포를 가리키는 로컬/문서상의 이름으로 취급한다.
 
 ## 역사적 수집 범위
 
-초기 지식 레포는 동일 ChatGPT 프로젝트의 관련 대화 3개를 수집해 구성했다. 대화 원문은 provenance에 역사적 근거로 남기되, 이후 실제 repository 검증 결과가 있는 항목은 현재 canonical 문서와 Implementation Map을 우선한다.
+초기 지식 레포는 동일 ChatGPT 프로젝트의 관련 대화를 수집해 구성했다. 대화 원문은 provenance에 역사적 근거로 남기되, 이후 사용자 승인 정책과 실제 repository 검증 결과가 있는 항목은 현재 canonical 문서와 Implementation Map을 우선한다.
 
 <!-- END SOURCE: docs/open-questions.md -->
-
 
 ---
 
@@ -450,7 +776,6 @@ D011의 최초 기준 revision과 capability 판정은 Implementation Map (`docs
 이 레포에는 대화 원문 아카이브가 포함되어 있으므로 현재 private 상태를 기본 전제로 한다. 공개 전에는 provenance와 원문 아카이브의 공유 범위를 별도로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
 
 <!-- END SOURCE: CONTRIBUTING.md -->
-
 
 ---
 
