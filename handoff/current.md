@@ -12,7 +12,9 @@ Updated: 2026-09-20 (Asia/Seoul)
 - Site [draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9)는 이전 Site-owned package 안을 기록한 superseded draft이며 활성화하지 않는다.
 - package는 framework-neutral contract/manifest와 React renderer surface를 분리한다. public implementation에는 `.astro`를 사용하지 않는다.
 - Site는 React renderer consumer, Engine/CMS는 framework-neutral contract/manifest consumer다.
-- 현재 결정 gate는 Open Questions Q011/Q012/Q016: initial version/release/compatibility, exact subpath exports, 독립 GitHub repository owner/name/visibility다.
+- 확정: source repository는 public `ooMia/content-components`, npm package는 `@oomia/content-components`, initial version은 `0.1.0`, public subpaths는 root / `./react` / `./manifest` / `./styles.css`다.
+- baseline CSS는 명시적 import이며 CSS variables + stable class/data hooks + `className`/`style` passthrough로 override한다.
+- 남은 설계 질문은 release trigger/transport와 manifest runtime shape뿐이며 repository bootstrap의 blocker는 아니다.
 
 ## Verified repository state
 
@@ -152,13 +154,12 @@ Updated: 2026-09-20 (Asia/Seoul)
 
 ## Next safe action
 
-1. 독립 repository의 GitHub owner/name/visibility를 확정한다. 우선 후보 이름은 `ooMia/content-components`이며 아직 repository가 존재한다고 가정하지 않는다.
-2. package export surface를 확정한다. 현재 우선 설계는 framework-neutral root contract + React renderer subpath + manifest subpath다.
-3. initial version과 pre-1.0 compatibility policy, release trigger/transport를 확정한다.
-4. repository를 생성한 뒤 기존 프로젝트의 generic orchestration Action/branch 규칙 중 재사용 가치가 있는 부분만 이관한다.
-5. 첫 vertical slice는 새 repository에서 `Callout`을 새로 구현하고 package pack/install → Site consumer integration을 검증한다.
-6. Engine package adoption은 Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13)의 실제 구현 상태를 재확인한 뒤 별도 consumer change로 진행한다.
-
+1. public `ooMia/content-components` repository를 생성하고 `main` / `develop` workflow를 bootstrap한다.
+2. 기존 프로젝트의 generic Issue activation / Project sync / linked Development branch automation 중 package repository에도 필요한 부분만 이관한다.
+3. package `@oomia/content-components@0.1.0`의 최소 구조를 만든다: framework-neutral root, `./react`, `./manifest`, `./styles.css`.
+4. 첫 vertical slice는 `Callout` 하나로 semantic markup, React props, manifest, baseline CSS/theme overrides, pack/install을 검증한다.
+5. Site consumer integration으로 renderer 사용을 검증한다. Engine package adoption은 Engine Issue #13의 실제 상태를 재확인한 뒤 별도 change로 진행한다.
+6. npm 최초 publish 이후 Trusted Publishing/OIDC release trigger를 확정하고 자동화한다.
 ## Deferred housekeeping
 
 - 완료된 orchestration 작업에서 남아 있는 stale Engine branches는 추후 삭제 전 compare하여 미병합 작업이 없는지 확인한다.
