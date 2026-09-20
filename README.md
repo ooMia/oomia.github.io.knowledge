@@ -1,6 +1,6 @@
 # Publishing Platform Knowledge
 
-Git-backed Markdown/MDX content를 Obsidian·Fumadocs Editor로 작성하고, Engine이 검증·Git revision·publishing을 orchestration하여 실제 Site로 전달한다.
+Git-backed document workspace를 editor/tooling과 분리해 유지하고, Engine이 검증·Git revision·publishing을 orchestration하여 실제 Site로 전달한다. Obsidian과 Fumadocs Editor의 역할은 현재 integration evidence로 비교 중이다.
 
 이 repository는 Publishing Platform의 **제품·아키텍처·계획 지식에 대한 canonical source**다. 구현 코드와 GitHub Project의 실시간 작업 상태는 각 소유 위치에서 관리한다.
 
@@ -38,7 +38,7 @@ Git-backed Markdown/MDX content를 Obsidian·Fumadocs Editor로 작성하고, En
 
 - **authoring/draft state**: local Git working tree의 Markdown/MDX + frontmatter/assets
 - **durable shared canonical revision**: [`ooMia/oomia.github.io.docs`](https://github.com/ooMia/oomia.github.io.docs)의 Git commit
-- **authoring clients**: Obsidian, Fumadocs Editor, IDE/Agent
+- **authoring clients**: editor selection 미확정 — Obsidian primary candidate, Fumadocs Editor component-aware candidate, IDE/Agent source client
 - **validation/publishing orchestration**: Engine
 - **presentation/delivery**: Site
 
