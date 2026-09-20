@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-21
+
+- public `ooMia/content-components` source repository, npm `@oomia/content-components`, React renderer + framework-neutral contract/manifest, optional `styles.css` styling contract를 확정(D018–D020).
+- initial version `0.1.0`, public subpaths root / `./react` / `./manifest` / `./styles.css`, pre-1.0 breaking change는 minor version 정책으로 시작.
+
 ## 2026-09-20
 
 - content-component ownership을 Site에서 독립 repository로 이동하고 npm public package `@oomia/content-components` 및 React renderer/framework-neutral contract 분리를 확정(D018). Site draft Issue #9는 superseded 처리.
