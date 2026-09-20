@@ -11,9 +11,11 @@
 | Q010 | 미디어 공개 범위·asset 저장 위치 | workspace-relative asset과 durable external URL을 허용하는 방향. public/private 범위와 large/binary asset policy는 추가 결정 필요 |
 | Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
 | Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
-| Q015 | canonical file extension/layout convention | Markdown/MDX + frontmatter/filesystem 원칙은 확정. Obsidian interoperability와 Fumadocs component 사용을 고려해 `.md` / `.mdx` 선택 및 directory naming을 implementation spike에서 확정 |
+| Q015 | consumer-specific path/file convention | docs repository 전체는 자유로운 document tree로 유지. Site/Engine이 소비하는 subtree에서만 `.md` / `.mdx`, frontmatter, route/path naming을 어디까지 요구할지 integration spike에서 최소화해 결정 |
 | Q016 | Git publish semantics | durable canonical revision은 docs commit으로 확정. Engine이 auto-commit/push할지, 사용자 commit을 publish 입력으로 받을지, branch/PR를 사용할지 세부 UX 결정 필요 |
-| Q017 | Fumadocs Editor embedding 수준 | standalone Studio를 기본으로 쓸지 Engine shell에 `@fumadocs-editor/ui`를 embed할지는 최소 구현을 먼저 검증한 뒤 결정 |
+| Q017 | 실제 authoring editor 역할 분담 | Obsidian을 primary editor로 충분히 사용할 수 있는지, Fumadocs Editor가 component-aware visual editing을 위해 별도로 필요한지 기존 content corpus integration으로 결정. Fumadocs Studio vs embedded UI는 Fumadocs Editor 채택 시 하위 결정 |
+| Q018 | Obsidian ↔ Site component/style bridge | Obsidian CSS snippets/custom callout은 styling과 Markdown primitive 확장에 강하지만 arbitrary MDX semantics는 CSS만으로 제공하지 못한다. Obsidian plugin Markdown post-processing, portable callout/code-fence syntax, Site remark/rehype transform 중 최소 구현을 비교해야 함 |
+| Q019 | Engine/Site migration 방식 | 기존 소스를 in-place refactor할지 새 target skeleton을 greenfield로 만들고 generic code만 이식할지 미결. repository별 keep/adapt/retire 비율과 dependency graph를 Phase A에서 확인한 뒤 결정 |
 
 ## 분리 원칙
 
