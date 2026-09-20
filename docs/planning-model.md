@@ -61,9 +61,11 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | Iteration Goal 및 회고 | GitHub Project Status Update |
 | Status / Iteration / Work Type / Scope / Target Release / Objective 값 | GitHub Project fields |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
+| canonical content draft/working state | local Git working tree |
+| durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
 | 구현·테스트·구체적인 계약 | 책임을 소유한 구현 레포 |
 
-GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 knowledge repository에 두고 Project README에는 canonical 문서 링크와 Project 운영 원칙만 남긴다.
+Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 [Architecture Transition](architecture-transition.md)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 knowledge repository에 두고 Project README에는 canonical 문서 링크와 Project 운영 원칙만 남긴다.
 
 ## 릴리스와 시간
 
