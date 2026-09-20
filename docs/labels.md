@@ -19,7 +19,7 @@ GitHub labels는 Project #11의 필드 체계를 복제하지 않고, Issue/PR�
 | `orchestration:cross-repo` | 두 개 이상의 repository를 함께 조정하는 작업 | knowledge + engine + site 동기화 |
 | `orchestration:evidence` | automation 자체보다 검증·재현·evidence 수집이 Outcome인 작업 | idempotency/E2E 검증 |
 
-색상·설명까지 포함한 machine-readable registry는 [config/labels.json](../config/labels.json)을 canonical source로 사용한다.
+label의 **이름과 의미**는 [config/labels.json](../config/labels.json)을 canonical source로 사용한다. 색상은 UI 구분을 위한 표시 힌트이며 repository별 실제 색과 달라도 semantics가 바뀌지 않는다.
 
 ## 사용 기준
 
