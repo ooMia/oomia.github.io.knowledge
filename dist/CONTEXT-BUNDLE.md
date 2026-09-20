@@ -3,6 +3,7 @@
 GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.
 Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
 Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 transition guide를 먼저 따릅니다.
+JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정책을 함께 적용합니다.
 상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.
 
 
@@ -18,12 +19,13 @@ Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 tr
 
 콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
 
-- canonical Article content는 Git-backed local filesystem workspace의 Markdown/MDX + frontmatter/assets로 보존한다.
+- canonical content는 Git-backed local filesystem document workspace에 보존한다. publishable 문서는 Markdown/MDX + frontmatter/assets를 사용할 수 있고, docs layout은 free-form부터 strict convention까지 아직 열려 있다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
 - authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
 - Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
 - storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
-- Fumadocs built-in component/tooling을 우선 재사용하며 custom component/shared package는 실제 필요가 생길 때만 도입한다.
+- Fumadocs UI/Core/MDX를 Site에서 우선 재사용하고, Fumadocs Editor는 custom-component authoring 이점이 실제로 필요한지 비교한다. Obsidian-native custom syntax bridge는 1.0 필수 고려사항이 아니다.
+- JavaScript/TypeScript 구현에서는 Development Toolchain (`docs/development-toolchain.md`)의 VP-first 정책과 Repository Design (`docs/repository-design.md`)의 monorepo-ready/package-light 원칙을 적용한다.
 - 실제 구현 수준은 Implementation Map (`docs/implementation-map.md`)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
 현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 Architecture Transition (`docs/architecture-transition.md`)을 읽는다. 확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다. 이전 작업을 이어받는 경우에는 Architecture Transition (`docs/architecture-transition.md`) → Current Handoff (`handoff/current.md`) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
@@ -35,6 +37,8 @@ Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 tr
 | architecture migration 구현/이어받기 | Architecture Transition (`docs/architecture-transition.md`) → Current Handoff (`handoff/current.md`) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
 | 전체 이해 | Architecture (`docs/architecture.md`), Release 1.0 (`docs/release-1.0.md`) |
 | legacy → new target migration 판단 | Architecture Transition (`docs/architecture-transition.md`), Implementation Map (`docs/implementation-map.md`) |
+| VP 명령·환경·CI·hooks 정책 | Development Toolchain (`docs/development-toolchain.md`) |
+| monorepo/package/repository 구조 | Repository Design (`docs/repository-design.md`) |
 | Markdown/MDX authoring·storage·publish 정책 | Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`) |
 | custom MDX component profile/manifest | Content Component Manifest Schema (`docs/content-component-schema.md`), JSON Schema (`schemas/content-component-manifest.schema.json`) |
 | 현재 1.0 구현 수준·migration gap | Implementation Map (`docs/implementation-map.md`) → 기준 revision의 구현 레포 코드·테스트 |
@@ -55,11 +59,12 @@ Content 관련 구현을 계획하거나 수정할 때:
 3. Fumadocs Editor가 표현하지 못하는 syntax를 삭제/정규화해서 손실시키기보다 Obsidian/IDE Source path를 유지한다.
 4. uncommitted working tree와 committed docs canonical revision을 구분한다.
 5. publish는 DB export보다 validation / Git revision / Site consumer verification에 집중한다.
-6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. Obsidian-native source syntax와 Site-side remark/rehype mapping을 먼저 검토한다.
+6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. custom component authoring UX/DX가 editor 선택의 핵심 비교점이며 Obsidian-native custom syntax bridge는 1.0 범위 밖이다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine/Site를 greenfield로 다시 세우는 안도 Phase A evidence로 판단한다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
+11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -176,10 +181,11 @@ IDE / Agent ───────┘             │ validate / commit / push
 
 ### Authoring
 
-- editor는 아직 확정하지 않는다. Obsidian은 broad file/Markdown UX의 primary candidate이고, Fumadocs Editor는 MDX/custom-component-aware visual editing candidate다.
-- 핵심 검증 대상은 두 editor를 모두 필수로 만드는 것이 아니라, 동일 docs workspace를 authoring tool과 Site가 손실 없이 공유하는 integration framework다.
-- Fumadocs Editor가 표현하지 못하는 source 때문에 canonical syntax 범위를 줄이지 않는다.
+- editor는 아직 확정하지 않는다. 기존 content corpus가 이미 Obsidian 기반이므로 Obsidian의 기본 file/Markdown authoring 가능성은 검증 대상이 아니다.
+- 핵심 검증 대상은 Fumadocs Site integration과, custom component 주입·structured editing 관점에서 Fumadocs Editor가 Obsidian보다 실질적으로 유리한지 여부다.
+- 동일 docs workspace를 editor와 Site가 불필요한 conversion 없이 공유해야 한다.
 - Source-level editing은 Obsidian/IDE/Agent로 항상 가능해야 한다.
+- Obsidian-native custom syntax/style bridge는 1.0 핵심 과제로 만들지 않는다.
 - full CMS나 자체 editor framework를 직접 재구현하지 않는다.
 
 ### Engine
@@ -222,9 +228,9 @@ Docs repository는 ownership이 가장 크게 바뀐다.
 > generated document projection
 
 현재:
-> 자유롭게 변형 가능한 document directory/tree + durable Git revision history
+> 구현 목적에 따라 layout을 자유롭게 선택할 수 있는 document repository + durable Git revision history
 
-Docs는 특정 `content/` path, Article schema, route 구조를 repository 전체에 강제하지 않는다. Site/Engine 같은 consumer가 필요한 subtree/path convention은 정의할 수 있지만 이는 consumer contract다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
+Docs는 완전 자유 tree, consumer별 discovery convention, strict repository-wide layout을 모두 허용한다. 어떤 형태를 채택할지는 Site/Fumadocs integration과 유지보수 비용을 보고 결정한다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
 
 ## 4. Repository별 migration impact
 
@@ -332,21 +338,20 @@ Site 구현자가 과거 component-package 계획을 보고 별도 library부터
 - Site의 docs consumption 방식 조사
 - 현재 publish workflow에서 generic 부분과 Payload coupling 분리
 
-### Phase B — Prove the authoring/rendering integration
+### Phase B — Prove the Fumadocs/Site integration
 
-synthetic 최소 fixture를 먼저 설계하지 않는다. 기존에 작성한 실제 content corpus를 docs workspace로 import하여 다양한 Markdown 구조, frontmatter, links, assets, code blocks, legacy syntax를 한 번에 노출시킨다.
+synthetic 최소 fixture보다 기존에 Obsidian으로 작성한 실제 content corpus를 우선 사용한다. Obsidian authoring 자체는 이미 검증된 전제이므로, spike는 다음 불확실성에 집중한다.
 
-검증 목표:
+- 기존 corpus를 Fumadocs UI/Core/MDX 기반 Site에서 얼마나 자연스럽게 소비할 수 있는가
+- custom component가 필요할 때 Site와 authoring 측에서 주입/편집 경험이 어떤가
+- Fumadocs Editor가 custom component authoring을 충분히 단순화해 별도 editor로 채택할 가치가 있는가
+- Obsidian을 primary editor로 유지해도 source와 Site rendering contract가 충분히 단순한가
+- docs layout을 free-form/discovery-based로 유지하는 편과 strict convention을 도입하는 편 중 어느 쪽이 실제 integration을 단순화하는가
+- external edits/source round-trip에서 의미 없는 normalization이나 data loss가 발생하지 않는가
 
-- existing corpus를 Obsidian vault로 열었을 때 별도 migration 없이 유용한 authoring UX가 나오는가
-- Obsidian의 Properties / Live Preview / CSS snippets / custom callout만으로 필요한 visual authoring 수준을 어디까지 충족하는가
-- arbitrary MDX/custom component가 필요할 때 Obsidian plugin extension과 Fumadocs Editor 중 어느 쪽이 더 단순한가
-- Fumadocs UI/Core/MDX가 동일 source를 Site에서 자연스럽게 소비하는가
-- Obsidian-friendly Markdown syntax를 remark/rehype adapter로 richer Fumadocs UI에 mapping할 수 있는가
-- external edits가 source loss나 강제 normalization을 일으키지 않는가
-- docs tree의 기존 자유도를 유지하면서 consumer-specific path convention만 최소로 둘 수 있는가
+Obsidian-native custom callout/plugin/CSS bridge는 1.0 spike의 필수 항목이 아니다.
 
-synthetic fixture는 intentionally broken source, edge-case component, encoding/path edge case처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
+synthetic fixture는 broken source, encoding/path edge case, custom component validation처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
 
 ### Phase C — Rewire publishing
 
@@ -373,7 +378,7 @@ synthetic fixture는 intentionally broken source, edge-case component, encoding/
 - **Site verification 생략 금지**: file parse 성공만으로 Publishable 판정을 내리지 않는다.
 - **Framework rewrite 금지**: Fumadocs 도입을 이유로 Astro 등 이미 동작하는 Site 기반을 불필요하게 전면 교체하지 않는다.
 - **Editor lock-in 금지**: Obsidian/Fumadocs Editor 중 하나를 integration evidence 없이 canonical editor로 고정하지 않는다.
-- **Repository layout overconstraint 금지**: docs 전체에 단일 application-specific directory/frontmatter schema를 강제하지 않는다.
+- **Premature layout lock-in 금지**: strict layout 자체를 금지하지 않는다. 다만 integration evidence 없이 free-form 또는 strict layout을 architecture 원칙으로 선결하지 않는다.
 - **Legacy sunk-cost bias 금지**: 과거 구현 유지가 새 모델을 더 복잡하게 만들면 제거를 우선 검토한다.
 - **Unverified convenience assumption 금지**: Obsidian plugin/Fumadocs 기능을 문서나 실제 spike 없이 canonical capability로 가정하지 않는다.
 
@@ -383,38 +388,49 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 1. 이 문서
 2. Architecture (`docs/architecture.md`)
-3. Open Questions (`docs/open-questions.md`)에서 editor / layout / rebuild decision gate 확인
-4. Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)
-5. Release 1.0 (`docs/release-1.0.md`)
-6. Implementation Map (`docs/implementation-map.md`)
-7. Current Handoff (`handoff/current.md`)
-8. 변경 대상 repository의 최신 Issue/branch/code/test
+3. Development Toolchain (`docs/development-toolchain.md`)
+4. Repository Design & Maintenance (`docs/repository-design.md`)
+5. Open Questions (`docs/open-questions.md`)에서 editor / layout / Site migration decision gate 확인
+6. Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)
+7. Release 1.0 (`docs/release-1.0.md`)
+8. Implementation Map (`docs/implementation-map.md`)
+9. Current Handoff (`handoff/current.md`)
+10. 변경 대상 repository의 최신 Issue/branch/code/test
 
 과거 Issue body나 branch code가 위 문서와 충돌하면 **현재 canonical Knowledge가 목표를 소유하고, 과거 구현은 migration input**으로 취급한다.
 
 단, 실제 live repository state와 미push local work는 임의로 덮어쓰지 않는다.
 
-## 10.5 Greenfield rebuild option
+## 10.5 Engine greenfield scratch build
 
-Engine 또는 Site를 기존 구조에서 점진적으로 뜯어고치는 것만이 정답은 아니다.
+Engine은 D032에 따라 **greenfield scratch build를 기본 migration 전략으로 확정**한다.
 
-다음 조건이면 **새 target을 기준으로 greenfield skeleton을 만들고 legacy에서 필요한 부분만 가져오는 방식**을 허용한다.
+목표는 Git history를 지우는 것이 아니라 legacy source tree를 새 architecture의 template로 사용하지 않는 것이다.
 
-- legacy abstraction을 제거하는 비용이 새 구현보다 크다.
-- Payload/PostgreSQL coupling 때문에 workspace boundary를 검증하기 어렵다.
-- 재사용 가능한 코드가 command runner, evidence, Git verification처럼 작고 독립적이다.
-- 기존 테스트 대부분이 target behavior보다 legacy implementation detail을 고정한다.
+원칙:
 
-반대로 Site처럼 이미 canonical docs rendering/delivery Evidence가 있고 새 target과 구조적 충돌이 적다면 incremental migration을 우선한다.
+- same repository history를 보존한다.
+- scratch implementation은 새 Issue-linked branch에서 시작한다.
+- legacy branch/worktree의 미병합 작업은 먼저 보존한다.
+- Vite+ toolchain과 repository orchestration은 새 global policy를 적용한다.
+- Payload/PostgreSQL/Lexical/DB export task taxonomy를 새 skeleton에 복제하지 않는다.
+- legacy에서 generic behavior를 가져올 때는 이유와 verification evidence를 남긴다.
 
-greenfield 여부는 아직 결정되지 않았다. Phase A에서 repository별 keep/adapt/retire 비율과 dependency graph를 확인한 뒤 결정한다.
+우선 port 후보:
+
+- process execution behavior
+- concurrency/idempotency semantics
+- evidence/revision linkage
+- Site verification logic
+
+Site는 현재 docs→Astro→Pages Evidence가 있으므로 같은 결정을 자동 적용하지 않는다. Site는 incremental Fumadocs integration을 우선 후보로 유지하고 별도 evidence로 판단한다.
 
 ## 11. Transition completion criteria
 
 다음이 모두 충족되면 이 transition guide를 Active에서 Completed/Archived 상태로 바꿀 수 있다.
 
 - Docs repository가 canonical content remote로 실제 운영된다.
-- 선택된 authoring workflow가 실제 기존 content corpus에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
+- 실제 기존 content corpus가 Fumadocs/Site integration에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
 - Engine target path가 Payload/PostgreSQL 없이 workspace를 검증·publish할 수 있다.
 - Site가 새 canonical content revision을 실제 build/deploy한다.
 - publish Evidence가 docs SHA + Engine/Site revision + delivery result로 연결된다.
@@ -452,7 +468,7 @@ greenfield 여부는 아직 결정되지 않았다. Phase A에서 repository별 
 | 레포 | 책임 |
 |---|---|
 | `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
-| `oomia.github.io.docs` | 변형 가능한 document directory/tree와 assets의 durable Git remote 및 shared revision history. consumer별 path convention은 허용하지만 repository 자체의 고정 application schema는 강제하지 않음 |
+| `oomia.github.io.docs` | document directory/tree와 assets의 durable Git remote 및 shared revision history. layout은 자유 tree부터 strict path/schema까지 구현 목적에 맞게 선택 가능하며 현재 Knowledge가 한 형태를 선결하지 않음 |
 | `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
@@ -460,7 +476,7 @@ greenfield 여부는 아직 결정되지 않았다. Phase A에서 repository별 
 
 ## Canonical content workspace
 
-1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository는 특정 framework나 route 구조를 위해 설계된 고정 `content/` tree가 아니라, 다양한 Markdown-like 문서와 관련 자산을 담을 수 있는 유연한 directory tree다.
+1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository의 directory/path/layout 정책은 아직 확정하지 않는다. 완전 자유 tree, consumer별 discovery convention, strict application-specific layout 모두 유효한 구현 선택지다.
 
 ```text
 Obsidian ──────────────┐
@@ -483,22 +499,29 @@ Source editor / Agent ┘      frontmatter / assets
 
 - local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다.
 - 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
-- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있지만 모든 docs path가 Article schema를 따라야 하는 것은 아니다.
-- consumer가 필요하면 특정 subtree/path에 frontmatter 또는 naming convention을 요구할 수 있다. 이 규약은 consumer contract이지 docs repository 전체의 절대 layout contract가 아니다.
+- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있다.
+- consumer 또는 repository 자체가 필요하면 subtree 또는 repository-wide directory/path/frontmatter convention을 강제할 수 있다. 핵심은 어떤 layout도 사전에 금지하지 않고 실제 integration/maintenance 비용을 근거로 선택하는 것이다.
 - asset은 workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
 - Git history가 content revision history, diff, rollback의 기본 수단이다.
 - PostgreSQL/Payload state를 canonical content로 사용하지 않는다.
 
 ## Authoring boundary
 
-authoring client 선택은 아직 확정하지 않는다. 현재 핵심은 특정 Editor를 제품 경계로 고정하는 것이 아니라 **동일한 자유로운 docs workspace를 여러 authoring/rendering tool이 손실 없이 공유하는 integration framework**를 검증하는 것이다.
+authoring client 선택은 아직 확정하지 않는다. 기존 content corpus는 이미 Obsidian에서 작성되어 왔으므로 **Obsidian에서 기본 Markdown/file authoring이 가능한가**는 1.0의 주요 불확실성이 아니다.
+
+현재 비교의 핵심은 다음이다.
+
+- Obsidian을 primary editor로 유지했을 때 전체 authoring UX가 충분한가.
+- Fumadocs Editor가 custom MDX component를 더 쉽게 주입·편집하는 데 실질적인 우위를 제공하는가.
+- 선택한 editor와 Site/Fumadocs rendering layer가 동일 filesystem source를 불필요한 conversion 없이 공유할 수 있는가.
+- editor 선택이 docs repository의 layout이나 canonical source를 과도하게 제한하지 않는가.
 
 ```text
                          Git-backed docs workspace
                       /              |              \
                      /               |               \
                Obsidian        Fumadocs Editor      IDE / Agent
-             broad file UX      MDX-aware visual      source UX
+             proven source UX   component-aware UX    source UX
                      \               |               /
                       \              |              /
                           integration boundary
@@ -507,13 +530,9 @@ authoring client 선택은 아직 확정하지 않는다. 현재 핵심은 특�
                            Site consumer
 ```
 
-- **Obsidian**은 현재 primary editor 후보다. file navigation, Markdown/source editing, Properties/frontmatter, Live Preview, CSS snippets/theme/plugin ecosystem을 활용할 수 있다.
-- **Fumadocs Editor**는 MDX와 Fumadocs/custom component를 구조적으로 visual-edit하는 데 강점이 있는 후보다. editor 자체가 필수 architecture component라는 뜻은 아니다.
-- Obsidian의 CSS snippets와 custom callout은 스타일/Markdown primitive 확장에는 충분히 강력하지만, CSS만으로 arbitrary MDX/JSX component semantics를 구현하지는 못한다. 필요한 경우 Obsidian plugin Markdown post-processing 같은 별도 extension이 필요하다.
-- 따라서 가능한 경우 portable Markdown/Obsidian-friendly syntax를 canonical source로 두고 Site/Fumadocs 쪽 remark/rehype transformation으로 richer UI를 만드는 경로를 우선 검토한다.
-- 특정 authoring client가 지원하지 않는 syntax를 canonical workspace에서 삭제하거나 제한하는 근거로 사용하지 않는다.
-- 실제 editor 선정은 기존 content corpus를 import한 integration spike에서 authoring UX, component extensibility, source preservation, Site rendering 비용을 비교한 뒤 확정한다.
-- Engine은 full CMS나 editor framework를 재구현하지 않는다.
+Obsidian-specific custom syntax/CSS bridge는 1.0 필수 고려사항이 아니다. 향후 필요하면 별도 extension 문제로 다룬다.
+
+Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
@@ -564,15 +583,14 @@ Site revision linkage / delivery
 
 ## Fumadocs boundary
 
-Fumadocs는 **Site presentation/content processing**에서는 적극적인 재사용 후보이고, **authoring editor**로서는 Obsidian과 비교 중인 후보다.
+Fumadocs는 **Site presentation/content processing**의 주요 재사용 후보이며, authoring에서는 custom component 주입과 structured visual editing의 편의 때문에 Obsidian과 비교 중인 후보다.
 
-- Fumadocs UI/Core/MDX가 Site의 layout, search, Markdown/MDX processing, built-in components를 단순화하면 우선 활용한다.
-- Fumadocs MDX는 custom remark/rehype plugin을 허용하므로, Obsidian-friendly source syntax를 Site에서 richer component로 변환하는 adapter layer를 만들 수 있다.
-- Fumadocs Editor는 files를 source of truth로 유지하고 custom component specs를 제공하므로 component-aware visual editing이 실제 요구가 될 때 가치가 크다.
-- 반면 일반 document/file authoring과 styling만 필요하다면 Obsidian의 Live Preview, CSS snippets, custom callout, plugin ecosystem으로 충분할 수 있다.
-- 따라서 Fumadocs Editor를 1.0 필수 editor로 두지 않는다. Site integration과 Editor selection을 서로 분리해 판단한다.
+- Fumadocs UI/Core/MDX가 Site의 layout, search, Markdown/MDX processing, built-in/custom components를 단순화하면 우선 활용한다.
+- Fumadocs Editor는 files를 source of truth로 유지하고 custom component specs를 제공하므로 Oomia-specific component authoring이 늘어날 경우 중요한 이점이 될 수 있다.
+- Obsidian 기반 기존 corpus의 일반 authoring 호환성은 이미 확보되어 있으므로 1.0 spike의 초점은 Fumadocs integration과 editor 역할 결정에 둔다.
+- Fumadocs Editor를 1.0 필수 editor로 미리 확정하지 않는다.
 
-Fumadocs 자체 API가 canonical content contract는 아니다. canonical source는 자유로운 filesystem document tree와 consumer별 최소 contract다.
+Fumadocs 자체 API가 canonical content contract는 아니다. canonical source와 docs layout은 editor 선택과 분리한다.
 
 ## Component contract
 
@@ -606,6 +624,791 @@ Engine을 container image로 배포하는 방향은 이 architecture와 정합�
 
 ---
 
+<!-- BEGIN SOURCE: docs/development-toolchain.md -->
+
+# Development Toolchain — Vite+ First
+
+상태: 2026-09-21 project-wide engineering policy.
+
+이 문서는 Publishing Platform의 JavaScript/TypeScript repository에서 사용하는 **개발 도구의 전역 기본값**을 소유한다. 특정 repository가 다른 선택을 해야 한다면 그 이유와 차이를 해당 repository contract에 명시한다.
+
+핵심 원칙:
+
+> Vite+의 `vp`를 runtime, package management, static checks, tests, builds, workspace task orchestration, staged checks의 **기본 진입점**으로 사용한다. Vite+가 이미 제공하는 기능을 위해 별도의 wrapper/tool을 추가하지 않는다.
+
+Vite+ official documentation:
+- https://viteplus.dev/guide/
+- https://viteplus.dev/guide/monorepo
+- https://viteplus.dev/guide/run
+- https://viteplus.dev/guide/env
+- https://viteplus.dev/guide/commit-hooks
+- https://viteplus.dev/guide/ci
+- https://viteplus.dev/guide/docker
+
+## 1. Command surface
+
+### VP-first
+
+가능하면 다음 명령을 직접 사용한다.
+
+| 목적 | 표준 |
+|---|---|
+| environment 진단 | `vp env current`, `vp env doctor` |
+| dependency install | `vp install` |
+| dependency 추가/삭제 | `vp add`, `vp remove` |
+| dependency 조사 | `vp why`, `vp info`, `vp outdated`, `vp list` |
+| local binary | `vp exec` |
+| one-shot package binary | `vp dlx` / `vpx` |
+| static checks | `vp check` |
+| formatting | `vp fmt` |
+| lint | `vp lint` |
+| Vitest | `vp test` |
+| Vite app dev/build/preview | `vp dev`, `vp build`, `vp preview` |
+| library/executable packaging | `vp pack` |
+| repository task/script | `vp run <task>` / `vpr <task>` |
+| staged checks | `vp staged` |
+
+package-manager-specific 동작이 정말 필요할 때만 `vp pm <command>`을 escape hatch로 사용한다.
+
+직접 `pnpm`, `npm`, `bun`, `yarn` 명령을 문서·스크립트·CI의 표준 interface로 만들지 않는다. 단, Vite+가 정상화하지 않는 package-manager-specific feature를 의도적으로 사용할 때는 예외를 허용한다.
+
+### `vp <command>`와 `vp run <command>`을 혼동하지 않는다
+
+Vite+ built-in command는 package script로 override되지 않는다.
+
+예:
+
+- `vp dev` → built-in Vite dev server
+- `vp run dev` / `vpr dev` → package.json script 또는 Vite Task
+- `vp build` → built-in Vite build
+- `vp run build` → package-specific build script/task
+- `vp test` → built-in Vitest
+- `vp run test` → package-specific test script/task
+
+따라서 Astro처럼 package script가 `astro dev` / `astro build`를 소유한다면 **`vpr dev` / `vpr build`**를 사용한다. bare `vp dev` / `vp build`가 framework script를 실행한다고 가정하지 않는다.
+
+### `vpr`
+
+`vpr`는 `vp run`의 공식 shorthand다.
+
+프로젝트에서는 다음처럼 사용한다.
+
+- 개발자가 반복적으로 실행하는 task: `vpr <task>`을 표준 shorthand로 허용한다.
+- 설명 문서에서 task runner semantics를 처음 설명할 때는 `vp run`을 명시하고 이후 `vpr`를 사용할 수 있다.
+- agent는 task 이름이 built-in과 충돌할 수 있으면 반드시 `vp run` / `vpr` 여부를 확인한다.
+
+## 2. Runtime / package manager pinning
+
+전역 VP 환경 관리와 repository reproducibility를 함께 사용한다.
+
+- 개발자 machine에서는 Vite+ managed environment를 사용할 수 있다.
+- 각 repository는 runtime과 package manager requirement를 repository 안에 선언한다.
+- `vp env current` / `vp env doctor`가 실제 선택을 설명할 수 있어야 한다.
+- CI와 Agent는 system Node/pnpm이 우연히 맞는다고 가정하지 않는다.
+
+권장 우선순위:
+
+1. Node 개발 runtime은 `.node-version` 또는 `devEngines.runtime`으로 명확하게 pin한다.
+2. consumer support range가 필요하면 `engines.node`은 별도로 유지한다.
+3. package manager는 가능한 한 top-level `packageManager`에 exact version을 pin한다.
+4. `devEngines.packageManager`는 개발 환경 constraint 설명에 사용할 수 있다.
+5. 두 declaration이 함께 있다면 서로 모순되지 않게 한다.
+
+Vite+ global CLI가 project-local toolchain보다 새로울 수 있으므로 **global latest를 project behavior로 간주하지 않는다**.
+
+## 3. Vite+ version policy
+
+- `vite-plus` project dependency는 exact version을 사용한다.
+- pnpm workspace에서는 root catalog에서 한 번만 pin하는 것을 기본으로 한다.
+- Vite alias가 필요하면 Vite+가 요구하는 bundled core alias와 version을 함께 관리한다.
+- toolchain version upgrade는 독립 Maintenance change로 수행한다.
+- `vp migrate`를 일상적인 setup/repair command로 사용하지 않는다.
+
+### `vp migrate` guard
+
+`vp migrate`는 monorepo root의 dependency/config/catalog/lockfile/agent integration까지 변경할 수 있다. global VP가 더 최신이면 project Vite+를 그 버전으로 올릴 수도 있다.
+
+따라서 Agent는 다음 경우에만 실행한다.
+
+- Outcome이 Vite+ migration/upgrade 자체인 Issue
+- 변경 전 Git 상태가 clean하거나 별도 branch에서 보존됨
+- 변경 후 diff를 검토할 계획이 있음
+
+단순 dependency install, lint 문제, PATH 문제를 해결하기 위해 `vp migrate`를 먼저 실행하지 않는다.
+
+## 4. Root `vite.config.ts` ownership
+
+Vite+ monorepo에서는 root `vite.config.ts`를 **toolchain policy의 단일 중심**으로 사용한다.
+
+root가 우선 소유할 항목:
+
+- `lint`
+- `fmt`
+- `check`
+- `staged`
+- shared `run.tasks`
+- optional `create`
+- shared cache policy
+
+Vite+는 현재 nested lint/format config를 자동 적용하지 않으므로 package별 차이는 root의 `lint.overrides` / `fmt.overrides`로 표현한다.
+
+package-level `vite.config.ts`는 다음과 같은 **실제 package/runtime config**를 소유할 수 있다.
+
+- framework/Vite app config
+- package-specific Vitest config
+- package-specific build/pack config
+- package runtime plugin
+
+lint/fmt policy를 package마다 중복하지 않는다.
+
+root config가 커지면 pure configuration object를 별도 file에서 import할 수 있지만, 모든 VP command가 config를 읽는다는 점을 고려해 top-level import에 side effect나 heavy plugin initialization을 넣지 않는다.
+
+## 5. Task ownership
+
+repository가 지저분해지는 가장 흔한 원인은 task가 여러 layer에 중복되는 것이다.
+
+### package script가 적합한 경우
+
+- package/framework가 고유 command를 요구함
+- 예: `astro build`, custom Node service start
+- task가 그 package의 public development interface임
+
+### root Vite Task가 적합한 경우
+
+- 여러 package를 orchestration함
+- dependency ordering이 필요함
+- cache/input/output/env contract가 필요함
+- repository-wide verification/publishing/evidence workflow임
+
+Vite Task는 workspace package의 실제 `dependencies` graph를 ordering에 사용한다. 별도의 가상 dependency graph를 만들지 않는다.
+
+### naming
+
+새 repository에서는 의미가 겹치는 alias를 늘리지 않는다.
+
+권장 vocabulary:
+
+- `check`: formatting + lint + type static gate
+- `test`: automated behavior tests
+- `build`: buildable artifact validation
+- `verify`: repository-wide aggregate gate가 실제로 필요할 때만
+- `publish`: external/repository state를 변경하는 explicit side-effect task
+- `evidence`: verification result capture가 독립 outcome일 때
+
+`ready`, `quality`, `validate`, `ci`, `check:all`처럼 같은 의미의 aggregate alias를 동시에 만들지 않는다.
+
+## 6. Workspace task execution
+
+표준 패턴:
+
+- 현재 package: `vpr test`
+- 모든 package: `vp run -r test`
+- 특정 package: `vp run @scope/name#build`
+- dependencies 포함: `vp run -t @scope/app#build`
+- filter: `vp run --filter ./apps/engine test`
+- package cwd에서 실행: `vp -C apps/engine <command>`
+
+package를 실제 cwd처럼 취급해야 하면 positional Vite root 인자보다 `-C`를 우선한다.
+
+## 7. Caching
+
+cache는 **순수하거나 재현 가능한 task에 적극 사용**한다.
+
+기본 cache 후보:
+
+- compile/build
+- unit test
+- lint/static analysis
+- deterministic code generation
+
+기본 `cache: false` 후보:
+
+- Git commit/push/tag
+- publishing/deployment
+- external service mutation
+- interactive server
+- environment setup
+- credential-dependent state check
+- Evidence가 현재 external state를 관찰해야 하는 task
+
+Vite Task는 task config는 기본 cache 대상이고 package.json script는 기본적으로 cache되지 않는다.
+
+cacheable task가 environment에 의존하면 `env`를 cache fingerprint에 명시한다. 단순 전달만 필요하고 output 의미를 바꾸지 않는 변수는 `untrackedEnv`를 검토한다.
+
+CI에서 Vite Task cache 공유는 현재 experimental이므로, 먼저 local immediate second-run cache hit가 재현되는지 확인한 후 도입한다.
+
+## 8. Static quality gate
+
+`vp check`를 JavaScript/TypeScript static gate의 기본으로 사용한다.
+
+root config에서 기본적으로:
+
+- Oxfmt
+- Oxlint
+- type-aware lint
+- type checking
+
+을 함께 사용한다.
+
+Vite+가 권장하는 `lint.options.typeAware: true`, `typeCheck: true`를 기본값으로 삼되 실제 TypeScript project structure가 호환되는지 검증한다.
+
+Prettier/ESLint를 Vite+가 처리할 수 있는 영역에 병렬로 유지하지 않는다.
+
+예외:
+
+- Oxfmt가 지원하지 않는 plugin behavior가 실제 requirement일 때
+- framework file support가 실제로 부족하다고 검증됐을 때
+
+Oxfmt는 현재 Markdown/MDX를 포함한 다수 format을 지원한다. 별도 Prettier 사용은 “예전에 필요했다”가 아니라 **현재 gap**으로 증명한다.
+
+## 9. Git hooks
+
+새 repository에서는 Husky + lint-staged 대신 Vite+ native path를 기본으로 한다.
+
+```text
+.vite-hooks/pre-commit
+  -> vp staged
+```
+
+`vite.config.ts`의 `staged` block이 staged checks를 소유한다.
+
+- `vp hooks status`로 local clone 상태를 확인한다.
+- `vp hooks enable` / `disable`로 dispatcher를 관리한다.
+- generated dispatcher는 commit하지 않고 project-owned hook만 commit한다.
+- automation/content commit처럼 hook을 의도적으로 건너뛰어야 할 때는 `VP_GIT_HOOKS=0`을 명시적으로 사용한다.
+
+기존 Husky repository는 한 번에 강제 migration하지 않는다. parity를 검증한 뒤 기존 hook dependency/config를 제거한다.
+
+## 10. Evidence output
+
+재현 가능한 evidence/log 수집 task는 ANSI/color에 의존하지 않는다.
+
+프로젝트 기존 정책대로 evidence collector/task 내부에서 `NO_COLOR=1`을 강제한다. Vite+도 `NO_COLOR`를 지원한다.
+
+개발자의 일반 shell 전체에서 color를 끄는 것이 아니라 **evidence-producing boundary에서만** 적용한다.
+
+## 11. CI
+
+GitHub Actions에서는 Vite+ official `voidzero-dev/setup-vp`를 사용한다.
+
+규칙:
+
+- action version은 exact release 또는 commit SHA로 pin한다.
+- obsolete floating `v1` tag를 사용하지 않는다.
+- 별도 `setup-node` + pnpm setup + package cache chain이 필요하지 않으면 중복하지 않는다.
+- install은 `vp install --frozen-lockfile`을 기본으로 한다.
+- static gate는 `vp check`.
+- package tests/build는 monorepo task ownership에 따라 `vp test` 또는 `vp run -r test/build`를 사용한다.
+
+Vite Task result cache의 cross-run restore는 experimental이므로 correctness보다 먼저 최적화하지 않는다.
+
+## 12. Docker
+
+Vite+ official image는 build/CI/devcontainer에 사용할 수 있지만 production runtime image로 사용하지 않는다.
+
+Engine container는 multi-stage를 기본으로 한다.
+
+1. Vite+ build stage에서 install/check/test/build/pack
+2. runtime stage에는 실제 runtime과 artifact/production dependency만 포함
+
+이렇게 하면 project toolchain이 production image surface에 불필요하게 남지 않는다.
+
+## 13. IDE
+
+VS Code 계열에서는 Vite+ / Oxc workspace integration을 우선한다.
+
+- Oxc formatter/linter
+- nested config disable
+- format on save
+- 필요하면 `npm.scriptRunner: "vp"`
+
+목표는 CLI, editor, CI가 서로 다른 formatter/linter 설정을 읽지 않게 하는 것이다.
+
+## 14. Agent instructions
+
+Agent가 Vite+ repository를 다룰 때 최소한 다음을 알아야 한다.
+
+1. `vp <built-in>`과 `vp run <script/task>`의 차이
+2. 작업 시작 전 `vp install`
+3. 환경 이상 시 `vp env doctor`
+4. static gate는 `vp check`
+5. package-specific 추가 gate는 `vp run` / `vpr`
+6. direct package-manager/tool binary 호출보다 VP command surface 우선
+
+Vite+의 `vp config`는 agent integration까지 변경할 수 있다. Publishing Platform은 Knowledge와 repository-specific Agent 지침을 별도로 관리하므로 단순 hook setup을 위해 agent file을 자동 수정하지 않는다.
+
+필요하면:
+
+```sh
+vp config --no-agent
+```
+
+처럼 실행하고 agent integration 변경은 별도 diff로 검토한다.
+
+## 15. Anti-patterns
+
+새 구현에서 피한다.
+
+- Vite+ + Turbo를 같은 역할의 root task runner로 중복 도입
+- Vite+ hooks + Husky를 같은 pre-commit 경로에 중복 유지
+- root lint/fmt와 package별 lint/fmt config drift
+- 모든 command를 package.json wrapper script로 다시 감싸기
+- `vp dev`가 package의 `dev` script라고 가정
+- stateful publish/Git mutation task를 cache
+- global latest Vite+ behavior에 기대고 project version을 pin하지 않기
+- troubleshooting을 위해 무조건 `vp migrate` 실행
+- repo-specific agent instructions를 `vp config`가 무검토로 덮어쓰게 두기
+
+## 16. Current repository implications
+
+### Engine
+
+현재 Engine은 Vite+를 이미 사용하지만 task taxonomy가 legacy architecture에 결합되어 있다.
+
+예:
+- `db:*`
+- `cms:*`
+- DB-based `docs:publish`
+
+scratch build에서는 이 task set을 이어받지 않는다.
+
+VP 자체와 다음 종류의 정책만 재사용한다.
+
+- root lint/fmt/check
+- catalog/pinning model
+- workspace task execution
+- evidence `NO_COLOR`
+- generic verification
+
+### Site
+
+현재 Site는 Vite+와 Turbo를 함께 사용한다.
+
+새 policy에서는 VP가 default task runner다. Turbo는 즉시 삭제하지 않지만 **새 workflow가 Turbo dependency를 확대하지 않는다**. VP recursive/filter/cache가 현재 Turbo usage를 대체할 수 있는지 별도 parity migration으로 검증한 뒤 정리한다.
+
+## External references reviewed
+
+- Vite+ Getting Started: https://viteplus.dev/guide/
+- Vite+ Monorepo: https://viteplus.dev/guide/monorepo
+- Vite+ Run: https://viteplus.dev/guide/run
+- Vite+ Task Caching: https://viteplus.dev/guide/cache
+- Vite+ Environment: https://viteplus.dev/guide/env
+- Vite+ Package Management: https://viteplus.dev/guide/install
+- Vite+ Check: https://viteplus.dev/guide/check
+- Vite+ Commit Hooks: https://viteplus.dev/guide/commit-hooks
+- Vite+ CI: https://viteplus.dev/guide/ci
+- Vite+ Docker: https://viteplus.dev/guide/docker
+- Vite+ IDE Integration: https://viteplus.dev/guide/ide-integration
+- Vite+ Migrate: https://viteplus.dev/guide/migrate
+- Oxfmt language support: https://oxc.rs/docs/guide/usage/formatter/language-support
+
+<!-- END SOURCE: docs/development-toolchain.md -->
+
+
+---
+
+<!-- BEGIN SOURCE: docs/repository-design.md -->
+
+# Repository Design & Maintenance
+
+상태: 2026-09-21 project-wide engineering policy.
+
+이 문서는 Publishing Platform의 implementation repository를 **오래 유지하기 쉽게 만드는 구조 원칙**을 소유한다. 특정 framework의 boilerplate를 복제하는 문서가 아니라, Engine/Site와 향후 package/tooling repository에 공통으로 적용할 boundary와 hygiene를 정의한다.
+
+조사한 공통 패턴:
+
+- Vite+는 root config와 실제 workspace dependency graph를 중심으로 monorepo task를 구성한다.
+- pnpm은 workspace package dependency를 `workspace:` protocol로 명시하고 shared dependency version은 catalog로 중앙 관리할 수 있다.
+- Astro는 코드 구조를 실행 context와 책임에 따라 `core`, `runtime/client`, `runtime/server`처럼 나눈다.
+- 성숙한 대형 monorepo도 `apps` / `packages` 또는 역할별 package를 사용하지만, package 수 자체를 목표로 삼지는 않는다.
+
+핵심 원칙:
+
+> directory는 기술 이름보다 **실행 단위와 소유 책임**을 표현한다. package는 재사용 가능성, dependency boundary, 독립 검증 또는 배포 경계가 실제로 존재할 때만 만든다.
+
+## 1. Default workspace shape
+
+JavaScript/TypeScript implementation repository의 기본 shape는 다음을 사용한다.
+
+```text
+/
+├─ apps/        # independently runnable/deployable programs
+├─ packages/    # reusable libraries with explicit dependency boundaries
+├─ tools/       # repository-development-only tools/generators
+├─ .github/     # CI / repository automation
+├─ vite.config.ts
+├─ pnpm-workspace.yaml
+├─ package.json
+└─ tsconfig.json
+```
+
+모든 directory가 처음부터 존재할 필요는 없다.
+
+### apps
+
+`apps/*`에 둘 조건:
+
+- 독립적으로 실행할 수 있음
+- container/process/UI/CLI처럼 runtime entry point가 있음
+- 다른 app과 lifecycle이 다름
+
+### packages
+
+`packages/*`에 둘 조건 중 하나 이상:
+
+- 두 개 이상의 app/package가 실제로 사용함
+- 독립 dependency boundary가 중요함
+- 별도 unit/API contract로 검증하는 것이 명확함
+- library artifact로 pack/publish할 가능성이 실제로 있음
+- execution context를 분리해야 함
+
+단순히 파일이 많아졌다는 이유로 package를 만들지 않는다.
+
+### tools
+
+`tools/*`는 제품 runtime에 포함되지 않는 repository 개발 도구다.
+
+예:
+
+- code generator
+- fixture generator
+- migration helper
+- release/evidence utility
+- local developer diagnostics
+
+한 번만 쓰는 20줄 script를 전부 package로 만들 필요는 없지만, root `scripts/`가 장기적으로 기능 dump가 되지 않게 한다.
+
+## 2. Monorepo-ready, package-light
+
+scratch repository는 처음부터 workspace를 사용할 수 있지만 package proliferation은 피한다.
+
+예를 들어 새 Engine은 다음처럼 시작할 수 있다.
+
+```text
+/
+├─ apps/
+│  └─ engine/
+├─ packages/   # initially empty or absent
+└─ tools/      # actual need appears later
+```
+
+이 구조는 향후 package 분리를 쉽게 하면서도 첫날부터 `core`, `utils`, `infra`, `shared`를 추측해 만들지 않는다.
+
+## 3. Avoid catch-all packages
+
+다음 이름은 쉽게 책임이 흐려지므로 기본적으로 만들지 않는다.
+
+- `utils`
+- `common`
+- `shared`
+- `helpers`
+- `infra`
+
+이름 자체가 금지되는 것은 아니다. 다만 생성하려면 “어떤 dependency boundary를 소유하는가?”에 명확히 답할 수 있어야 한다.
+
+예를 들어 process execution이 Engine과 별도 tool에서 모두 필요해 실제 contract가 생겼다면 `packages/process`처럼 구체적인 capability package를 고려할 수 있다.
+
+두 번째 consumer가 아직 없다면 app 내부에 둔다.
+
+## 4. Dependency direction
+
+workspace dependency는 `package.json`의 실제 dependency로 표현한다.
+
+pnpm workspace 내부 dependency는 가능한 한:
+
+```json
+{
+  "dependencies": {
+    "@oomia/example": "workspace:*"
+  }
+}
+```
+
+처럼 local-only intent를 명시한다.
+
+이 dependency graph가 Vite+ task ordering에도 사용되므로 별도의 task-runner 전용 graph를 만들지 않는다.
+
+순환 dependency가 생기면 task runner 설정으로 감추지 않고 package boundary를 다시 검토한다.
+
+## 5. Dependency versions
+
+여러 workspace package가 공유하는 third-party dependency는 root `pnpm-workspace.yaml` catalog에 둘 수 있다.
+
+catalog를 사용할 기준:
+
+- 여러 package가 같은 version policy를 공유함
+- upgrade를 한 곳에서 관리하는 것이 유리함
+- peer/runtime mismatch를 피해야 함
+
+한 package에서만 쓰는 작은 dependency까지 무조건 catalog에 넣어 catalog를 dependency dump로 만들 필요는 없다.
+
+Vite+, TypeScript, common runtime/framework처럼 **workspace-wide toolchain/compatibility version**은 catalog에 두는 편을 우선한다.
+
+## 6. Root package responsibility
+
+root package는 private orchestration package다.
+
+root에는 제품 business logic을 두지 않는다.
+
+root가 소유할 수 있는 것:
+
+- workspace metadata
+- Vite+ config
+- TypeScript base config
+- package-manager policy
+- repository-wide tasks
+- CI/hook integration
+
+root `package.json` scripts는 최소화한다.
+
+Vite+ built-in 또는 `vp run` task를 단순히 다시 alias하는 script를 무분별하게 추가하지 않는다.
+
+## 7. Configuration ownership
+
+가능하면 config source를 하나로 만든다.
+
+- lint/fmt/check/staged → root Vite+ config
+- package manager/workspace/catalog → `pnpm-workspace.yaml`
+- TS shared compiler policy → root/base tsconfig
+- framework runtime config → owning app/package
+- CI → `.github/workflows`
+
+동일 설정을 root와 package에 복사해 “어느 것이 적용되는지” Agent가 추론하게 만들지 않는다.
+
+## 8. Co-location
+
+코드는 소비 책임과 가까이 둔다.
+
+package 내부 기본 예:
+
+```text
+src/
+tests/
+package.json
+tsconfig.json
+```
+
+작은 package는 과도한 layer directory를 만들지 않는다.
+
+다음과 같은 layer를 구현 전에 생성하지 않는다.
+
+```text
+controllers/
+services/
+repositories/
+domain/
+application/
+infrastructure/
+adapters/
+ports/
+```
+
+실제 책임이 분리될 때 이름을 부여한다.
+
+## 9. Execution-context boundaries
+
+Astro repository의 구조에서 참고할 수 있는 좋은 원칙은 **같은 제품이라도 실행되는 context가 다르면 코드 경계를 분명히 하는 것**이다.
+
+Engine에서도 다음 차이가 실제로 생기면 directory/package boundary 후보가 된다.
+
+- host filesystem / Git access
+- container runtime
+- pure validation/domain logic
+- child process execution
+- browser/editor integration
+- Site verification adapter
+
+기술 패턴 이름을 먼저 선택하지 않고 “이 코드는 어디에서 실행되고 어떤 capability를 허용하는가?”로 분리한다.
+
+## 10. Tests
+
+test는 가능한 한 owning code와 가까이 둔다.
+
+권장:
+
+- unit test → app/package 내부
+- package integration → package 내부
+- cross-repository/system integration → 명확한 integration/e2e location
+- fixture → 해당 test의 owner와 가까이
+
+root `tests` 하나에 모든 레벨의 test를 섞지 않는다.
+
+실제 content corpus는 authoring/Site integration Evidence로 사용할 수 있지만, edge-case regression fixture와 역할을 구분한다.
+
+## 11. Repository documentation
+
+Knowledge repository와 implementation repository가 같은 내용을 두 번 소유하지 않는다.
+
+Knowledge가 소유:
+
+- product architecture
+- cross-repo contract
+- migration direction
+- global engineering policy
+
+implementation repo가 소유:
+
+- 실제 command
+- package/runtime API
+- local setup
+- debugging
+- test/evidence reproduction
+
+따라서 implementation repository의 다음 종류 문서는 장기적으로 최소화한다.
+
+- 중복 architecture prompt
+- 오래된 전체 TODO
+- 별도의 상태 원장
+- Knowledge와 다른 decision history
+
+필요한 local ADR은 실제 code-specific decision에 한정하고 Knowledge cross-repo decision과 서로 link한다.
+
+## 12. Agent context
+
+Agent용 root instruction은 짧고 실행 가능해야 한다.
+
+포함:
+
+- Knowledge canonical link / transition guide
+- repository role
+- standard VP commands
+- current verification gate
+- destructive migration safety
+- local code ownership rules
+
+포함하지 않음:
+
+- 장문의 오래된 product history
+- superseded architecture
+- copy-pasted entire Knowledge
+- 이미 존재하지 않는 service/DB commands
+
+repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. live stale-file 여부는 `handoff/current.md`에서 추적한다.
+
+## 13. Generated and local state
+
+generated/local state를 source tree와 섞지 않는다.
+
+예:
+
+- `dist/`
+- caches
+- evidence runtime output
+- temporary cloned workspace
+- container state
+- credentials
+
+필요한 경우 `.state/`, temporary directory 또는 configured external workspace를 사용하고 `.gitignore` ownership을 명확히 한다.
+
+canonical content 자체는 Engine repository 내부 generated directory가 아니라 external/mounted docs workspace로 취급한다.
+
+## 14. Scratch-build policy for Engine
+
+현재 Engine은 legacy CMS architecture coupling이 강하므로 **greenfield scratch target을 기본 migration 전략으로 채택한다.**
+
+의미:
+
+- Git history와 legacy revision은 보존한다.
+- 기존 source tree를 새 architecture의 directory template로 사용하지 않는다.
+- 새 branch에서 target architecture 기준 skeleton을 만든다.
+- legacy code는 검토 후 필요한 부분만 의도적으로 port한다.
+- “삭제하고 다시 쓰기”와 “history를 지우기”를 동일시하지 않는다.
+
+우선 port 후보:
+
+- process execution abstraction이 실제로 유용하면 해당 부분
+- concurrency/idempotency behavior
+- evidence/revision linkage
+- Site verification logic
+
+port하지 않는 기본값:
+
+- Payload UI
+- PostgreSQL lifecycle
+- Lexical codec
+- DB export
+- legacy CMS task taxonomy
+
+## 15. Engine scratch initial shape
+
+초기 proposal:
+
+```text
+/
+├─ apps/
+│  └─ engine/
+│     ├─ src/
+│     └─ tests/
+├─ .github/
+├─ .vite-hooks/
+├─ package.json
+├─ pnpm-workspace.yaml
+├─ tsconfig.json
+└─ vite.config.ts
+```
+
+`packages/*`와 `tools/*`는 실제 extraction point가 확인될 때 추가한다.
+
+첫 구현부터 다음처럼 나누지 않는다.
+
+```text
+packages/
+├─ core
+├─ git
+├─ workspace
+├─ process
+├─ validation
+└─ utils
+```
+
+이들은 architecture diagram의 개념이지 반드시 npm/workspace package여야 하는 것은 아니다.
+
+## 16. Site migration implication
+
+Site는 이미 docs consumption → Astro build → GitHub Pages delivery Evidence가 있으므로 Engine과 달리 greenfield를 기본값으로 하지 않는다.
+
+- Astro structure는 유지 가능
+- Fumadocs integration은 incremental spike
+- Turbo는 Vite+ task parity가 확인될 때 단계적으로 제거 가능
+- generic `packages/ui`, `packages/md`는 실제 새 responsibility와 맞는지 integration 과정에서 재검토
+
+## 17. Maintenance checklist
+
+새 directory/package/tool을 추가하기 전에 묻는다.
+
+1. 독립 runtime인가?
+2. 둘 이상의 consumer가 있는가?
+3. dependency boundary가 필요한가?
+4. 별도 test/build/release lifecycle이 있는가?
+5. 기존 owner 안에 두면 실제 문제가 생기는가?
+
+5개 모두 아니라면 새 package를 만들 이유가 약하다.
+
+새 tool을 추가하기 전에 묻는다.
+
+1. Vite+가 이미 제공하는가?
+2. pnpm/workspace 기능으로 충분한가?
+3. platform-native Git/GitHub 기능으로 충분한가?
+4. 기존 dependency를 재사용할 수 있는가?
+
+비핵심 문제는 새 구현보다 기존 도구와 요구사항 조정을 우선한다.
+
+## External references reviewed
+
+- Vite+ Monorepo: https://viteplus.dev/guide/monorepo
+- Vite+ Run: https://viteplus.dev/guide/run
+- Vite+ Create/Generators: https://viteplus.dev/guide/create
+- pnpm Workspaces: https://pnpm.io/workspaces
+- pnpm Catalogs: https://pnpm.io/catalogs
+- Astro CONTRIBUTING / code structure: https://github.com/withastro/astro/blob/main/CONTRIBUTING.md
+- Vite+ repository: https://github.com/voidzero-dev/vite-plus
+- Payload monorepo (large-repo comparison, not target architecture): https://github.com/payloadcms/payload
+
+<!-- END SOURCE: docs/repository-design.md -->
+
+
+---
+
 <!-- BEGIN SOURCE: docs/content-authoring-contract.md -->
 
 # Content Authoring & Publishing Contract
@@ -618,7 +1421,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 공식 정책:
 
-> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs repository 전체에 단일 application layout을 강제하지 않으며 consumer별 최소 convention만 둔다. authoring editor는 아직 확정하지 않고 Obsidian/Fumadocs Editor/IDE가 동일 source를 다룰 수 있는 integration을 우선 검증한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
+> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
 이 문서는 **Editing, Storage, Canonical Revision, Publishing**을 분리해 정의한다.
 
@@ -656,7 +1459,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 canonical content의 물리적 표현은 local Git working tree의 files다.
 
 - Markdown/MDX-like document source는 파일 내용 자체다.
-- frontmatter는 publishable Article-like documents의 유력 metadata representation이지만 docs repository의 모든 파일에 공통 schema로 강제하지 않는다.
+- frontmatter는 publishable Article-like documents의 유력 metadata representation이다. repository 또는 consumer가 strict schema를 선택할 수 있고, 반대로 일부 path는 schema 밖에 둘 수도 있다. 어느 형태를 택할지는 layout decision에 따른다.
 - asset은 workspace-relative file 또는 정책상 허용된 durable external reference로 표현한다.
 - uncommitted working tree는 작성 중 draft state다.
 - 다른 환경과 공유·재현하는 durable canonical state는 `ooMia/oomia.github.io.docs`의 commit SHA다.
@@ -717,42 +1520,50 @@ Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아�
 
 editor는 아직 확정하지 않는다. 1.0의 고정 계약은 **filesystem source가 editor보다 우선한다**는 점이다.
 
-### Obsidian — primary candidate
+### Obsidian
 
-Obsidian은 현재 가장 강한 primary-editor 후보다.
+기존 content corpus가 이미 Obsidian 기반으로 작성되어 있으므로 basic Markdown/file authoring compatibility는 1.0의 주요 불확실성이 아니다.
 
-- arbitrary directory tree를 vault로 직접 열 수 있다.
-- Markdown source, YAML Properties, file create/rename/delete, Live Preview를 제공한다.
-- CSS snippets와 CSS variables로 editor/reading appearance를 크게 조정할 수 있다.
-- `cssclasses` frontmatter로 document-level styling hook을 줄 수 있다.
-- custom callout을 CSS만으로 추가·스타일링할 수 있다.
-- plugin API의 Markdown post processor / code-block processor를 사용하면 CSS를 넘어 custom rendered elements도 만들 수 있다.
+Obsidian은 다음 경우 primary editor 후보로 충분하다.
 
-그러나 CSS는 **presentation layer**다. arbitrary MDX/JSX component의 props/children semantics를 CSS만으로 해석하지는 못한다. component-like syntax가 필요하면 portable Markdown primitive, Obsidian plugin, 또는 Site-side transformation이 필요하다.
+- 일반 Markdown/source 작성
+- file navigation / rename / create / delete
+- Properties/frontmatter
+- 기존 사용자 authoring workflow 유지
 
-### Fumadocs Editor — component-aware candidate
+Obsidian-native custom syntax, CSS snippet, plugin-based rich rendering은 향후 확장 수단일 수 있지만 **1.0 필수 contract가 아니다**.
 
-Fumadocs Editor는 visual MDX authoring과 custom component specs에 강점이 있다.
+### Fumadocs Editor
 
-- Markdown/MDX files를 source of truth로 직접 편집한다.
-- Fumadocs built-in/custom component의 structured visual editing을 제공한다.
-- external file changes와 merge하는 workflow를 지원한다.
-- embedded UI로 확장할 수 있다.
+Fumadocs Editor는 custom MDX component 주입과 structured visual editing을 쉽게 제공할 수 있다는 점 때문에 중요한 후보다.
 
-반면 Obsidian이 일반 authoring/file management/style UX를 충분히 해결한다면 Fumadocs Editor는 특정 MDX/component authoring gap을 채우는 optional tool이 될 수 있다.
+검증할 핵심:
 
-### Site-side bridge
+- 기존 Obsidian corpus를 같은 filesystem source로 다룰 수 있는가
+- custom component를 정의하고 authoring UI에 노출하는 비용이 낮은가
+- external edit와 visual edit 사이에서 source loss나 과도한 normalization이 없는가
+- Obsidian을 primary editor로 유지하는 경우보다 실제 UX/DX가 개선되는가
 
-authoring syntax와 final presentation을 같은 UI component syntax로 강제하지 않는다.
+Fumadocs Editor 내부 state는 canonical source를 대체하지 않는다.
 
-예를 들어 Obsidian-friendly callout/code-fence/directive를 canonical source로 유지하고, Site의 remark/rehype plugin에서 Fumadocs UI component로 변환하는 방식이 가능하다. Fumadocs MDX는 custom remark/rehype plugins를 지원하므로 이 경계를 실제 corpus로 검증한다.
+### Site integration
+
+Site presentation은 Fumadocs UI/Core/MDX를 적극 재사용할 수 있다. authoring editor와 Site renderer는 같은 product choice일 필요가 없다.
+
+예:
+
+- Obsidian primary editor + Fumadocs Site
+- Obsidian + optional Fumadocs Editor + Fumadocs Site
+- Fumadocs Editor 중심 + Fumadocs Site
+
+중 어떤 구성이 적합한지는 existing corpus와 custom component authoring evidence로 결정한다.
 
 ### Engine
 
-Engine은 1.0에서 full CMS나 editor host가 아니다.
+Engine은 1.0에서 full CMS나 editor framework가 아니다.
 
 - workspace discovery / validation
-- consumer-specific convention 검사
+- selected layout/convention validation
 - Git status / revision linkage
 - explicit publish action
 - Site consumer verification
@@ -760,9 +1571,11 @@ Engine은 1.0에서 full CMS나 editor host가 아니다.
 
 를 담당한다.
 
+Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존 실험/legacy implementation으로만 취급한다.
+
 ## Metadata contract
 
-publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. 다만 docs repository 전체에 동일 frontmatter schema를 강제하지 않는다.
+publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. docs layout 결정에 따라 repository-wide 또는 subtree-specific schema를 강제할 수 있다.
 
 최소 공통 예:
 
@@ -775,7 +1588,7 @@ draft: true
 ---
 ```
 
-정확한 required/optional field schema는 해당 consumer subtree의 implementation contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
+정확한 required/optional field schema와 적용 범위는 선택된 docs layout/consumer contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
 
 외부 source에서 import할 경우 canonical frontmatter로 normalize할 수 있지만 import adapter의 source-specific metadata를 장기 SoT로 유지하지 않는다.
 
@@ -1093,9 +1906,9 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
-| Authoring | 선택된 authoring workflow가 자유로운 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. Obsidian은 primary candidate이고 Fumadocs Editor는 component-aware visual candidate이며, 최종 editor 선택은 실제 corpus integration evidence로 결정한다. |
-| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. 특정 subtree에 consumer-specific convention을 둘 수 있지만 docs repository 전체에 단일 Article/path schema를 강제하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
-| Extensibility | Fumadocs built-in content component를 우선 재사용하고 custom component가 필요한 경우 source semantics와 editor/renderer integration을 명시할 수 있다. Visual adapter 유무가 canonical support를 결정하지 않는다. |
+| Authoring | 선택된 authoring workflow가 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. 기존 corpus는 Obsidian 기반이므로 basic Obsidian compatibility는 전제하고, Fumadocs Editor의 custom-component/structured authoring 이점까지 비교해 editor 역할을 결정한다. |
+| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. docs layout은 free-form, discovery-based, strict convention 중 구현 목적에 맞게 선택할 수 있으며 1.0 설계가 사전에 한 형태를 금지하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
+| Extensibility | Fumadocs built-in component를 우선 재사용하고 Oomia-specific custom component가 필요한 경우 source semantics와 Site/editor integration을 명시할 수 있다. Fumadocs Editor의 custom component spec은 유력한 authoring extension 후보지만 필수로 선결하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
 | Publishing | local workspace를 검증하고 실제 Site consumer build를 통과시킨 뒤 canonical docs revision으로 확정한다. DB → Markdown export나 Visual Editor codec round-trip을 publish prerequisite로 요구하지 않는다. |
 | Presentation | Site가 canonical docs revision의 Markdown/MDX를 렌더링한다. Fumadocs UI/content tooling을 우선 재사용하되 Site framework 자체는 implementation detail이다. |
@@ -1210,9 +2023,9 @@ Site
 
 | Capability | 상태 | 현재 Evidence | 새 target에 남은 delta |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 작성 content corpus를 실제 docs workspace에 import하고 Obsidian 중심 workflow와 Fumadocs Editor의 component-aware workflow를 비교해야 한다. 핵심 Evidence는 source preservation, authoring UX, Site/Fumadocs rendering integration 비용이다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. docs 전체를 단일 application layout으로 고정하지 않고 consumer-specific subtree/path convention만 최소화하며 Git revision semantics를 확정해야 한다. |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Obsidian-native callout/CSS/plugin extension과 Fumadocs MDX/custom component 중 source portability가 더 높은 경로를 실제 corpus로 비교한다. Fumadocs built-in/UI는 Site에서 우선 재사용하되 별도 component package는 실제 필요 전까지 만들지 않는다. |
+| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 corpus가 이미 Obsidian 기반이므로 basic authoring 호환성보다 Fumadocs/Site integration과 custom-component authoring 경험을 검증해야 한다. Obsidian-only, Obsidian + optional Fumadocs Editor, Fumadocs-heavy 역할 중 하나를 Evidence로 결정한다. |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동하고 Git revision semantics를 확정해야 한다. layout은 free-form/discovery/strict convention 모두 후보이며 integration/maintenance Evidence로 의도적으로 선택한다. |
+| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Fumadocs built-in/custom component와 Editor component-spec workflow를 실제 Site integration에서 검증한다. Obsidian-native custom syntax bridge는 1.0 범위 밖이며 별도 component package는 실제 cross-repo 공유 수요 전까지 만들지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | trigger를 Payload endpoint에서 Git workspace publish action으로 옮기고 validation→commit/push→Site verification 흐름을 재검증해야 한다. |
 | Publishing | **부분 충족** | DB snapshot을 docs repo에 반영하고 실제 Site sync/lint/test/typecheck/build를 통과시키는 workflow가 있다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate를 제거하고 canonical workspace 자체를 검증한 뒤 docs commit으로 확정하는 publish path가 필요하다. 기존 downstream Site verification은 재사용 가능성이 높다. |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | Fumadocs UI/content tooling 도입은 UX/DX 개선 과제로 진행할 수 있으나 canonical docs content를 렌더한다는 1.0 기본 결과는 이미 충족한다. |
@@ -1246,15 +2059,15 @@ Site
 
 1. **Workspace / Docs Contract**
    - docs repository를 canonical content remote로 재정의
-   - docs tree의 자유도를 보존하고 consumer-specific path/frontmatter convention만 필요한 범위에 한정
+   - free-form/discovery-based/strict docs layout 후보를 실제 corpus와 Site/Fumadocs integration으로 비교하고 하나를 의도적으로 선택
    - working tree draft vs committed canonical revision 구분
 
 2. **Authoring + Site Integration**
    - 기존 작성 content corpus를 docs workspace에 import
-   - Obsidian의 source/file UX, Properties, Live Preview, CSS snippets/custom callout/plugin extension 검증
-   - Fumadocs Editor의 MDX/component-aware visual editing 이점과 비용 비교
-   - Obsidian-friendly Markdown → Fumadocs Site UI transformation을 remark/rehype adapter로 구현 가능한지 검증
-   - 최종 editor 역할을 evidence로 결정
+   - 기존 Obsidian corpus를 Fumadocs UI/Core/MDX Site에 통합
+   - Fumadocs Editor의 MDX/custom-component-aware editing 이점과 비용 비교
+   - custom component 주입/편집 경험과 source round-trip 검증
+   - 최종 editor 역할을 Evidence로 결정
 
 3. **Engine Simplification**
    - Payload/PostgreSQL 의존 경로를 target implementation에서 제거
@@ -1273,11 +2086,16 @@ Site
    - Fumadocs Editor가 실제로 필요한 component-aware editing gap만 식별
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
-6. **Migration strategy decision**
-   - Engine/Site 각각 in-place refactor와 greenfield rebuild 비용 비교
-   - keep/adapt/retire 비율과 dependency graph를 근거로 선택
+6. **Engine Scratch Bootstrap**
+   - D032에 따라 greenfield skeleton 생성
+   - Development Toolchain (`docs/development-toolchain.md`)과 Repository Design (`docs/repository-design.md`) 적용
+   - legacy code는 keep/adapt/retire review 후 필요한 generic behavior만 port
 
-7. **Regression / Migration**
+7. **Site migration strategy**
+   - 현재 Astro/docs/Pages Evidence를 보존하면서 Fumadocs integration을 incremental로 검증
+   - Turbo → VP task-runner parity는 별도 Maintenance delta
+
+8. **Regression / Migration**
    - legacy DB content가 있다면 canonical files로 일회성 migration
    - 기존 Site delivery chain 유지
    - obsolete Payload/PostgreSQL code와 infra 제거
@@ -1374,9 +2192,13 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D023 | publishing은 DB를 Markdown으로 export하는 작업이 아니라 content workspace를 검증하고 canonical docs revision으로 commit/push한 뒤 실제 Site consumer build/delivery를 검증하는 흐름이다 | D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
 | D024 | Fumadocs의 built-in UI/Editor component capability를 우선 재사용한다. 독립 `@oomia/content-components` React library는 1.0 선행 과제에서 제거하고, 실제 custom component가 생겨 cross-repository contract가 필요할 때 얇은 profile/adapter package를 도입한다 | 사용자 방향 전환 및 오버엔지니어링 회피, 2026-09-21 | D018–D020의 독립 renderer/component library 선행 구축 |
 | D025 | architecture migration은 새 Git-backed vertical slice를 먼저 검증한 뒤 legacy Payload/PostgreSQL path를 단계적으로 retire한다. 과거 Issue/branch는 현재 Knowledge와 reconciliation 후에만 계속하며 미병합 작업을 먼저 보존한다 | 사용자 요청에 따른 migration context/정합성 강화, 2026-09-21 | 기존 구현 중단 상태를 그대로 재개하거나 새 path 검증 전에 big-bang delete |
-| D026 | `oomia.github.io.docs`는 특정 application용 고정 schema repository가 아니라 변형 가능한 문서 directory/tree를 표현하는 canonical content repository다. consumer별 path convention은 둘 수 있지만 repository 전체에 불필요한 layout 제약을 강제하지 않는다 | 사용자 명시, 2026-09-21 | 고정된 `content/` layout이나 단일 frontmatter schema를 repository 자체의 절대 규약으로 취급 |
+| D026 | `oomia.github.io.docs`의 layout은 구현 목적에 따라 자유롭게 결정할 수 있다. 자유는 unconstrained document tree뿐 아니라 strict directory/path/frontmatter convention을 의도적으로 선택해 강제하는 방식까지 포함한다. Knowledge는 현재 어느 쪽도 선결하지 않는다 | 사용자 정정, 2026-09-21 | “layout 자유”를 strict layout을 배제하거나 convention을 항상 최소화해야 한다는 뜻으로 해석 |
 | D027 | 1.0 editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware/visual candidate로 비교하며 핵심 과제는 두 도구와 Site가 동일 filesystem workspace를 공유하는 integration framework를 검증하는 것이다 | 사용자 명시 + 조사 결과, 2026-09-21 | Obsidian과 Fumadocs Editor를 동등한 필수 1급 client로 미리 확정 |
 | D028 | authoring/integration 검증은 synthetic 최소 fixture보다 기존 작성 content corpus를 우선 import해 실제 구조·문법·스타일 충돌을 빠르게 드러낸다. 최소 fixture는 edge-case regression에만 보조적으로 사용한다 | 사용자 명시, 2026-09-21 | 최소 fixture 자체를 핵심 migration outcome으로 삼는 접근 |
+| D029 | Obsidian-native custom syntax/style bridge는 1.0 필수 고려사항이 아니다. 기존 content가 이미 Obsidian 기반이므로 1.0 integration은 기존 corpus와 Fumadocs/Site 호환, editor 선택, custom component 주입 경험에 집중한다 | 사용자 명시, 2026-09-21 | Obsidian custom callout/plugin ↔ Fumadocs transformation을 1.0 핵심 과제로 선행 |
+| D030 | JavaScript/TypeScript repository의 전역 toolchain entry point는 Vite+ `vp`다. package management, check/lint/fmt/test/build/task/hooks에서 VP를 우선하고 동등 역할의 Turbo/Husky/Prettier/ESLint wrapper를 새로 중복 도입하지 않는다 | 사용자 명시 + Vite+ 공식 문서 조사, 2026-09-21 | repository마다 package manager/task runner/check/hook interface를 별도로 조합 |
+| D031 | implementation repository는 monorepo-ready but package-light 구조를 기본으로 한다. `apps/*`는 실행 단위, `packages/*`는 검증된 재사용/dependency boundary, `tools/*`는 repository-only 개발 도구이며 추측성 `utils/shared/infra` package를 선행 생성하지 않는다 | 사용자 요청 + Vite+/pnpm/Astro repository 조사, 2026-09-21 | 처음부터 많은 layer/package를 만들어 architecture diagram을 filesystem에 그대로 투영 |
+| D032 | Engine의 새 target implementation은 같은 repository history를 보존한 채 greenfield scratch build를 기본 migration 전략으로 한다. legacy tree는 template가 아니라 reference이며 generic verified behavior만 의도적으로 port한다 | 사용자 명시, 2026-09-21 | Payload/PostgreSQL 중심 tree를 계속 깎아내는 in-place refactor를 기본값으로 사용 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -1385,7 +2207,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D028이 현재 1.0 persistence/authoring/integration 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D032가 현재 1.0 persistence/authoring/integration 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -1409,11 +2231,12 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q010 | 미디어 공개 범위·asset 저장 위치 | workspace-relative asset과 durable external URL을 허용하는 방향. public/private 범위와 large/binary asset policy는 추가 결정 필요 |
 | Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
 | Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
-| Q015 | consumer-specific path/file convention | docs repository 전체는 자유로운 document tree로 유지. Site/Engine이 소비하는 subtree에서만 `.md` / `.mdx`, frontmatter, route/path naming을 어디까지 요구할지 integration spike에서 최소화해 결정 |
+| Q015 | docs layout / consumer path convention | layout policy 자체는 미결. 완전 자유 tree, consumer별 discovery rule, strict directory/path/frontmatter convention 모두 허용한다. 실제 corpus와 Site/Fumadocs integration을 본 뒤 어떤 수준의 layout을 의도적으로 강제할지 결정 |
 | Q016 | Git publish semantics | durable canonical revision은 docs commit으로 확정. Engine이 auto-commit/push할지, 사용자 commit을 publish 입력으로 받을지, branch/PR를 사용할지 세부 UX 결정 필요 |
 | Q017 | 실제 authoring editor 역할 분담 | Obsidian을 primary editor로 충분히 사용할 수 있는지, Fumadocs Editor가 component-aware visual editing을 위해 별도로 필요한지 기존 content corpus integration으로 결정. Fumadocs Studio vs embedded UI는 Fumadocs Editor 채택 시 하위 결정 |
-| Q018 | Obsidian ↔ Site component/style bridge | Obsidian CSS snippets/custom callout은 styling과 Markdown primitive 확장에 강하지만 arbitrary MDX semantics는 CSS만으로 제공하지 못한다. Obsidian plugin Markdown post-processing, portable callout/code-fence syntax, Site remark/rehype transform 중 최소 구현을 비교해야 함 |
-| Q019 | Engine/Site migration 방식 | 기존 소스를 in-place refactor할지 새 target skeleton을 greenfield로 만들고 generic code만 이식할지 미결. repository별 keep/adapt/retire 비율과 dependency graph를 Phase A에서 확인한 뒤 결정 |
+| Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
+| Q020 | VP runtime/package-manager exact pins | VP-first policy는 확정. Engine scratch와 Site의 Node/pnpm/Vite+ exact version을 동일하게 맞출지, repository별 requirement를 유지할지는 bootstrap 직전에 live compatibility를 확인해 결정 |
+| Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
 
 ## 분리 원칙
 
