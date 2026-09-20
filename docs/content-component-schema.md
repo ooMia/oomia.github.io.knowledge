@@ -15,12 +15,16 @@ manifest의 JSON 형태는 [content-component-manifest.schema.json](../schemas/c
 
 ## Package surface 경계
 
-public package `@oomia/content-components`는 최소한 다음 두 surface를 구분한다.
+public package `@oomia/content-components`는 다음 public surface로 시작한다.
 
-1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
-2. **Renderer surface**: React/TypeScript 기반 component implementation을 제공한다. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
+1. **`@oomia/content-components`**: component identity와 framework-neutral TypeScript contract/helpers. React/Astro/Payload runtime을 import하지 않는다.
+2. **`@oomia/content-components/react`**: React/TypeScript component implementation. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
+3. **`@oomia/content-components/manifest`**: machine-readable component manifest. builder/Agent/runtime validation이 React 없이 읽을 수 있다.
+4. **`@oomia/content-components/styles.css`**: optional baseline stylesheet. React renderer가 자동 import하지 않으며 consumer가 명시적으로 opt-in한다.
 
 Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
+
+스타일 contract는 manifest와 분리한다. React component는 stable class/data attributes와 `className`/`style` passthrough를 제공하고, baseline stylesheet의 themeable 값은 package-prefixed CSS custom properties를 사용한다. Tailwind/CSS-in-JS/theme provider를 consumer requirement로 만들지 않는다.
 
 package의 canonical source는 Engine/Site와 독립된 repository가 소유한다. npm artifact는 `@oomia/content-components`로 배포하고, Site와 Engine은 별도 consumer로 통합한다. Engine adoption은 canonical source/save-path 작업과 별도 Issue/PR로 나눌 수 있다.
 
@@ -70,4 +74,4 @@ Agent가 Article source를 분석할 때:
 
 manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 semantic version을 가진다.
 
-registry와 package identity는 public npm `@oomia/content-components`로 확정했다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 [Open Questions](open-questions.md)에서 추적한다.
+registry/package identity는 public npm `@oomia/content-components`, source repository는 public `ooMia/content-components`로 확정했다. public subpaths는 root, `./react`, `./manifest`, `./styles.css`로 시작하고 initial version은 `0.1.0`이다. pre-1.0 breaking public-contract 변경은 minor version에서 수행한다. release trigger/transport 세부와 manifest runtime shape는 [Open Questions](open-questions.md)에서 추적한다.
