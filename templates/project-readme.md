@@ -6,6 +6,8 @@ Turn structured content into customizable, deployable sites through explicit aut
 
 - [1.0 Definition](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/release-1.0.md)
 - [Active Architecture Transition](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/architecture-transition.md)
+- [Development Toolchain](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/development-toolchain.md)
+- [Repository Design & Maintenance](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/repository-design.md)
 - [Project Planning Model](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/planning-model.md)
 - [Project Fields](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/fields.md)
 - [Implementation Map](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/implementation-map.md)
