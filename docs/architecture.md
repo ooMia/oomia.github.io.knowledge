@@ -1,6 +1,6 @@
 # Architecture
 
-상태: 사용자 명시 사항 및 이후 README 기준을 종합. 2026-09-20 Content Authoring & Publishing Contract를 반영.
+상태: 2026-09-21 Git-backed content workspace와 Obsidian + Fumadocs Editor authoring 모델을 반영.
 
 ## 원칙
 
@@ -10,7 +10,9 @@
 - 안정된 경계가 필요해질 때까지 설계 선택의 변경 가능성을 유지한다.
 - 레포와 프레임워크를 영구적인 제품 경계로 취급하지 않는다.
 - canonical source는 특정 CMS/Visual Editor의 표현 능력에 종속되지 않는다.
-- 저장 가능성, authoring surface의 편집 가능성, 실제 Site의 publishability를 서로 다른 계약으로 취급한다.
+- storage / editing / publishing / presentation을 서로 다른 계약으로 취급한다.
+- canonical content를 표현하기 위해 별도 DB가 필요하지 않으면 도입하지 않는다.
+- content authoring 도구는 canonical workspace 위의 교체 가능한 client로 취급한다.
 
 ## 레포의 역할
 
@@ -18,93 +20,148 @@
 
 | 레포 | 책임 |
 |---|---|
-| `oomia.github.io.engine` | canonical content를 다루는 authoring 환경과 CMS adapter, persistence 접근, publishing workflow orchestration |
-| `oomia.github.io.docs` | downstream이 소비할 계약된 generated document set |
-| `oomia.github.io` | generated documents와 public content-component package를 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
+| `oomia.github.io.docs` | canonical Markdown/MDX content와 metadata/assets의 durable Git remote 및 shared revision history |
+| `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
-`mono`는 사용자가 로컬에서 붙인 별칭이며 실제 레포 이름의 일부가 아니다. docs는 현재 engine과 site 사이의 generated projection으로 사용된다.
+`mono`는 사용자가 Site repository에 붙인 로컬 별칭이며 실제 원격 repository 이름의 일부가 아니다.
+
+## Canonical content workspace
+
+1.0의 canonical content representation은 **Git-backed filesystem workspace**다.
 
 ```text
-Authoring Adapter → Canonical Content → Generated Documents → Site Output → Live Site
-      engine              engine              docs              site
+Obsidian ──────────────┐
+                      │
+Fumadocs Editor ───────┼──> local content working tree
+                      │      Markdown / MDX
+Source editor / Agent ┘      frontmatter / assets
+                                  │
+                                  │ git commit / push
+                                  ▼
+                       oomia.github.io.docs
+                        canonical Git revision
+                                  │
+                                  ▼
+                            Site consumer
+                                  │
+                                  ▼
+                             Live Site
 ```
 
-Canonical content가 콘텐츠의 권위 있는 상태다. Article body는 Markdown/MDX raw source string으로 보존하고, CMS editor state는 derived/virtual representation으로 취급한다. docs는 재생성 가능한 projection이며 수동 수정이 canonical state를 대체하지 않는다.
-
-제품 수준 계약은 특정 DB/CMS를 강제하지 않는다. 현재 구현이 PostgreSQL과 Payload를 사용하더라도 해당 구현 선택이 canonical content syntax를 제한하는 근거가 되어서는 안 된다.
+- local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다.
+- 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
+- Article body는 Markdown/MDX source 자체다.
+- title, description, author, draft 등 문서 단위 metadata는 1.0에서 frontmatter를 canonical representation으로 사용한다.
+- asset은 content workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
+- Git history가 content revision history, diff, rollback의 기본 수단이다.
+- PostgreSQL/Payload state를 canonical content로 사용하지 않는다.
 
 ## Authoring boundary
 
-Authoring surface는 canonical content의 adapter다.
+Obsidian과 Fumadocs Editor는 같은 canonical workspace를 바라보는 서로 다른 authoring client다.
 
 ```text
-                canonical raw source
-                       |
-          +------------+------------+
-          |                         |
-    Visual Editor               Source Editor
-  supported subset             lossless fallback
+                   Git-backed content workspace
+                         /               \
+                        /                 \
+                 Obsidian             Fumadocs Editor
+              source/file UX          visual MDX UX
+                        \                 /
+                         \               /
+                           Engine shell
+                   validate / publish / Git
 ```
 
-- Visual Editor가 무손실로 표현 가능한 content에는 구조화 편집을 제공할 수 있다.
-- Visual Editor가 표현하지 못하는 content는 Source mode로 fallback할 수 있어야 한다.
-- unsupported source를 Visual Editor가 조용히 삭제하거나 재작성해서는 안 된다.
-- 최종 Site와 동일한 WYSIWYG Preview는 authoring contract의 필수조건이 아니다.
-- 자세한 수준 정의와 정책 테이블은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다.
+- **Obsidian**은 file navigation, Markdown/source editing, frontmatter Properties 등 source-oriented authoring을 담당할 수 있다.
+- **Fumadocs Editor**는 지원되는 Markdown/MDX와 component를 구조적으로 편집하는 visual authoring surface다.
+- 두 client는 별도의 content database를 유지하지 않고 동일한 filesystem source를 수정한다.
+- Visual Editor가 표현하지 못하는 source는 Obsidian 또는 다른 source editor에서 그대로 유지할 수 있어야 한다.
+- 특정 authoring client가 지원하지 않는 syntax를 canonical workspace에서 삭제하거나 제한하는 근거로 사용하지 않는다.
+- Engine은 full CMS를 재구현하지 않는다. 필요한 경우 file discovery, create/rename/delete, validation, Git/publish action 같은 얇은 workspace shell만 제공한다.
 
-## Official MDX component boundary
+## Engine boundary
 
-공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 public `ooMia/content-components` repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
+Engine의 1.0 목표는 DB-backed CMS가 아니라 **containerizable workspace orchestrator**다.
 
 ```text
-              @oomia/content-components
-        independent source + versioned release
-              /                    \
-             /                      \
-   framework-neutral             React renderer
-   contract / manifest           implementation
-          |                           |
-          v                           v
-     Engine / CMS                    Site
-   builder / adapter            webpage renderer
+Engine container
+├─ workspace discovery
+├─ content/frontmatter validation
+├─ optional Fumadocs Editor integration
+├─ publish validation
+├─ Git/revision linkage
+└─ Site consumer verification
+          │
+          └── bind mount / volume
+                 local content repository
 ```
 
-책임은 다음과 같이 나눈다.
+- Engine image 자체의 ephemeral filesystem을 canonical storage로 사용하지 않는다.
+- content repository는 host bind mount 또는 durable volume로 Engine에 제공한다.
+- application-level user/database/auth model은 1.0의 필수조건이 아니다. 외부 공개가 필요해질 때 별도 access boundary를 추가한다.
+- 검색·인덱싱·복잡한 query가 필요해지면 DB를 **derived index**로 추가할 수 있지만 canonical source를 대체하지 않는다.
+- Payload, PostgreSQL, Lexical 기반 `cms-lab` 구현은 기존 실험/legacy Evidence로 취급하며 새 target architecture의 전제가 아니다.
 
-- **Content-component repository**: component semantics, public contract, manifest, React rendering implementation과 package version/release를 소유한다.
-- **Site**: React renderer surface를 소비해 generated content를 실제 웹페이지로 렌더링한다. Site가 어떤 framework를 사용하는지는 public component contract의 전제가 아니다.
-- **Engine**: renderer implementation에 결합하지 않고 framework-neutral contract/manifest를 참조해 CMS editor, validation, builder integration을 구성한다.
-- **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
-- **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
+## Publishing boundary
 
-public package는 source 수준에서 React/TypeScript로 구현하되 **contract surface가 React를 import하지 않도록 분리**한다. React renderer는 framework-specific runtime surface이며 `react`를 host와 공유하는 peer dependency로 취급한다. `.astro` 파일은 public component implementation에 사용하지 않는다.
+Publishing은 더 이상 DB state를 generated Markdown으로 변환하는 작업이 아니다.
 
-React source를 별도의 framework-independent DOM 구현으로 자동 변환하는 것은 초기 계약에 포함하지 않는다. 비-React renderer 수요가 실제로 생기면 별도 renderer surface(Web Components 등)를 추가할 수 있으나, 현재 Site/Engine 요구를 위해 이중 구현을 선행하지 않는다.
+```text
+local content workspace
+        ↓
+content / frontmatter / component validation
+        ↓
+Site sync / typecheck / build
+        ↓
+git commit + push to oomia.github.io.docs
+        ↓
+canonical docs revision
+        ↓
+Site revision linkage / delivery
+```
 
-### Styling boundary
+- source content 자체가 이미 publishable document form이므로 별도 DB → docs projection은 제거한다.
+- publish 과정은 source를 의미 없이 재작성하지 않고 **검증 + revision 확정 + delivery linkage**에 집중한다.
+- `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
+- Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
+- 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
 
-- React component는 접근 가능한 semantic markup과 안정된 `className` / `data-*` hook을 제공한다.
-- baseline style은 package가 소유하지만 React entry point에서 자동 주입하지 않는다. 소비자가 `@oomia/content-components/styles.css`를 명시적으로 import한다.
-- 색상, 간격, border, typography처럼 theme에 따라 달라질 값은 package-prefixed CSS custom property로 override할 수 있게 한다.
-- component props의 `className`과 `style`은 최상위 element로 전달하여 소비자가 국소적으로 스타일을 조정할 수 있게 한다.
-- Tailwind, CSS-in-JS provider, 특정 site theme runtime을 public component의 필수조건으로 두지 않는다.
-- 내부 DOM 구조나 hashed class를 override API로 간주하지 않는다. 안정성이 필요한 selector는 명시된 class/data attribute와 CSS variable에 한정한다.
+## Fumadocs boundary
 
-현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. public entry point는 root contract, `./react`, `./manifest`, `./styles.css`로 시작한다. initial version은 `0.1.0`이며 pre-1.0 동안 breaking public-contract 변경은 minor version에서 수행한다. release trigger/transport의 세부 자동화만 구현 전 확정한다.
+Fumadocs는 현재 두 책임에서 우선 재사용한다.
+
+1. **Fumadocs Editor**: visual Markdown/MDX authoring.
+2. **Fumadocs UI / content tooling**: Site에서 문서/content rendering과 관련 기능을 구현할 때 우선 고려하는 presentation layer.
+
+Fumadocs 자체 API가 canonical content contract는 아니다. canonical source는 Markdown/MDX + frontmatter/filesystem contract다.
+
+built-in component는 우선 그대로 사용하고, 실제 custom component가 필요해질 때만 별도 shared profile/adapter를 추가한다. 과거 계획했던 독립 `@oomia/content-components` React component library는 1.0 선행 과제가 아니다.
+
+## Component contract
+
+official/custom component 지원은 다음 순서로 판단한다.
+
+1. Fumadocs built-in component로 요구사항을 충족할 수 있는지 확인한다.
+2. built-in component라면 Engine/Fumadocs Editor/Site에서 필요한 integration만 구성한다.
+3. custom component가 필요하면 canonical source에서 사용할 이름·props·children policy를 명시한다.
+4. Engine authoring spec과 Site renderer가 동일 계약을 공유해야 할 정도가 되면 machine-readable profile 또는 shared package를 도입한다.
+5. Visual adapter 유무와 Publishability를 동일시하지 않는다.
+
+[Content Component Manifest Schema](content-component-schema.md)는 custom component 공유가 실제로 필요해질 때 사용할 수 있는 planning vocabulary로 유지하되 1.0 bootstrap의 필수 artifact는 아니다.
 
 ## Contract surfaces
 
-source-level 결합보다 명시적인 artifact/runtime contract를 우선한다.
-
 | Surface | 소유 위치 |
 |---|---|
-| Content authoring/storage/publish 정책 | knowledge repository |
-| 공식 MDX component 의미와 버전 | versioned content-component package |
-| Payload-specific authoring adapter | engine |
-| generated document set | docs |
+| Content workspace / authoring / storage / publish 정책 | knowledge repository |
+| Canonical content revision | `oomia.github.io.docs` Git history |
+| Workspace validation / Git / publish orchestration | engine |
+| Visual MDX authoring | Fumadocs Editor integration |
+| Source-oriented authoring | Obsidian / filesystem clients |
 | final rendering / consumer compatibility | site |
+| custom component shared contract | 필요 시 별도 profile/package |
 | 구현별 API·테스트·runtime details | 해당 구현 repository |
 
-TypeScript type은 compile-time contract로 사용하고, Agent/runtime가 component surface를 읽어야 할 경우 machine-readable manifest를 함께 둘 수 있다. 계획용 초안은 [Content Component Manifest Schema](content-component-schema.md)에 둔다.
-
-engine을 container image 등으로 배포하는 것은 가능한 방향이며 확정된 구현 과제가 아니다. API와 generated document의 세부 runtime contract는 소유 레포에 두고, 이 레포에서 코드 구현 여부를 추론하지 않는다.
+Engine을 container image로 배포하는 방향은 이 architecture와 정합적이다. container는 실행 환경이고 canonical state는 mount된 Git-backed content workspace에 남긴다.
