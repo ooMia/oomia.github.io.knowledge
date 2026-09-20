@@ -32,6 +32,11 @@ Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, E
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
 - 코드 변경을 직접 소유하지 않는 cross-repo coordination Item은 branch를 만들지 않을 수 있다. 대신 연결된 각 repository implementation issue가 활성화되는 순간 각각의 branch를 생성한다.
 
+- Project orchestration Action이 설치된 repository에서는 Issue 활성화 이벤트가 Project #11 등록·field 초기화·Development linked branch 생성을 수행한다. 사용자는 별도 branch 생성 요청을 반복할 필요가 없다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둔다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
+- 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
