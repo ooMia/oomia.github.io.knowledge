@@ -272,7 +272,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 - copy-pasted entire Knowledge
 - 이미 존재하지 않는 service/DB commands
 
-Engine의 현재 `.github/copilot-instructions.md`에는 PostgreSQL SoT, DB commands 등 superseded architecture가 남아 있으므로 **scratch implementation을 시작하기 전에 교체 대상**이다.
+repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. live stale-file 여부는 `handoff/current.md`에서 추적한다.
 
 ## 13. Generated and local state
 
