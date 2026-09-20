@@ -9,11 +9,12 @@
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | public content-component package의 실제 이름, registry, initial version, release transport, semantic compatibility policy | public npm registry가 현재 우선 후보다. anonymous install이 가능하고 GitHub Actions Trusted Publishing/OIDC + provenance를 사용할 수 있다. GitHub Packages npm registry는 public package install에도 인증이 필요해 consumer friction이 더 크다. 최종 package scope/name, registry, initial version, release trigger, compatibility policy는 사용자 결정 필요 |
-| Q012 | component manifest schema의 최종 runtime API | [planning schema](content-component-schema.md)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
+| Q011 | public content-component package의 initial version, release transport, semantic compatibility policy | registry/name은 public npm `@oomia/content-components`로 확정. initial version, GitHub tag/release/workflow 관계, pre-1.0 compatibility policy는 추가 결정 필요 |
+| Q012 | content-component package의 exact subpath export와 manifest runtime API | framework-neutral contract + React renderer 분리는 확정. root export, `./react`, `./manifest` 등 exact public specifier와 manifest instance/schema 노출 방식은 구현 전 결정 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
+| Q016 | 독립 content-component GitHub repository의 owner/name과 public visibility | package ownership은 독립 repository로 확정. 기존 GitHub 레포들이 `ooMia/*`에 있으므로 `ooMia/content-components` public repository가 우선 후보이며 실제 생성 전에 확정 필요 |
 
 ## 분리 원칙
 
