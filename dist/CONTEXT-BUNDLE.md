@@ -105,7 +105,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 |---|---|
 | `oomia.github.io.engine` | canonical content를 다루는 authoring 환경과 CMS adapter, persistence 접근, publishing workflow orchestration |
 | `oomia.github.io.docs` | downstream이 소비할 계약된 generated document set |
-| `oomia.github.io` | generated documents를 소비해 사이트를 빌드하고 GitHub Pages로 전달하며, 공식 Article MDX content component의 rendering implementation을 소유 |
+| `oomia.github.io` | generated documents와 public content-component package를 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 
 `mono`는 사용자가 로컬에서 붙인 별칭이며 실제 레포 이름의 일부가 아니다. docs는 현재 engine과 site 사이의 generated projection으로 사용된다.
 
@@ -139,30 +139,34 @@ Authoring surface는 canonical content의 adapter다.
 
 ## Official MDX component boundary
 
-공식 Article MDX component의 계약은 Site repository에서 소스 변경을 소유하고, versioned public content-component package를 통해 공유하는 방향을 canonical architecture로 둔다.
+공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
 
 ```text
-                 public content-component package
-                     contract + implementation
-                         /             \
-                        /               \
-               Engine / CMS          Site
-              authoring adapter   rendering consumer
+              @oomia/content-components
+        independent source + versioned release
+              /                    \
+             /                      \
+   framework-neutral             React renderer
+   contract / manifest           implementation
+          |                           |
+          v                           v
+     Engine / CMS                    Site
+   builder / adapter            webpage renderer
 ```
 
 책임은 다음과 같이 나눈다.
 
-- **Site repository**: component source, rendering implementation, public component contract 변경을 소유한다.
-- **Site**: package의 runtime implementation을 사용한다.
-- **Engine**: rendering implementation에 직접 결합하지 않고 exported type/runtime contract를 참조해 Payload authoring adapter를 구성한다.
+- **Content-component repository**: component semantics, public contract, manifest, React rendering implementation과 package version/release를 소유한다.
+- **Site**: React renderer surface를 소비해 generated content를 실제 웹페이지로 렌더링한다. Site가 어떤 framework를 사용하는지는 public component contract의 전제가 아니다.
+- **Engine**: renderer implementation에 결합하지 않고 framework-neutral contract/manifest를 참조해 CMS editor, validation, builder integration을 구성한다.
 - **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
 - **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
 
-초기 public package 분리는 **Site 단독 변경으로 먼저 진행할 수 있다.** Engine/CMS가 package contract를 실제로 소비하는 변경은 별도 consumer change로 취급하며, canonical authoring/save-path 변경과 같은 Issue나 branch에 묶지 않는다.
+public package는 source 수준에서 React/TypeScript로 구현하되 **contract surface가 React를 import하지 않도록 분리**한다. React renderer는 framework-specific runtime surface이며 `react`를 host와 공유하는 peer dependency로 취급한다. `.astro` 파일은 public component implementation에 사용하지 않는다.
 
-public package 안에서도 **framework-neutral contract surface**와 renderer-specific implementation surface를 분리한다. TypeScript contract와 machine-readable manifest는 Astro/React/Payload 구현을 import하지 않고 독립적으로 소비할 수 있어야 한다. Site renderer는 별도 renderer export를 사용할 수 있고, Engine/CMS adapter는 rendering implementation에 의존하지 않는다.
+React source를 별도의 framework-independent DOM 구현으로 자동 변환하는 것은 초기 계약에 포함하지 않는다. 비-React renderer 수요가 실제로 생기면 별도 renderer surface(Web Components 등)를 추가할 수 있으나, 현재 Site/Engine 요구를 위해 이중 구현을 선행하지 않는다.
 
-현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 그대로 공개 계약으로 승격하지 않는다. Article MDX에서 허용할 content component surface는 일반 Site UI와 별도 경계로 둔다. 실제 package name, registry, release transport는 구현 단계에서 확정한다.
+현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 구현 전 확정한다.
 
 ## Contract surfaces
 
@@ -355,14 +359,14 @@ manifest의 JSON 형태는 content-component-manifest.schema.json (`schemas/cont
 
 ## Package surface 경계
 
-public package는 최소한 다음 두 surface를 구분한다.
+public package `@oomia/content-components`는 최소한 다음 두 surface를 구분한다.
 
 1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
-2. **Renderer surface**: Site가 실제 MDX를 렌더링하기 위한 implementation을 제공할 수 있다. framework-specific dependency는 이 surface에 한정한다.
+2. **Renderer surface**: React/TypeScript 기반 component implementation을 제공한다. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
 
 Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
 
-초기 rollout은 Site repository 안에서 package boundary와 renderer consumption을 먼저 검증하고, Engine adoption은 별도 Issue/PR로 나눌 수 있다. 이 순서는 canonical source/save-path 작업과 public component contract 작업을 독립적으로 진행하기 위한 의도된 경계다.
+package의 canonical source는 Engine/Site와 독립된 repository가 소유한다. npm artifact는 `@oomia/content-components`로 배포하고, Site와 Engine은 별도 consumer로 통합한다. Engine adoption은 canonical source/save-path 작업과 별도 Issue/PR로 나눌 수 있다.
 
 ## 최소 정보
 
@@ -410,7 +414,7 @@ Agent가 Article source를 분석할 때:
 
 manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 semantic version을 가진다.
 
-정확한 package compatibility policy와 registry/publishing 방식은 아직 미결이며 Open Questions (`docs/open-questions.md`)에서 추적한다.
+registry와 package identity는 public npm `@oomia/content-components`로 확정했다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 Open Questions (`docs/open-questions.md`)에서 추적한다.
 
 <!-- END SOURCE: docs/content-component-schema.md -->
 
@@ -739,18 +743,19 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D011 | 1.0 구현 수준은 revision이 고정된 Implementation Map으로 관리한다 | 사용자 요청 + 구현 레포 검증, 2026-09-18 | 설계 문서 또는 대화만으로 구현 완료 여부 추론 |
 | D012 | canonical Article source는 CMS/Visual Editor와 독립적인 raw Markdown/MDX string으로 보존한다 | 사용자 승인, 2026-09-20 | Visual Editor가 무손실 표현 가능한 Markdown subset을 canonical 저장 범위로 취급 |
 | D013 | Storage, Editing, Publishing 가능성을 서로 독립된 계약으로 판정한다 | 사용자 승인, 2026-09-20 | 저장 가능 = Visual 편집 가능 = 발행 가능으로 묶는 모델 |
-| D014 | 공식 MDX component contract는 Site 쪽에서 소스 변경을 소유하는 versioned public content-component package로 공유한다 | 사용자 제안 및 승인, 2026-09-20 | engine과 site가 component spec을 각각 암묵적으로 복제 |
+| D014 | 공식 MDX component contract는 Site 쪽에서 소스 변경을 소유하는 versioned public content-component package로 공유한다 | **대체됨: D018**, 사용자 제안 및 승인, 2026-09-20 | engine과 site가 component spec을 각각 암묵적으로 복제 |
 | D015 | CMS는 공식 component의 authoring adapter이고 Site는 rendering consumer다. Visual adapter 유무는 publishability를 결정하지 않는다 | 사용자 승인, 2026-09-20 | CMS registry가 플랫폼 전체 MDX 지원 범위를 결정 |
 | D016 | Publishability는 CMS codec round-trip이 아니라 content/component contract와 실제 Site consumer 검증으로 판정한다 | D012–D015의 구현 원칙, 2026-09-20 | 모든 DB body에 Visual Editor representability를 요구하는 global publish gate |
 | D017 | Knowledge에는 raw conversation transcript를 저장하지 않고 source/turn provenance metadata와 canonical knowledge만 유지한다 | 사용자 위임에 따른 agent 결정, 2026-09-20 | `provenance/conversations.json`에 원문 대화를 장기 보존하거나 handoff와 세션 transcript archive를 결합 |
+| D018 | 공식 content component는 독립 repository가 소유하고 npm public package `@oomia/content-components`로 배포한다. framework-neutral contract/manifest와 React renderer surface를 분리하며 Site와 Engine은 각각 consumer다 | 사용자 명시, 2026-09-21 | D014의 Site-owned source 모델; `.astro` 기반 public renderer; 개인 unscoped package |
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
 
 D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현·품질·배포 성공은 구현 레포의 코드·테스트·commit/PR·실행/deployment Evidence가 별도로 필요하다.
 
-D011의 현재 기준 revision과 capability 판정은 [Implementation Map](implementation-map.md)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
+D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다. machine-readable component manifest는 현재 [planning schema](content-component-schema.md) 단계이며 published package API가 확정되었다는 뜻은 아니다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D018에 따라 component package의 canonical source는 Engine/Site와 독립된 repository에 두고, npm organization scope `@oomia`의 public package `@oomia/content-components`로 배포한다. machine-readable component manifest는 현재 planning schema (`docs/content-component-schema.md`) 단계이며 exact subpath export와 runtime API가 확정되었다는 뜻은 아니다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -772,11 +777,12 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | public content-component package의 실제 이름, registry, initial version, release transport, semantic compatibility policy | public npm registry가 현재 우선 후보다. anonymous install이 가능하고 GitHub Actions Trusted Publishing/OIDC + provenance를 사용할 수 있다. GitHub Packages npm registry는 public package install에도 인증이 필요해 consumer friction이 더 크다. 최종 package scope/name, registry, initial version, release trigger, compatibility policy는 사용자 결정 필요 |
-| Q012 | component manifest schema의 최종 runtime API | planning schema (`docs/content-component-schema.md`)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
+| Q011 | public content-component package의 initial version, release transport, semantic compatibility policy | registry/name은 public npm `@oomia/content-components`로 확정. initial version, GitHub tag/release/workflow 관계, pre-1.0 compatibility policy는 추가 결정 필요 |
+| Q012 | content-component package의 exact subpath export와 manifest runtime API | framework-neutral contract + React renderer 분리는 확정. root export, `./react`, `./manifest` 등 exact public specifier와 manifest instance/schema 노출 방식은 구현 전 결정 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
+| Q016 | 독립 content-component GitHub repository의 owner/name과 public visibility | package ownership은 독립 repository로 확정. 기존 GitHub 레포들이 `ooMia/*`에 있으므로 `ooMia/content-components` public repository가 우선 후보이며 실제 생성 전에 확정 필요 |
 
 ## 분리 원칙
 
