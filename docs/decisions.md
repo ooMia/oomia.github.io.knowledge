@@ -28,6 +28,7 @@
 | D022 | 1.0 기본 authoring client는 Obsidian과 Fumadocs Editor다. 둘은 같은 local content workspace를 직접 편집하며 Engine은 DB-backed CMS가 아니라 workspace validation/publishing orchestration을 담당한다 | 사용자 명시, 2026-09-21 | Payload + PostgreSQL + Lexical을 1.0 CMS/persistence로 유지 |
 | D023 | publishing은 DB를 Markdown으로 export하는 작업이 아니라 content workspace를 검증하고 canonical docs revision으로 commit/push한 뒤 실제 Site consumer build/delivery를 검증하는 흐름이다 | D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
 | D024 | Fumadocs의 built-in UI/Editor component capability를 우선 재사용한다. 독립 `@oomia/content-components` React library는 1.0 선행 과제에서 제거하고, 실제 custom component가 생겨 cross-repository contract가 필요할 때 얇은 profile/adapter package를 도입한다 | 사용자 방향 전환 및 오버엔지니어링 회피, 2026-09-21 | D018–D020의 독립 renderer/component library 선행 구축 |
+| D025 | architecture migration은 새 Git-backed vertical slice를 먼저 검증한 뒤 legacy Payload/PostgreSQL path를 단계적으로 retire한다. 과거 Issue/branch는 현재 Knowledge와 reconciliation 후에만 계속하며 미병합 작업을 먼저 보존한다 | 사용자 요청에 따른 migration context/정합성 강화, 2026-09-21 | 기존 구현 중단 상태를 그대로 재개하거나 새 path 검증 전에 big-bang delete |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -36,6 +37,6 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 [Implementation Map](implementation-map.md)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다. D021–D023이 현재 1.0 persistence/authoring/publishing 기준이며, D024에 따라 Fumadocs가 제공하는 component/editor capability를 먼저 사용한다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 [Architecture Transition](architecture-transition.md)가 소유한다. D021–D023이 현재 1.0 persistence/authoring/publishing 기준이며, D024에 따라 Fumadocs가 제공하는 component/editor capability를 먼저 사용한다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
