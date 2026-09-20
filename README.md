@@ -17,6 +17,8 @@ Git-backed document workspace를 editor/tooling과 분리해 유지하고, Engin
 |---|---|
 | 책임 경계와 레포 관계 | [Architecture](docs/architecture.md) |
 | legacy DB/CMS → Git workspace 전환 지침 | [Architecture Transition](docs/architecture-transition.md) |
+| VP command / runtime / CI / hooks 정책 | [Development Toolchain](docs/development-toolchain.md) |
+| monorepo / package / repository 구조 | [Repository Design & Maintenance](docs/repository-design.md) |
 | Markdown/MDX workspace·편집·저장·발행 수준 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
 | custom component manifest 계획 | [Content Component Manifest Schema](docs/content-component-schema.md) |
 | 목표·Item·Issue·완료 판정 | [Planning Model](docs/planning-model.md) |
@@ -44,7 +46,7 @@ Git-backed document workspace를 editor/tooling과 분리해 유지하고, Engin
 
 따라서 docs repository는 더 이상 DB에서 생성되는 단순 projection이 아니다. canonical content history와 published source revision을 소유한다.
 
-Payload/PostgreSQL 기반 CMS는 현재 target architecture가 아니라 legacy implementation/Evidence다. Fumadocs built-in component와 editor integration을 우선 사용하며, 별도 content-component library/manifest는 실제 custom component 공유 수요가 생길 때만 도입한다.
+Payload/PostgreSQL 기반 CMS는 현재 target architecture가 아니라 legacy implementation/Evidence다. Fumadocs UI/Core/MDX와 custom-component workflow를 우선 검토하며, Fumadocs Editor 채택 여부는 아직 열려 있다. JS/TS repository는 VP-first toolchain과 monorepo-ready/package-light 구조를 전역 기본값으로 사용한다.
 
 Project README는 장기 설계를 복제하지 않고 위 canonical 문서를 찾기 위한 짧은 진입점으로 유지한다. 권장 내용은 [Project README 템플릿](templates/project-readme.md)에 있다.
 
