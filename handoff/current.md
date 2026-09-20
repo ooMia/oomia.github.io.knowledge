@@ -6,10 +6,12 @@ Updated: 2026-09-20 (Asia/Seoul)
 
 ## Active work
 
-- Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13) `feat: decouple canonical source from visual editor constraints`가 활성 상태다.
-- linked Development branch [`13-feat-decouple-canonical-source-from-visual-editor-constraints`](https://github.com/ooMia/oomia.github.io.engine/tree/13-feat-decouple-canonical-source-from-visual-editor-constraints)가 존재한다.
-- Issue #13 구현 변경은 아직 시작하지 않았다. 다음 세션은 아래 문서·코드 anchor를 기준으로 설계/구현을 시작하면 된다.
-- Project #11 field live verification은 현재 #13 구현의 선행 조건이 아니다.
+- Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13)은 별도의 Codex 앱에서 구현 중이며, 현재 사용량 제한으로 해당 실행이 중단된 상태다.
+- 이 Chat 세션에서는 #13의 branch/code를 수정하지 않는다. 원격 [Issue #13 branch](https://github.com/ooMia/oomia.github.io.engine/tree/13-feat-decouple-canonical-source-from-visual-editor-constraints)가 아직 기존 SHA를 가리키더라도 Codex 로컬에 미push 변경이 있을 수 있으므로 **원격 identical 상태를 구현 미착수의 증거로 사용하지 않는다.**
+- 병행 작업은 Site의 [draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9) `draft: feat: establish public content-component package`다.
+- Issue #9는 `closed / not_planned` draft candidate이며 아직 Development branch와 Project activation을 만들지 않았다.
+- Site의 public content-component package boundary를 먼저 준비하고, Engine/CMS adoption은 #13과 충돌하지 않는 후속 consumer change로 분리한다.
+- 사용자 결정이 필요한 현재 gate는 Open Questions Q011의 registry / package name / initial version / release transport / compatibility policy다.
 
 ## Verified repository state
 
@@ -149,11 +151,11 @@ Updated: 2026-09-20 (Asia/Seoul)
 
 ## Next safe action
 
-1. Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13)의 현재 Acceptance Criteria와 위 implementation anchors를 기준으로 **raw Source save contract의 최소 변경 설계**를 확정한다.
-2. 설계가 기존 Payload semantics와 맞는지 관련 hook/API를 확인한다.
-3. 사용자 결정이 필요한 API/UX 경계가 나오면 구현 전에 중단하고 질의한다.
-4. 결정이 필요하지 않다면 [Issue #13 branch](https://github.com/ooMia/oomia.github.io.engine/tree/13-feat-decouple-canonical-source-from-visual-editor-constraints)에서 작은 단위로 구현과 regression test를 진행한다.
-5. 구현이 `main`에 통합되고 Evidence가 재검증된 뒤에만 Implementation Map을 갱신한다.
+1. public content-component package의 Q011 결정을 확정한다: registry, package scope/name, initial version, release trigger/transport, 최소 semantic compatibility policy.
+2. 결정은 Knowledge의 owning canonical 문서와 Decision Log에 반영한다.
+3. [Site draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9)를 활성화하고, activation automation이 만드는 Development branch에서 Site-only 구현을 시작한다.
+4. 첫 구현은 현재 `Callout` 하나를 기준으로 framework-neutral contract + manifest와 renderer surface의 package boundary를 증명한다.
+5. Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13) branch는 건드리지 않는다. Engine/CMS package adoption은 #13 상태를 재확인한 뒤 별도 Issue/PR로 진행한다.
 
 ## Deferred housekeeping
 
