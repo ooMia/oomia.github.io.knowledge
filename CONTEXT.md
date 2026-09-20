@@ -14,14 +14,15 @@
 - Fumadocs built-in component/tooling을 우선 재사용하며 custom component/shared package는 실제 필요가 생길 때만 도입한다.
 - 실제 구현 수준은 [Implementation Map](docs/implementation-map.md)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
-확정 수준은 [Provenance](provenance/README.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 먼저 [Current Handoff](handoff/current.md)를 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
+현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 [Architecture Transition](docs/architecture-transition.md)을 읽는다. 확정 수준은 [Provenance](provenance/README.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
 
 ## 작업별 읽기
 
 | 작업 | 읽을 문서 |
 |---|---|
-| 이전 세션 이어받기 | [Current Handoff](handoff/current.md) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
+| architecture migration 구현/이어받기 | [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
 | 전체 이해 | [Architecture](docs/architecture.md), [Release 1.0](docs/release-1.0.md) |
+| legacy → new target migration 판단 | [Architecture Transition](docs/architecture-transition.md), [Implementation Map](docs/implementation-map.md) |
 | Markdown/MDX authoring·storage·publish 정책 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
 | custom MDX component profile/manifest | [Content Component Manifest Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
 | 현재 1.0 구현 수준·migration gap | [Implementation Map](docs/implementation-map.md) → 기준 revision의 구현 레포 코드·테스트 |
@@ -45,6 +46,8 @@ Content 관련 구현을 계획하거나 수정할 때:
 6. Fumadocs built-in component를 우선 사용하고 custom wrapper/library를 불필요하게 만들지 않는다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다.
+10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 
 ## 프로젝트 협업·응답 원칙
 
