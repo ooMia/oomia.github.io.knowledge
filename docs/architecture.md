@@ -54,7 +54,7 @@ Authoring surface는 canonical content의 adapter다.
 
 ## Official MDX component boundary
 
-공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
+공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 public `ooMia/content-components` repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
 
 ```text
               @oomia/content-components
@@ -81,7 +81,16 @@ public package는 source 수준에서 React/TypeScript로 구현하되 **contrac
 
 React source를 별도의 framework-independent DOM 구현으로 자동 변환하는 것은 초기 계약에 포함하지 않는다. 비-React renderer 수요가 실제로 생기면 별도 renderer surface(Web Components 등)를 추가할 수 있으나, 현재 Site/Engine 요구를 위해 이중 구현을 선행하지 않는다.
 
-현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 구현 전 확정한다.
+### Styling boundary
+
+- React component는 접근 가능한 semantic markup과 안정된 `className` / `data-*` hook을 제공한다.
+- baseline style은 package가 소유하지만 React entry point에서 자동 주입하지 않는다. 소비자가 `@oomia/content-components/styles.css`를 명시적으로 import한다.
+- 색상, 간격, border, typography처럼 theme에 따라 달라질 값은 package-prefixed CSS custom property로 override할 수 있게 한다.
+- component props의 `className`과 `style`은 최상위 element로 전달하여 소비자가 국소적으로 스타일을 조정할 수 있게 한다.
+- Tailwind, CSS-in-JS provider, 특정 site theme runtime을 public component의 필수조건으로 두지 않는다.
+- 내부 DOM 구조나 hashed class를 override API로 간주하지 않는다. 안정성이 필요한 selector는 명시된 class/data attribute와 CSS variable에 한정한다.
+
+현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. public entry point는 root contract, `./react`, `./manifest`, `./styles.css`로 시작한다. initial version은 `0.1.0`이며 pre-1.0 동안 breaking public-contract 변경은 minor version에서 수행한다. release trigger/transport의 세부 자동화만 구현 전 확정한다.
 
 ## Contract surfaces
 
