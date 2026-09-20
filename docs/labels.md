@@ -8,7 +8,7 @@ GitHub labels는 Project #11의 필드 체계를 복제하지 않고, Issue/PR�
 - label은 Project field로 자연스럽게 표현되지 않는 운영 의미만 담는다.
 - orchestration 전용 label은 `orchestration:*` namespace를 사용한다.
 - 하나의 Issue/PR에 여러 orchestration label을 함께 붙일 수 있다.
-- `oomia.github.io.docs`는 generated projection이므로 개발 Issue label 체계의 적용 대상이 아니다.
+- `oomia.github.io.docs`는 canonical content remote다. 일반 Article/content edit에는 구현 Issue label을 요구하지 않지만, repository-level schema/tooling/policy migration Issue가 생기면 동일한 orchestration label semantics를 적용할 수 있다.
 
 ## Registry
 
