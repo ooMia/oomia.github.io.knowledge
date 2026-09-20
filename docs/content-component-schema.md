@@ -15,14 +15,14 @@ manifest의 JSON 형태는 [content-component-manifest.schema.json](../schemas/c
 
 ## Package surface 경계
 
-public package는 최소한 다음 두 surface를 구분한다.
+public package `@oomia/content-components`는 최소한 다음 두 surface를 구분한다.
 
 1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
-2. **Renderer surface**: Site가 실제 MDX를 렌더링하기 위한 implementation을 제공할 수 있다. framework-specific dependency는 이 surface에 한정한다.
+2. **Renderer surface**: React/TypeScript 기반 component implementation을 제공한다. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
 
 Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
 
-초기 rollout은 Site repository 안에서 package boundary와 renderer consumption을 먼저 검증하고, Engine adoption은 별도 Issue/PR로 나눌 수 있다. 이 순서는 canonical source/save-path 작업과 public component contract 작업을 독립적으로 진행하기 위한 의도된 경계다.
+package의 canonical source는 Engine/Site와 독립된 repository가 소유한다. npm artifact는 `@oomia/content-components`로 배포하고, Site와 Engine은 별도 consumer로 통합한다. Engine adoption은 canonical source/save-path 작업과 별도 Issue/PR로 나눌 수 있다.
 
 ## 최소 정보
 
@@ -70,4 +70,4 @@ Agent가 Article source를 분석할 때:
 
 manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 semantic version을 가진다.
 
-정확한 package compatibility policy와 registry/publishing 방식은 아직 미결이며 [Open Questions](open-questions.md)에서 추적한다.
+registry와 package identity는 public npm `@oomia/content-components`로 확정했다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 [Open Questions](open-questions.md)에서 추적한다.
