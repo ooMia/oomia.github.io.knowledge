@@ -158,6 +158,10 @@ Authoring surface는 canonical content의 adapter다.
 - **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
 - **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
 
+초기 public package 분리는 **Site 단독 변경으로 먼저 진행할 수 있다.** Engine/CMS가 package contract를 실제로 소비하는 변경은 별도 consumer change로 취급하며, canonical authoring/save-path 변경과 같은 Issue나 branch에 묶지 않는다.
+
+public package 안에서도 **framework-neutral contract surface**와 renderer-specific implementation surface를 분리한다. TypeScript contract와 machine-readable manifest는 Astro/React/Payload 구현을 import하지 않고 독립적으로 소비할 수 있어야 한다. Site renderer는 별도 renderer export를 사용할 수 있고, Engine/CMS adapter는 rendering implementation에 의존하지 않는다.
+
 현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 그대로 공개 계약으로 승격하지 않는다. Article MDX에서 허용할 content component surface는 일반 Site UI와 별도 경계로 둔다. 실제 package name, registry, release transport는 구현 단계에서 확정한다.
 
 ## Contract surfaces
@@ -348,6 +352,17 @@ publishable result
 - component manifest: runtime/Agent-readable contract
 
 manifest의 JSON 형태는 content-component-manifest.schema.json (`schemas/content-component-manifest.schema.json`)으로 검증한다.
+
+## Package surface 경계
+
+public package는 최소한 다음 두 surface를 구분한다.
+
+1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
+2. **Renderer surface**: Site가 실제 MDX를 렌더링하기 위한 implementation을 제공할 수 있다. framework-specific dependency는 이 surface에 한정한다.
+
+Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
+
+초기 rollout은 Site repository 안에서 package boundary와 renderer consumption을 먼저 검증하고, Engine adoption은 별도 Issue/PR로 나눌 수 있다. 이 순서는 canonical source/save-path 작업과 public component contract 작업을 독립적으로 진행하기 위한 의도된 경계다.
 
 ## 최소 정보
 
@@ -748,7 +763,7 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 
 # Open Questions / Verification Gaps
 
-현재 canonical 정책에서 **사용자 결정이나 설계 선택이 아직 필요한 항목**만 유지한다. GitHub live 상태처럼 조회로 해결되는 운영 확인 사항은 [Current Handoff](../handoff/current.md)에 두고, 구현 수준과 revision-bound Evidence는 [Implementation Map](implementation-map.md)이 소유한다.
+현재 canonical 정책에서 **사용자 결정이나 설계 선택이 아직 필요한 항목**만 유지한다. GitHub live 상태처럼 조회로 해결되는 운영 확인 사항은 Current Handoff (`handoff/current.md`)에 두고, 구현 수준과 revision-bound Evidence는 Implementation Map (`docs/implementation-map.md`)이 소유한다.
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
@@ -757,8 +772,8 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | public content-component package의 실제 이름, registry, release transport, semantic compatibility policy | architecture는 versioned public package를 요구하지만 npm registry/package name/version coupling은 구현 시 결정 |
-| Q012 | component manifest schema의 최종 runtime API | [planning schema](content-component-schema.md)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
+| Q011 | public content-component package의 실제 이름, registry, initial version, release transport, semantic compatibility policy | public npm registry가 현재 우선 후보다. anonymous install이 가능하고 GitHub Actions Trusted Publishing/OIDC + provenance를 사용할 수 있다. GitHub Packages npm registry는 public package install에도 인증이 필요해 consumer friction이 더 크다. 최종 package scope/name, registry, initial version, release trigger, compatibility policy는 사용자 결정 필요 |
+| Q012 | component manifest schema의 최종 runtime API | planning schema (`docs/content-component-schema.md`)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
@@ -766,9 +781,9 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 ## 분리 원칙
 
 - **결정이 필요한 질문** → 이 문서
-- **현재 GitHub/branch/Project 상태를 다시 확인해야 하는 항목** → [Current Handoff](../handoff/current.md)
-- **특정 revision에서 검증된 capability와 남은 구현 delta** → [Implementation Map](implementation-map.md)
-- **이미 확정된 방향과 대체된 결정** → [Decision Log](decisions.md)
+- **현재 GitHub/branch/Project 상태를 다시 확인해야 하는 항목** → Current Handoff (`handoff/current.md`)
+- **특정 revision에서 검증된 capability와 남은 구현 delta** → Implementation Map (`docs/implementation-map.md`)
+- **이미 확정된 방향과 대체된 결정** → Decision Log (`docs/decisions.md`)
 
 초기 지식 레포 구성에 사용한 대화의 source/turn metadata는 provenance에 역사적 근거로 남기되 raw transcript는 저장하지 않는다. 현재 정책과 실제 repository 검증 결과가 있는 항목은 canonical 문서와 Implementation Map을 우선한다.
 
