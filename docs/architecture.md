@@ -73,6 +73,10 @@ Authoring surface는 canonical content의 adapter다.
 - **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
 - **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
 
+초기 public package 분리는 **Site 단독 변경으로 먼저 진행할 수 있다.** Engine/CMS가 package contract를 실제로 소비하는 변경은 별도 consumer change로 취급하며, canonical authoring/save-path 변경과 같은 Issue나 branch에 묶지 않는다.
+
+public package 안에서도 **framework-neutral contract surface**와 renderer-specific implementation surface를 분리한다. TypeScript contract와 machine-readable manifest는 Astro/React/Payload 구현을 import하지 않고 독립적으로 소비할 수 있어야 한다. Site renderer는 별도 renderer export를 사용할 수 있고, Engine/CMS adapter는 rendering implementation에 의존하지 않는다.
+
 현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 그대로 공개 계약으로 승격하지 않는다. Article MDX에서 허용할 content component surface는 일반 Site UI와 별도 경계로 둔다. 실제 package name, registry, release transport는 구현 단계에서 확정한다.
 
 ## Contract surfaces
