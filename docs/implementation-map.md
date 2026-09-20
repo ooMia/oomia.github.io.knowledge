@@ -54,9 +54,9 @@ Site
 
 | Capability | 상태 | 현재 Evidence | 새 target에 남은 delta |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 작성 content corpus를 실제 docs workspace에 import하고 Obsidian 중심 workflow와 Fumadocs Editor의 component-aware workflow를 비교해야 한다. 핵심 Evidence는 source preservation, authoring UX, Site/Fumadocs rendering integration 비용이다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. docs 전체를 단일 application layout으로 고정하지 않고 consumer-specific subtree/path convention만 최소화하며 Git revision semantics를 확정해야 한다. |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Obsidian-native callout/CSS/plugin extension과 Fumadocs MDX/custom component 중 source portability가 더 높은 경로를 실제 corpus로 비교한다. Fumadocs built-in/UI는 Site에서 우선 재사용하되 별도 component package는 실제 필요 전까지 만들지 않는다. |
+| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 corpus가 이미 Obsidian 기반이므로 basic authoring 호환성보다 Fumadocs/Site integration과 custom-component authoring 경험을 검증해야 한다. Obsidian-only, Obsidian + optional Fumadocs Editor, Fumadocs-heavy 역할 중 하나를 Evidence로 결정한다. |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동하고 Git revision semantics를 확정해야 한다. layout은 free-form/discovery/strict convention 모두 후보이며 integration/maintenance Evidence로 의도적으로 선택한다. |
+| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Fumadocs built-in/custom component와 Editor component-spec workflow를 실제 Site integration에서 검증한다. Obsidian-native custom syntax bridge는 1.0 범위 밖이며 별도 component package는 실제 cross-repo 공유 수요 전까지 만들지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | trigger를 Payload endpoint에서 Git workspace publish action으로 옮기고 validation→commit/push→Site verification 흐름을 재검증해야 한다. |
 | Publishing | **부분 충족** | DB snapshot을 docs repo에 반영하고 실제 Site sync/lint/test/typecheck/build를 통과시키는 workflow가 있다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate를 제거하고 canonical workspace 자체를 검증한 뒤 docs commit으로 확정하는 publish path가 필요하다. 기존 downstream Site verification은 재사용 가능성이 높다. |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | Fumadocs UI/content tooling 도입은 UX/DX 개선 과제로 진행할 수 있으나 canonical docs content를 렌더한다는 1.0 기본 결과는 이미 충족한다. |
@@ -90,15 +90,15 @@ Site
 
 1. **Workspace / Docs Contract**
    - docs repository를 canonical content remote로 재정의
-   - docs tree의 자유도를 보존하고 consumer-specific path/frontmatter convention만 필요한 범위에 한정
+   - free-form/discovery-based/strict docs layout 후보를 실제 corpus와 Site/Fumadocs integration으로 비교하고 하나를 의도적으로 선택
    - working tree draft vs committed canonical revision 구분
 
 2. **Authoring + Site Integration**
    - 기존 작성 content corpus를 docs workspace에 import
-   - Obsidian의 source/file UX, Properties, Live Preview, CSS snippets/custom callout/plugin extension 검증
-   - Fumadocs Editor의 MDX/component-aware visual editing 이점과 비용 비교
-   - Obsidian-friendly Markdown → Fumadocs Site UI transformation을 remark/rehype adapter로 구현 가능한지 검증
-   - 최종 editor 역할을 evidence로 결정
+   - 기존 Obsidian corpus를 Fumadocs UI/Core/MDX Site에 통합
+   - Fumadocs Editor의 MDX/custom-component-aware editing 이점과 비용 비교
+   - custom component 주입/편집 경험과 source round-trip 검증
+   - 최종 editor 역할을 Evidence로 결정
 
 3. **Engine Simplification**
    - Payload/PostgreSQL 의존 경로를 target implementation에서 제거
@@ -117,11 +117,16 @@ Site
    - Fumadocs Editor가 실제로 필요한 component-aware editing gap만 식별
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
-6. **Migration strategy decision**
-   - Engine/Site 각각 in-place refactor와 greenfield rebuild 비용 비교
-   - keep/adapt/retire 비율과 dependency graph를 근거로 선택
+6. **Engine Scratch Bootstrap**
+   - D032에 따라 greenfield skeleton 생성
+   - [Development Toolchain](development-toolchain.md)과 [Repository Design](repository-design.md) 적용
+   - legacy code는 keep/adapt/retire review 후 필요한 generic behavior만 port
 
-7. **Regression / Migration**
+7. **Site migration strategy**
+   - 현재 Astro/docs/Pages Evidence를 보존하면서 Fumadocs integration을 incremental로 검증
+   - Turbo → VP task-runner parity는 별도 Maintenance delta
+
+8. **Regression / Migration**
    - legacy DB content가 있다면 canonical files로 일회성 migration
    - 기존 Site delivery chain 유지
    - obsolete Payload/PostgreSQL code와 infra 제거
