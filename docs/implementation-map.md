@@ -1,6 +1,6 @@
 # Implementation Map
 
-기준일: 2026-09-20. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **검증 스냅샷**이다. 설계 정의는 [Release 1.0](release-1.0.md)과 [Content Authoring & Publishing Contract](content-authoring-contract.md)를 따르고, 상태 판정은 아래 revision과 연결된 immutable Evidence를 근거로 한다.
+기준일: 2026-09-20. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **revision-bound 검증 스냅샷**이다. 설계 정의는 [Release 1.0](release-1.0.md)과 [Content Authoring & Publishing Contract](content-authoring-contract.md)를 따르고, 상태 판정은 아래 revision과 연결된 immutable Evidence를 근거로 한다.
 
 ## 기준 revision
 
@@ -36,7 +36,7 @@
 | Presentation | **충족** | site가 docs submodule의 md/mdx를 Astro content collection으로 읽고 article page에서 렌더한다. engine의 격리 통합 검증은 실제 site build와 등록 Callout HTML까지 확인한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts), [article page](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/pages/articles/%5B...id%5D.astro) | 일반 Site UI와 Article content component의 package boundary를 분리하는 것은 Extensibility delta에서 다룬다. |
 | Delivery | **충족** | verified docs SHA를 소비하는 site main revision이 존재하고, 해당 revision `a3b2e182...`에 대한 GitHub Pages run [35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484)에서 build와 deploy가 모두 성공했다. [Pages artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312)도 생성되었다. | 현재 1.0 boundary의 실제 deployment Evidence 요구는 충족한다. 향후 content delta가 있는 publish에 대한 end-to-end deployment 관찰은 regression/evidence 강화 항목이다. |
 
-## 현재 1.0 gap
+## 기준 revision에서 확인된 1.0 gap
 
 우선 추적할 구현 delta는 다음과 같다.
 
@@ -50,6 +50,6 @@ draft/public lifecycle, preview 고도화, revision history는 위 contract를 �
 
 ## 갱신 규칙
 
-구현 상태를 말할 때는 이 문서의 기준 revision을 먼저 확인한다. 구현 레포의 `main`이 기준 revision보다 진행되었으면 최신 코드·테스트를 다시 조사한 뒤 이 문서를 갱신한다. 설계 문서만으로 구현 상태를 올리지 않으며, `충족` 판정에는 재현 가능한 코드·테스트·commit·deployment 등의 Evidence가 필요하다.
+이 문서는 현재 작업 세션이나 live branch 상태를 추적하지 않는다. 그런 정보는 [Current Handoff](../handoff/current.md)에 두고, 구현 상태를 말할 때는 이 문서의 기준 revision을 먼저 확인한다. 구현 레포의 `main`이 기준 revision보다 진행되었으면 최신 코드·테스트를 다시 조사한 뒤 이 문서를 갱신한다. 설계 문서만으로 구현 상태를 올리지 않으며, `충족` 판정에는 재현 가능한 코드·테스트·commit·deployment 등의 Evidence가 필요하다.
 
 Product Boundary 자체가 변경되면 기존 구현이 그대로여도 capability 판정이 바뀔 수 있다. 이 경우 regression과 contract 강화에 따른 재평가를 구분해 기록한다.
