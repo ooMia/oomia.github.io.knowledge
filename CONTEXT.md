@@ -8,7 +8,7 @@
 
 - canonical Article content는 Git-backed local filesystem workspace의 Markdown/MDX + frontmatter/assets로 보존한다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
-- Obsidian과 Fumadocs Editor는 동일 content workspace를 편집하는 authoring client다.
+- authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
 - Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
 - storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
 - Fumadocs built-in component/tooling을 우선 재사용하며 custom component/shared package는 실제 필요가 생길 때만 도입한다.
@@ -43,10 +43,10 @@ Content 관련 구현을 계획하거나 수정할 때:
 3. Fumadocs Editor가 표현하지 못하는 syntax를 삭제/정규화해서 손실시키기보다 Obsidian/IDE Source path를 유지한다.
 4. uncommitted working tree와 committed docs canonical revision을 구분한다.
 5. publish는 DB export보다 validation / Git revision / Site consumer verification에 집중한다.
-6. Fumadocs built-in component를 우선 사용하고 custom wrapper/library를 불필요하게 만들지 않는다.
+6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. Obsidian-native source syntax와 Site-side remark/rehype mapping을 먼저 검토한다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine/Site를 greenfield로 다시 세우는 안도 Phase A evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 
 ## 프로젝트 협업·응답 원칙
