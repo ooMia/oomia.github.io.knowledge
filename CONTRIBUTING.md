@@ -27,4 +27,4 @@
 
 ## 공유
 
-이 레포에는 대화 원문 아카이브가 포함되어 있으므로 현재 private 상태를 기본 전제로 한다. 공개 전에는 provenance와 원문 아카이브의 공유 범위를 별도로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
+이 레포에는 대화 원문 아카이브가 포함되어 있다. repository visibility와 별개로 provenance 원문 아카이브의 공유 범위를 명시적으로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
