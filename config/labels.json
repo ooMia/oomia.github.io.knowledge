@@ -1,22 +1,22 @@
 [
   {
     "name": "orchestration:automation",
-    "color": "1D76DB",
+    "colorHint": "1D76DB",
     "description": "Repository/Project workflow and automation behavior"
   },
   {
     "name": "orchestration:policy",
-    "color": "5319E7",
+    "colorHint": "5319E7",
     "description": "Repository lifecycle, permissions, and orchestration policy"
   },
   {
     "name": "orchestration:cross-repo",
-    "color": "0E8A16",
+    "colorHint": "0E8A16",
     "description": "Coordination spanning multiple Publishing Platform repositories"
   },
   {
     "name": "orchestration:evidence",
-    "color": "FBCA04",
+    "colorHint": "FBCA04",
     "description": "Verification, reproducibility, and evidence-focused orchestration work"
   }
 ]
