@@ -139,7 +139,7 @@ Authoring surface는 canonical content의 adapter다.
 
 ## Official MDX component boundary
 
-공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
+공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 public `ooMia/content-components` repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
 
 ```text
               @oomia/content-components
@@ -166,7 +166,16 @@ public package는 source 수준에서 React/TypeScript로 구현하되 **contrac
 
 React source를 별도의 framework-independent DOM 구현으로 자동 변환하는 것은 초기 계약에 포함하지 않는다. 비-React renderer 수요가 실제로 생기면 별도 renderer surface(Web Components 등)를 추가할 수 있으나, 현재 Site/Engine 요구를 위해 이중 구현을 선행하지 않는다.
 
-현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 구현 전 확정한다.
+### Styling boundary
+
+- React component는 접근 가능한 semantic markup과 안정된 `className` / `data-*` hook을 제공한다.
+- baseline style은 package가 소유하지만 React entry point에서 자동 주입하지 않는다. 소비자가 `@oomia/content-components/styles.css`를 명시적으로 import한다.
+- 색상, 간격, border, typography처럼 theme에 따라 달라질 값은 package-prefixed CSS custom property로 override할 수 있게 한다.
+- component props의 `className`과 `style`은 최상위 element로 전달하여 소비자가 국소적으로 스타일을 조정할 수 있게 한다.
+- Tailwind, CSS-in-JS provider, 특정 site theme runtime을 public component의 필수조건으로 두지 않는다.
+- 내부 DOM 구조나 hashed class를 override API로 간주하지 않는다. 안정성이 필요한 selector는 명시된 class/data attribute와 CSS variable에 한정한다.
+
+현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. public entry point는 root contract, `./react`, `./manifest`, `./styles.css`로 시작한다. initial version은 `0.1.0`이며 pre-1.0 동안 breaking public-contract 변경은 minor version에서 수행한다. release trigger/transport의 세부 자동화만 구현 전 확정한다.
 
 ## Contract surfaces
 
@@ -359,12 +368,16 @@ manifest의 JSON 형태는 content-component-manifest.schema.json (`schemas/cont
 
 ## Package surface 경계
 
-public package `@oomia/content-components`는 최소한 다음 두 surface를 구분한다.
+public package `@oomia/content-components`는 다음 public surface로 시작한다.
 
-1. **Contract surface**: component identity, TypeScript types, machine-readable manifest를 제공한다. 이 surface는 framework-neutral하며 Astro/React/Payload runtime implementation을 import하지 않는다.
-2. **Renderer surface**: React/TypeScript 기반 component implementation을 제공한다. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
+1. **`@oomia/content-components`**: component identity와 framework-neutral TypeScript contract/helpers. React/Astro/Payload runtime을 import하지 않는다.
+2. **`@oomia/content-components/react`**: React/TypeScript component implementation. `react` dependency와 renderer-specific code는 이 surface에 한정하고 `.astro`를 public implementation으로 사용하지 않는다.
+3. **`@oomia/content-components/manifest`**: machine-readable component manifest. builder/Agent/runtime validation이 React 없이 읽을 수 있다.
+4. **`@oomia/content-components/styles.css`**: optional baseline stylesheet. React renderer가 자동 import하지 않으며 consumer가 명시적으로 opt-in한다.
 
 Engine/CMS의 Payload adapter는 package의 contract surface를 소비하는 별도 consumer다. Payload field config나 Visual adapter 구현 자체는 public package contract에 포함하지 않는다.
+
+스타일 contract는 manifest와 분리한다. React component는 stable class/data attributes와 `className`/`style` passthrough를 제공하고, baseline stylesheet의 themeable 값은 package-prefixed CSS custom properties를 사용한다. Tailwind/CSS-in-JS/theme provider를 consumer requirement로 만들지 않는다.
 
 package의 canonical source는 Engine/Site와 독립된 repository가 소유한다. npm artifact는 `@oomia/content-components`로 배포하고, Site와 Engine은 별도 consumer로 통합한다. Engine adoption은 canonical source/save-path 작업과 별도 Issue/PR로 나눌 수 있다.
 
@@ -414,7 +427,7 @@ Agent가 Article source를 분석할 때:
 
 manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 semantic version을 가진다.
 
-registry와 package identity는 public npm `@oomia/content-components`로 확정했다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 Open Questions (`docs/open-questions.md`)에서 추적한다.
+registry/package identity는 public npm `@oomia/content-components`, source repository는 public `ooMia/content-components`로 확정했다. public subpaths는 root, `./react`, `./manifest`, `./styles.css`로 시작하고 initial version은 `0.1.0`이다. pre-1.0 breaking public-contract 변경은 minor version에서 수행한다. release trigger/transport 세부와 manifest runtime shape는 Open Questions (`docs/open-questions.md`)에서 추적한다.
 
 <!-- END SOURCE: docs/content-component-schema.md -->
 
@@ -748,6 +761,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D016 | Publishability는 CMS codec round-trip이 아니라 content/component contract와 실제 Site consumer 검증으로 판정한다 | D012–D015의 구현 원칙, 2026-09-20 | 모든 DB body에 Visual Editor representability를 요구하는 global publish gate |
 | D017 | Knowledge에는 raw conversation transcript를 저장하지 않고 source/turn provenance metadata와 canonical knowledge만 유지한다 | 사용자 위임에 따른 agent 결정, 2026-09-20 | `provenance/conversations.json`에 원문 대화를 장기 보존하거나 handoff와 세션 transcript archive를 결합 |
 | D018 | 공식 content component는 독립 repository가 소유하고 npm public package `@oomia/content-components`로 배포한다. framework-neutral contract/manifest와 React renderer surface를 분리하며 Site와 Engine은 각각 consumer다 | 사용자 명시, 2026-09-21 | D014의 Site-owned source 모델; `.astro` 기반 public renderer; 개인 unscoped package |
+| D019 | content-component source repository는 public `ooMia/content-components`로 둔다. npm organization scope `@oomia`와 GitHub owner를 억지로 일치시키지 않고, 기존 프로젝트 repository ownership과 일관성을 우선한다 | 사용자 위임에 따른 agent 결정, 2026-09-21 | 별도 GitHub organization으로 즉시 이동하거나 Site/Engine 내부 package로 유지 |
+| D020 | React content components는 semantic markup과 optional baseline CSS를 제공한다. 기본 스타일은 `@oomia/content-components/styles.css`를 소비자가 명시적으로 import하고, CSS custom properties·stable class/data hooks·`className`/`style` passthrough로 override한다 | 사용자 요구 + Fumadocs/Nextra/Docusaurus 패턴 조사, 2026-09-21 | CSS 자동 주입, Tailwind/runtime theme 강제, 완전 unstyled-only package |
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
 
@@ -755,7 +770,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D018에 따라 component package의 canonical source는 Engine/Site와 독립된 repository에 두고, npm organization scope `@oomia`의 public package `@oomia/content-components`로 배포한다. machine-readable component manifest는 현재 planning schema (`docs/content-component-schema.md`) 단계이며 exact subpath export와 runtime API가 확정되었다는 뜻은 아니다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D018–D020에 따라 component package의 canonical source는 public `ooMia/content-components` repository에 두고, npm organization scope `@oomia`의 public package `@oomia/content-components`로 배포한다. public surface는 framework-neutral root contract, React renderer, manifest, optional baseline stylesheet로 나눈다. manifest의 exact runtime object shape는 구현 검증 중 조정할 수 있다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -777,12 +792,11 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
-| Q011 | public content-component package의 initial version, release transport, semantic compatibility policy | registry/name은 public npm `@oomia/content-components`로 확정. initial version, GitHub tag/release/workflow 관계, pre-1.0 compatibility policy는 추가 결정 필요 |
-| Q012 | content-component package의 exact subpath export와 manifest runtime API | framework-neutral contract + React renderer 분리는 확정. root export, `./react`, `./manifest` 등 exact public specifier와 manifest instance/schema 노출 방식은 구현 전 결정 필요 |
+| Q011 | public content-component package의 release transport | registry/name은 public npm `@oomia/content-components`, initial version은 `0.1.0`, pre-1.0 breaking contract 변경은 minor version으로 확정. 최초 publish 후 Trusted Publishing으로 전환할 때 Git tag / GitHub Release / workflow trigger 관계만 추가 결정 필요 |
+| Q012 | component manifest의 최종 runtime API | public subpath는 root contract, `./react`, `./manifest`, `./styles.css`로 확정. manifest instance/schema/exported helper의 exact runtime shape와 generator 사용 여부만 구현 중 검증 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
-| Q016 | 독립 content-component GitHub repository의 owner/name과 public visibility | package ownership은 독립 repository로 확정. 기존 GitHub 레포들이 `ooMia/*`에 있으므로 `ooMia/content-components` public repository가 우선 후보이며 실제 생성 전에 확정 필요 |
 
 ## 분리 원칙
 
