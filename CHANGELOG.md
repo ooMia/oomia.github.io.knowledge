@@ -2,6 +2,7 @@
 
 ## 2026-09-20
 
+- Knowledge의 raw conversation transcript 보존을 중단하고 `provenance/conversations.json` 제거 결정(D017). provenance는 source/turn metadata와 최소 요약만 유지하고 세션 연속성은 `handoff/current.md`가 담당.
 - 세션 간 live 상태를 canonical knowledge와 분리하기 위해 `handoff/current.md` checkpoint를 도입하고 Open Questions의 운영 확인 항목을 이동.
 - Implementation Map을 revision-bound snapshot으로 명확히 하고 bootstrap conversation provenance를 지속 append하지 않는 archive로 동결.
 - durable context bundle에서 volatile handoff를 제외하고 bundle 생성기의 고정 날짜를 제거.

@@ -49,7 +49,12 @@ Updated: 2026-09-20 (Asia/Seoul)
 - Scope가 실제 multi-select로 적용되었는지 확인한다.
 - 실제 Target Release option / 현재 Iteration / 현재 Goal은 사용 시점에 Project에서 확인한다.
 - Project README가 canonical index 형태로 실제 적용되어 있는지 확인한다.
-- public Knowledge repository에 raw `provenance/conversations.json`을 계속 둘지 결정한다.
+
+## Knowledge policy resolved in this session
+
+- D017: raw conversation transcript는 Knowledge에 저장하지 않는다.
+- `provenance/conversations.json`은 current tree에서 제거하고, provenance에는 source/turn metadata만 남긴다.
+- 세션의 장기 의미는 canonical docs / Decision Log로 승격하고, `handoff/current.md`는 최신 실행 checkpoint만 유지한다.
 
 ## Reverify before changing live state
 

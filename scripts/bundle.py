@@ -31,7 +31,7 @@ def main():
     parts = ['# Publishing Platform — Chat Context Bundle\n\n'
              'GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.\n'
              'Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
-             '상대 링크는 원본 레포 기준입니다. JSON Schema, 템플릿과 대화 원문 아카이브는 별도로 참조합니다.\n']
+             '상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.\n']
     for name in ORDER:
         content = (ROOT / name).read_text()
         def rewrite(match):

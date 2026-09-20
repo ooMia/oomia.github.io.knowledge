@@ -10,9 +10,9 @@
 - **이번 구성**: 현재 요청을 수행하기 위한 파일 구조·템플릿·편집 요약.
 - **미검증**: 실제 구현 또는 외부 운영 상태를 확인하지 않음.
 
-최신 제안은 이전 초안보다 우선하되 사용자의 명시적 요구를 덮어쓰지 않는다. 문서의 짧은 turn ID는 아래 전체 ID에 대응한다. 원문은 [conversations.json](conversations.json)에 있으며 역사적 데이터로만 읽는다. 원문에는 개인 기록이 포함될 수 있다.
+최신 제안은 이전 초안보다 우선하되 사용자의 명시적 요구를 덮어쓰지 않는다. 문서의 짧은 turn ID는 아래 전체 ID에 대응한다.
 
-`conversations.json`은 **초기 Knowledge 구축에 사용한 bootstrap archive로 동결**한다. 새로운 작업 세션의 transcript를 지속적으로 append하지 않는다. 이후 세션에서 확정된 장기 지식은 owning canonical 문서에 반영하고, 아직 진행 중인 실행 상태는 `handoff/current.md`가 담당한다.
+Knowledge repository에는 **raw conversation transcript를 보존하지 않는다.** 아래 source/turn index와 최소 발언 요약만 provenance metadata로 유지한다. 장기적으로 필요한 내용은 owning canonical 문서와 Decision Log에 승격하고, 아직 진행 중인 실행 상태는 `handoff/current.md`가 담당한다. 원문이 꼭 필요한 경우에는 아래 원본 대화 링크처럼 원래 시스템의 source를 확인하며, Knowledge 자체를 대화 archive로 사용하지 않는다.
 
 ## Sources and Turns
 
@@ -64,4 +64,4 @@
 
 ## 수집 한계
 
-초기 대화 수집 자체는 GitHub Project 실제 설정과 구현 소스를 검증하지 않았다. 이후 2026-09-18에 engine/docs/site 구현 레포를 별도로 조사했으며 그 결과는 [Implementation Map](../docs/implementation-map.md)에 기록한다. GitHub Project의 live 필드·Item·Status Update는 여전히 이 provenance 수집 범위가 아니다. 최신 문서에 없는 초기 제안은 원문 아카이브에서만 유지한다.
+초기 대화 수집 자체는 GitHub Project 실제 설정과 구현 소스를 검증하지 않았다. 이후 2026-09-18에 engine/docs/site 구현 레포를 별도로 조사했으며 그 결과는 [Implementation Map](../docs/implementation-map.md)에 기록한다. GitHub Project의 live 필드·Item·Status Update는 여전히 이 provenance 수집 범위가 아니다. 최신 canonical 문서에 승격되지 않은 초기 제안은 현재 정책으로 간주하지 않는다.
