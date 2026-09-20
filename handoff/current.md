@@ -36,6 +36,7 @@ IDE / Agent ───────┘             │ validate / commit / push
 
 Canonical references:
 
+- **Read first:** [Architecture Transition](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/architecture-transition.md)
 - [Architecture](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/architecture.md)
 - [Content Authoring & Publishing Contract](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/content-authoring-contract.md)
 - [Release 1.0](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/release-1.0.md)
@@ -128,7 +129,7 @@ Issue #13의 기존 AC 상당수는 filesystem model에서 구조적으로 해�
 
 ## Next safe action
 
-다음 세션은 **코드 삭제부터 시작하지 않는다.**
+다음 세션은 **코드 삭제나 중단된 #13 구현 재개부터 시작하지 않는다.** 먼저 Architecture Transition의 Phase A/B를 수행한다.
 
 1. [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 현재 tree와 Site consumption path를 live로 조사한다.
 2. 최소 canonical workspace fixture를 정의한다.
