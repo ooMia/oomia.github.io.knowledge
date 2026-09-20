@@ -178,6 +178,29 @@ D026에 따라 어떤 layout도 현재 선결하지 않는다.
 
 strict layout을 선택하는 것도 완전히 유효하다. 선택 기준은 Fumadocs/Site integration, authoring UX, validation 단순성, maintenance cost다.
 
+## Verified current Site/docs coupling
+
+2026-09-21 live `main` 확인:
+
+- Docs repository는 현재 `.engine-export.json`과 `article-7.mdx`만 가진 매우 작은 generated-era state다.
+- Site는 docs repo를 `apps/web/data/articles`에 Git submodule로 mount한다.
+- Astro content collection은 submodule root의 `**/*.{md,mdx}`를 모두 `articles`로 읽는다.
+- current schema는 `title`, `description`, `author`를 요구하고 추가 frontmatter는 허용하는 loose schema다.
+- 현재 Article route는 MDX renderer에 local `Callout.astro`를 component map으로 주입한다.
+- legacy publish는 docs commit/push → Site submodule을 exact docs SHA로 checkout → Site commit/push → Engine submodule pointer commit/push 순으로 세 repo를 갱신했다.
+
+새 architecture에서 강한 재사용 후보:
+
+- Site가 exact docs SHA를 pin하는 submodule revision linkage
+- actual Astro consumer verification
+- docs SHA를 Site commit에 기록하는 commit message/evidence pattern
+
+재검토 대상:
+
+- docs 전체를 하나의 Article collection으로 간주하는 current consumer assumption
+- Engine이 자신의 docs submodule pointer까지 매 publish마다 commit하는 self-recording
+- Engine이 authoring working tree를 자동으로 생성/교체/commit하는 legacy export ownership
+
 ## Current capability status
 
 [Implementation Map](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/implementation-map.md) 기준:
@@ -203,9 +226,29 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 - Git publish semantics
 - Engine container mount/credential contract
 - custom component shared profile/package 필요 시점
-- VP exact Node/pnpm/Vite+ pins
 - Site Turbo retirement timing
 - Site incremental migration 범위
+
+## Immediate user decision gates
+
+현재 scratch bootstrap을 실제로 막는 사용자 선택은 두 개다.
+
+### Q022 — Engine execution surface
+
+- **A. CLI-first one-shot runtime/container**: Engine은 명령 실행 후 종료. `verify`, `publish`, `doctor` 같은 command surface 중심.
+- **B. long-running service 포함**: HTTP/API process와 lifecycle을 1.0부터 소유.
+
+현재 architecture와 오버엔지니어링 회피 기준에서는 A를 권장한다.
+
+### Q016 — Git publish ownership
+
+current submodule linkage를 유지한다는 전제에서:
+
+- **A. committed-revision publish**: Engine은 docs working tree를 commit하지 않는다. clean/committed docs HEAD를 검증하고 필요 시 docs push, Site submodule pointer commit/push, delivery verification을 orchestration한다.
+- **B. one-click author+publish**: Engine이 dirty docs working tree를 stage/commit한 뒤 A의 과정을 수행한다.
+- **C. review-first publish**: Engine이 branch/PR를 만들고 merge 이후 Site pointer를 갱신한다.
+
+canonical revision이 Git commit이고 Obsidian working tree에 unrelated/draft 변경이 섞일 수 있으므로 A를 권장한다.
 
 ## Next safe action
 
