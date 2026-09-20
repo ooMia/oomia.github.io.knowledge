@@ -2,7 +2,7 @@
 
 구조화된 콘텐츠를 명시적인 authoring·extension·publishing 계약을 통해 커스터마이징 가능한 실제 사이트로 전달한다.
 
-이 private repository는 Publishing Platform의 **제품·아키텍처·계획 지식에 대한 canonical source**다. 구현 코드와 GitHub Project의 실시간 작업 상태는 각 소유 위치에서 관리한다.
+이 repository는 Publishing Platform의 **제품·아키텍처·계획 지식에 대한 canonical source**다. 구현 코드와 GitHub Project의 실시간 작업 상태는 각 소유 위치에서 관리한다.
 
 ## 시작하기
 
