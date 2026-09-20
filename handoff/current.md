@@ -42,6 +42,13 @@ Updated: 2026-09-20 (Asia/Seoul)
 3. 완료된 orchestration 작업에서 남은 stale branches를 정리한다.
 4. Issue #13 구현에 착수한다.
 
+## Live verification backlog
+
+- Project #11의 실제 field / option / View / Item / Status Update 구성을 필요 시 live 상태에서 확인한다.
+- Scope가 실제 multi-select로 적용되었는지 확인한다.
+- 실제 Target Release option / 현재 Iteration / 현재 Goal은 사용 시점에 Project에서 확인한다.
+- Project README가 canonical index 형태로 실제 적용되어 있는지 확인한다.
+
 ## Reverify before changing live state
 
 - Project #11의 현재 Status / Iteration / field option은 실제 Project에서 다시 확인한다.
