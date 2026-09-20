@@ -2,6 +2,9 @@
 
 ## 2026-09-21
 
+- D033으로 Engine scratch bootstrap baseline을 Node 24.20.0 / pnpm 12.3.4 / Vite+ 0.3.3으로 고정하고 unrelated toolchain upgrade를 scratch 범위에서 제외.
+- Open Questions에 decision order를 추가해 즉시 사용자 결정이 필요한 Q022(Engine execution surface), Q016(Git publish ownership)과 evidence-gated/later decisions를 분리.
+- live Site/docs 구조를 재검증: docs repo 전체가 `apps/web/data/articles` submodule로 mount되고 모든 md/mdx가 하나의 `articles` collection으로 소비되며, legacy publish는 exact docs SHA를 Site submodule pointer로 commit하는 구조임을 handoff에 기록.
 - D026을 정정해 docs layout의 자유가 free-form만을 뜻하지 않고 strict directory/path/frontmatter convention을 의도적으로 강제하는 구현도 포함하도록 확정.
 - D027을 유지하되 기존 corpus가 이미 Obsidian 기반이라는 점을 반영해 basic Obsidian authoring 검증은 제외하고 Fumadocs Editor의 custom-component authoring 이점을 핵심 비교점으로 좁힘.
 - D028에 따라 synthetic 최소 fixture보다 기존 작성 content corpus를 Fumadocs/Site integration corpus로 우선 사용.
