@@ -2,6 +2,9 @@
 
 ## 2026-09-20
 
+- 세션 간 live 상태를 canonical knowledge와 분리하기 위해 `handoff/current.md` checkpoint를 도입하고 Open Questions의 운영 확인 항목을 이동.
+- Implementation Map을 revision-bound snapshot으로 명확히 하고 bootstrap conversation provenance를 지속 append하지 않는 archive로 동결.
+- durable context bundle에서 volatile handoff를 제외하고 bundle 생성기의 고정 날짜를 제거.
 - Issue #8의 explicit Publish automation을 idempotent no-op semantics까지 포함해 완료로 재평가하고 Automation capability를 충족으로 갱신.
 - GitHub Pages run `35472028484`의 build/deploy 성공과 artifact `10593195312`를 Delivery Evidence로 반영.
 - canonical Article source를 CMS/Visual Editor와 독립적인 raw Markdown/MDX string으로 보존하는 정책 확정.
