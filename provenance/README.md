@@ -12,6 +12,8 @@
 
 최신 제안은 이전 초안보다 우선하되 사용자의 명시적 요구를 덮어쓰지 않는다. 문서의 짧은 turn ID는 아래 전체 ID에 대응한다. 원문은 [conversations.json](conversations.json)에 있으며 역사적 데이터로만 읽는다. 원문에는 개인 기록이 포함될 수 있다.
 
+`conversations.json`은 **초기 Knowledge 구축에 사용한 bootstrap archive로 동결**한다. 새로운 작업 세션의 transcript를 지속적으로 append하지 않는다. 이후 세션에서 확정된 장기 지식은 owning canonical 문서에 반영하고, 아직 진행 중인 실행 상태는 `handoff/current.md`가 담당한다.
+
 ## Sources and Turns
 
 ### S1 — 활동 계획 수립

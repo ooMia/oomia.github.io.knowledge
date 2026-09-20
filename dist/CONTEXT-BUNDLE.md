@@ -1,8 +1,9 @@
 # Publishing Platform — Chat Context Bundle
 
 GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.
-생성 기준일: 2026-09-20. Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
+Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
 상대 링크는 원본 레포 기준입니다. JSON Schema, 템플릿과 대화 원문 아카이브는 별도로 참조합니다.
+
 
 ---
 
@@ -21,17 +22,19 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 - 공식 MDX component는 versioned public content-component contract를 공유하고 CMS는 authoring adapter, Site는 rendering consumer로 취급한다.
 - 실제 구현 수준은 Implementation Map (`docs/implementation-map.md`)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
-확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다.
+확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다. 이전 작업을 이어받는 경우에는 먼저 Current Handoff (`handoff/current.md`)를 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
 
 ## 작업별 읽기
 
 | 작업 | 읽을 문서 |
 |---|---|
+| 이전 세션 이어받기 | Current Handoff (`handoff/current.md`) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
 | 전체 이해 | Architecture (`docs/architecture.md`), Release 1.0 (`docs/release-1.0.md`) |
 | Markdown/MDX authoring·storage·publish 정책 | Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`) |
 | MDX component package / Agent-readable manifest | Content Component Manifest Schema (`docs/content-component-schema.md`), JSON Schema (`schemas/content-component-manifest.schema.json`) |
 | 현재 1.0 구현 수준·gap | Implementation Map (`docs/implementation-map.md`) → 기준 revision의 구현 레포 코드·테스트 |
 | Item 작성·분류·완료 검토 | Planning (`docs/planning-model.md`), Fields (`docs/fields.md`), 관련 release, 실제 Item의 Outcome/AC/Evidence |
+| Issue activation / Project field / Development branch 자동화 | Project Orchestration (`docs/project-orchestration.md`), Planning (`docs/planning-model.md`) |
 | 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
 | 주간 계획·발표 | Operating Rhythm (`docs/operating-rhythm.md`), 실제 Project Status Update, 실제 Evidence |
 | 설계 수정 | 해당 원본 문서, Decisions (`docs/decisions.md`), CONTRIBUTING (`CONTRIBUTING.md`) |
@@ -59,9 +62,12 @@ Content 관련 구현을 계획하거나 수정할 때:
 
 > 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
 
+세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다.
+
 설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다. 파일을 수정할 수 없는 Chat은 변경할 **원본 파일 전체**를 제공하고, 통합본 수정이나 대화상 합의만으로 원본이 갱신되었다고 표현하지 않는다.
 
 <!-- END SOURCE: CONTEXT.md -->
+
 
 ---
 
@@ -162,6 +168,7 @@ TypeScript type은 compile-time contract로 사용하고, Agent/runtime가 compo
 engine을 container image 등으로 배포하는 것은 가능한 방향이며 확정된 구현 과제가 아니다. API와 generated document의 세부 runtime contract는 소유 레포에 두고, 이 레포에서 코드 구현 여부를 추론하지 않는다.
 
 <!-- END SOURCE: docs/architecture.md -->
+
 
 ---
 
@@ -312,6 +319,7 @@ publishable result
 
 <!-- END SOURCE: docs/content-authoring-contract.md -->
 
+
 ---
 
 <!-- BEGIN SOURCE: docs/content-component-schema.md -->
@@ -381,6 +389,7 @@ manifest 자체는 `schemaVersion`을 가진다. component package도 별도의 
 
 <!-- END SOURCE: docs/content-component-schema.md -->
 
+
 ---
 
 <!-- BEGIN SOURCE: docs/planning-model.md -->
@@ -409,6 +418,20 @@ Objective와 capability 자체를 영구적으로 Done 처리하지 않는다. �
 Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. 시스템 변경에는 직접 바뀌는 Scope를 지정하고, 계획·분류 규칙 작업에는 Scope를 비울 수 있다. 구현 레포 이름이나 프레임워크만으로 제품 결과를 정의하지 않는다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+
+### Draft와 활성화
+
+- 가능한 경우 GitHub Project의 native Draft Issue를 사용한다. 현재 사용하는 connector가 이를 지원하지 않으면 repository issue를 `draft:` prefix + `closed / not_planned` 상태로 보관하는 fallback을 사용할 수 있으며, 이를 native Draft와 혼동하지 않는다.
+- Draft 단계에서는 implementation branch를 만들지 않는다.
+- 사용자가 Draft Issue를 명시적으로 발행/활성화하면 **같은 작업에서 Development branch를 반드시 생성·연결한다.** branch 생성은 별도 사용자 요청을 기다리지 않는다.
+- 활성화 시 제목의 draft 표기를 제거하고 Project Status를 `Todo`로 전환한 뒤, 실제 구현 착수 시 `In Progress`로 이동한다.
+- Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
+- 코드 변경을 직접 소유하지 않는 cross-repo coordination Item은 branch를 만들지 않을 수 있다. 대신 연결된 각 repository implementation issue가 활성화되는 순간 각각의 branch를 생성한다.
+
+- Project orchestration Action이 설치된 repository에서는 Issue 활성화 이벤트가 Project #11 등록·field 초기화·Development linked branch 생성을 수행한다. 사용자는 별도 branch 생성 요청을 반복할 필요가 없다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둔다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
+- 상세 동작과 PAT 설정은 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
 
 ## 완료 판정
 
@@ -445,6 +468,7 @@ Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리거
 `System view`는 과거에 제안된 사용자 정의 View 이름이다. Scope별 변경 이력을 보는 `By Scope`라는 이름으로 정리하며, 실제 View가 생성되어 있다는 의미는 아니다.
 
 <!-- END SOURCE: docs/planning-model.md -->
+
 
 ---
 
@@ -522,6 +546,7 @@ Authoring Experience는 CMS UI에 한정되지 않는다. CLI, IDE, form, agent-
 
 <!-- END SOURCE: docs/fields.md -->
 
+
 ---
 
 <!-- BEGIN SOURCE: docs/release-1.0.md -->
@@ -569,13 +594,14 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 
 <!-- END SOURCE: docs/release-1.0.md -->
 
+
 ---
 
 <!-- BEGIN SOURCE: docs/implementation-map.md -->
 
 # Implementation Map
 
-기준일: 2026-09-20. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **검증 스냅샷**이다. 설계 정의는 Release 1.0 (`docs/release-1.0.md`)과 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)를 따르고, 상태 판정은 아래 revision과 연결된 immutable Evidence를 근거로 한다.
+기준일: 2026-09-20. 이 문서는 Publishing Platform 1.0의 제품 경계를 실제 구현과 대조한 **revision-bound 검증 스냅샷**이다. 설계 정의는 Release 1.0 (`docs/release-1.0.md`)과 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)를 따르고, 상태 판정은 아래 revision과 연결된 immutable Evidence를 근거로 한다.
 
 ## 기준 revision
 
@@ -611,7 +637,7 @@ Deliver a usable and extensible workflow for authoring Articles and publishing t
 | Presentation | **충족** | site가 docs submodule의 md/mdx를 Astro content collection으로 읽고 article page에서 렌더한다. engine의 격리 통합 검증은 실제 site build와 등록 Callout HTML까지 확인한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts), [article page](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/pages/articles/%5B...id%5D.astro) | 일반 Site UI와 Article content component의 package boundary를 분리하는 것은 Extensibility delta에서 다룬다. |
 | Delivery | **충족** | verified docs SHA를 소비하는 site main revision이 존재하고, 해당 revision `a3b2e182...`에 대한 GitHub Pages run [35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484)에서 build와 deploy가 모두 성공했다. [Pages artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312)도 생성되었다. | 현재 1.0 boundary의 실제 deployment Evidence 요구는 충족한다. 향후 content delta가 있는 publish에 대한 end-to-end deployment 관찰은 regression/evidence 강화 항목이다. |
 
-## 현재 1.0 gap
+## 기준 revision에서 확인된 1.0 gap
 
 우선 추적할 구현 delta는 다음과 같다.
 
@@ -625,11 +651,12 @@ draft/public lifecycle, preview 고도화, revision history는 위 contract를 �
 
 ## 갱신 규칙
 
-구현 상태를 말할 때는 이 문서의 기준 revision을 먼저 확인한다. 구현 레포의 `main`이 기준 revision보다 진행되었으면 최신 코드·테스트를 다시 조사한 뒤 이 문서를 갱신한다. 설계 문서만으로 구현 상태를 올리지 않으며, `충족` 판정에는 재현 가능한 코드·테스트·commit·deployment 등의 Evidence가 필요하다.
+이 문서는 현재 작업 세션이나 live branch 상태를 추적하지 않는다. 그런 정보는 Current Handoff (`handoff/current.md`)에 두고, 구현 상태를 말할 때는 이 문서의 기준 revision을 먼저 확인한다. 구현 레포의 `main`이 기준 revision보다 진행되었으면 최신 코드·테스트를 다시 조사한 뒤 이 문서를 갱신한다. 설계 문서만으로 구현 상태를 올리지 않으며, `충족` 판정에는 재현 가능한 코드·테스트·commit·deployment 등의 Evidence가 필요하다.
 
 Product Boundary 자체가 변경되면 기존 구현이 그대로여도 capability 판정이 바뀔 수 있다. 이 경우 regression과 contract 강화에 따른 재평가를 구분해 기록한다.
 
 <!-- END SOURCE: docs/implementation-map.md -->
+
 
 ---
 
@@ -662,6 +689,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 자동화는 자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 순서로 필요에 맞게 확장한다. 현재 연결된 서비스나 구현 완료된 자동화를 의미하지 않는다.
 
 <!-- END SOURCE: docs/operating-rhythm.md -->
+
 
 ---
 
@@ -700,51 +728,40 @@ D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & P
 
 <!-- END SOURCE: docs/decisions.md -->
 
+
 ---
 
 <!-- BEGIN SOURCE: docs/open-questions.md -->
 
 # Open Questions / Verification Gaps
 
-현재 canonical 정책과 구현 검증에서 아직 확정되지 않은 항목만 유지한다. 완료되거나 다른 문서에서 확정된 과거 질문은 이 목록에서 제거하고 Decision Log / Implementation Map에 남긴다.
+현재 canonical 정책에서 **사용자 결정이나 설계 선택이 아직 필요한 항목**만 유지한다. GitHub live 상태처럼 조회로 해결되는 운영 확인 사항은 Current Handoff (`handoff/current.md`)에 두고, 구현 수준과 revision-bound Evidence는 Implementation Map (`docs/implementation-map.md`)이 소유한다.
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q001 | GitHub Project #11의 실제 필드·옵션·View·Item·Status Update | GitHub Project live 상태는 knowledge repo와 분리. 현재 plugin surface에서 ProjectV2 전체 설정을 직접 검증·수정하는 기능은 제한적 |
-| Q002 | Scope 다중 선택 및 Delivery 옵션의 실제 적용 | 최신 설계에 포함, 실제 Project 설정 미확인 |
 | Q003 | 1.0 public contract 목록·compatibility policy·release gate | Content authoring/component 방향은 확정. generated document public contract, package compatibility, 최종 release gate는 추가 결정 필요 |
-| Q004 | 각 capability의 구현 수준과 재현 증거 | Implementation Map (`docs/implementation-map.md`)에서 revision-bound snapshot으로 관리. 기준 revision 이후 변경은 재검증 필요 |
-| Q005 | 실제 Target Release 옵션·Iteration 일정·현재 Goal | Project 운영 상태에서 조회 필요; 예시를 실데이터로 만들지 않음 |
 | Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | 명시적으로 확정할 필요 있음 |
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
 | Q008 | engine container/artifact 배포 | 방향성 후보. 필요 시 별도 결정 |
-| Q009 | Project README 실제 canonical index 적용 여부 | knowledge remote는 설정 완료. 템플릿 (`templates/project-readme.md`)은 제공되어 있으나 Project README live 상태는 별도 확인 필요 |
 | Q010 | 미디어 공개 범위·저장 위치와 임시 블로그 채널 | 운영 필요 시 결정 |
 | Q011 | public content-component package의 실제 이름, registry, release transport, semantic compatibility policy | architecture는 versioned public package를 요구하지만 npm registry/package name/version coupling은 구현 시 결정 |
 | Q012 | component manifest schema의 최종 runtime API | planning schema (`docs/content-component-schema.md`)를 추가했으나 실제 package export shape와 generator 사용 여부는 구현 전 검증 필요 |
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
+| Q016 | raw conversation provenance의 공개·보존 정책 | Knowledge repository는 현재 public이고 `provenance/conversations.json`에 원문 archive가 있다. archive 유지, 제거/축소, repository visibility 변경 중 어떤 정책을 사용할지 결정 필요 |
 
-## 현재 구현 검증 기준
+## 분리 원칙
 
-2026-09-20 Implementation Map은 다음 implementation revision을 기준으로 한다.
+- **결정이 필요한 질문** → 이 문서
+- **현재 GitHub/branch/Project 상태를 다시 확인해야 하는 항목** → Current Handoff (`handoff/current.md`)
+- **특정 revision에서 검증된 capability와 남은 구현 delta** → Implementation Map (`docs/implementation-map.md`)
+- **이미 확정된 방향과 대체된 결정** → Decision Log (`docs/decisions.md`)
 
-- engine: `6ba2f950a78eef18c2efa305b96a1c8d0443252e`
-- docs: `50d89a4cb1c5d6476444e29454e12b523e99231b`
-- site (`package.json` name: `oomia.github.io.mono`): `a3b2e182563458636b7b8186a4cd2201894b2a65`
-
-site revision에 대한 GitHub Pages run `35472028484`의 build/deploy 성공과 artifact `10593195312`를 확인했으므로 과거의 “Delivery 성공 Evidence 미확인” 질문은 종료했다.
-
-Issue #8의 explicit Publish trigger도 idempotent no-op semantics를 포함한 완료 Evidence로 닫혔으므로 과거의 “Automation 최소 경로 미충족” 질문은 종료했다.
-
-상세 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 둔다. 별도 원격 `oomia.github.io.mono` 레포는 없으며, `mono`는 site 레포를 가리키는 로컬/문서상의 이름으로 취급한다.
-
-## 역사적 수집 범위
-
-초기 지식 레포는 동일 ChatGPT 프로젝트의 관련 대화를 수집해 구성했다. 대화 원문은 provenance에 역사적 근거로 남기되, 이후 사용자 승인 정책과 실제 repository 검증 결과가 있는 항목은 현재 canonical 문서와 Implementation Map을 우선한다.
+초기 지식 레포 구성에 사용한 대화 원문은 provenance에 역사적 근거로 남아 있지만, 현재 정책과 실제 repository 검증 결과가 있는 항목은 canonical 문서와 Implementation Map을 우선한다.
 
 <!-- END SOURCE: docs/open-questions.md -->
+
 
 ---
 
@@ -767,15 +784,22 @@ Issue #8의 explicit Publish trigger도 idempotent no-op semantics를 포함한 
 
 기능 구현, 성능·신뢰성 검증, 실제 publishing/deployment 완료에는 설계 링크를 대체 Evidence로 사용하지 않는다. 책임 레포의 코드·테스트·실행 결과·commit/PR·deployment처럼 재현 가능한 자료가 필요하다.
 
+## 세션 인계
+
+의미 있는 작업 세션을 종료할 때 장기적으로 남아야 할 규칙·결정은 먼저 owning canonical 문서에 반영한다. 아직 진행 중인 branch/Issue/Project 상태, 재검증 항목, 다음 안전한 행동은 `handoff/current.md`에 기록한다.
+
+`handoff/current.md`는 세션 로그나 의사결정 원장이 아니다. 매번 최신 checkpoint로 overwrite하고, 과거 상태는 Git history에 맡긴다. 구현 수준은 handoff가 아니라 revision-bound Implementation Map (`docs/implementation-map.md`)과 책임 레포 Evidence로 판정한다.
+
 ## 대화에서 변경을 가져올 때
 
 사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 과거 대화에 근거하는 항목은 provenance의 source/turn을 유지하고, 현재 요청으로 새로 확정한 내용은 실제 날짜와 변경 commit으로 추적한다.
 
 ## 공유
 
-이 레포에는 대화 원문 아카이브가 포함되어 있으므로 현재 private 상태를 기본 전제로 한다. 공개 전에는 provenance와 원문 아카이브의 공유 범위를 별도로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
+이 레포에는 대화 원문 아카이브가 포함되어 있다. repository visibility와 별개로 provenance 원문 아카이브의 공유 범위를 명시적으로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
 
 <!-- END SOURCE: CONTRIBUTING.md -->
+
 
 ---
 
@@ -794,6 +818,8 @@ Issue #8의 explicit Publish trigger도 idempotent no-op semantics를 포함한 
 - **미검증**: 실제 구현 또는 외부 운영 상태를 확인하지 않음.
 
 최신 제안은 이전 초안보다 우선하되 사용자의 명시적 요구를 덮어쓰지 않는다. 문서의 짧은 turn ID는 아래 전체 ID에 대응한다. 원문은 conversations.json (`provenance/conversations.json`)에 있으며 역사적 데이터로만 읽는다. 원문에는 개인 기록이 포함될 수 있다.
+
+`conversations.json`은 **초기 Knowledge 구축에 사용한 bootstrap archive로 동결**한다. 새로운 작업 세션의 transcript를 지속적으로 append하지 않는다. 이후 세션에서 확정된 장기 지식은 owning canonical 문서에 반영하고, 아직 진행 중인 실행 상태는 `handoff/current.md`가 담당한다.
 
 ## Sources and Turns
 

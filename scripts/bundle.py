@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
+# handoff/current.md is intentionally excluded: the bundle carries durable context, not live session state.
 ORDER = [
     'CONTEXT.md', 'docs/architecture.md', 'docs/content-authoring-contract.md',
     'docs/content-component-schema.md', 'docs/planning-model.md',
@@ -29,7 +30,7 @@ def main():
         raise SystemExit('\n'.join(errors))
     parts = ['# Publishing Platform — Chat Context Bundle\n\n'
              'GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.\n'
-             '생성 기준일: 2026-09-20. Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
+             'Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
              '상대 링크는 원본 레포 기준입니다. JSON Schema, 템플릿과 대화 원문 아카이브는 별도로 참조합니다.\n']
     for name in ORDER:
         content = (ROOT / name).read_text()

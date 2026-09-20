@@ -2,10 +2,11 @@
 
 구조화된 콘텐츠를 명시적인 authoring·extension·publishing 계약을 통해 커스터마이징 가능한 실제 사이트로 전달한다.
 
-이 private repository는 Publishing Platform의 **제품·아키텍처·계획 지식에 대한 canonical source**다. 구현 코드와 GitHub Project의 실시간 작업 상태는 각 소유 위치에서 관리한다.
+이 repository는 Publishing Platform의 **제품·아키텍처·계획 지식에 대한 canonical source**다. 구현 코드와 GitHub Project의 실시간 작업 상태는 각 소유 위치에서 관리한다.
 
 ## 시작하기
 
+- 이어받기: 진행 중인 작업은 [Current Handoff](handoff/current.md)에서 시작하고 live 상태를 재검증한다.
 - Agent: [CONTEXT.md](CONTEXT.md)를 읽고 작업에 필요한 원본 문서만 참조한다.
 - Chat: `python3 scripts/bundle.py`로 생성한 [CONTEXT-BUNDLE.md](dist/CONTEXT-BUNDLE.md)를 첨부한다.
 - 수정: 해당 규칙을 소유하는 Markdown을 직접 고치고 [변경 방법](CONTRIBUTING.md)을 따른다.
