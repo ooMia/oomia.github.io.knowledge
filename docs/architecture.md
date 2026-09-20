@@ -20,7 +20,7 @@
 |---|---|
 | `oomia.github.io.engine` | canonical content를 다루는 authoring 환경과 CMS adapter, persistence 접근, publishing workflow orchestration |
 | `oomia.github.io.docs` | downstream이 소비할 계약된 generated document set |
-| `oomia.github.io` | generated documents를 소비해 사이트를 빌드하고 GitHub Pages로 전달하며, 공식 Article MDX content component의 rendering implementation을 소유 |
+| `oomia.github.io` | generated documents와 public content-component package를 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 
 `mono`는 사용자가 로컬에서 붙인 별칭이며 실제 레포 이름의 일부가 아니다. docs는 현재 engine과 site 사이의 generated projection으로 사용된다.
 
@@ -54,30 +54,34 @@ Authoring surface는 canonical content의 adapter다.
 
 ## Official MDX component boundary
 
-공식 Article MDX component의 계약은 Site repository에서 소스 변경을 소유하고, versioned public content-component package를 통해 공유하는 방향을 canonical architecture로 둔다.
+공식 content component의 canonical source와 package release는 Engine/Site와 **독립된 repository**가 소유한다. public artifact는 npm organization scope의 `@oomia/content-components`다.
 
 ```text
-                 public content-component package
-                     contract + implementation
-                         /             \
-                        /               \
-               Engine / CMS          Site
-              authoring adapter   rendering consumer
+              @oomia/content-components
+        independent source + versioned release
+              /                    \
+             /                      \
+   framework-neutral             React renderer
+   contract / manifest           implementation
+          |                           |
+          v                           v
+     Engine / CMS                    Site
+   builder / adapter            webpage renderer
 ```
 
 책임은 다음과 같이 나눈다.
 
-- **Site repository**: component source, rendering implementation, public component contract 변경을 소유한다.
-- **Site**: package의 runtime implementation을 사용한다.
-- **Engine**: rendering implementation에 직접 결합하지 않고 exported type/runtime contract를 참조해 Payload authoring adapter를 구성한다.
+- **Content-component repository**: component semantics, public contract, manifest, React rendering implementation과 package version/release를 소유한다.
+- **Site**: React renderer surface를 소비해 generated content를 실제 웹페이지로 렌더링한다. Site가 어떤 framework를 사용하는지는 public component contract의 전제가 아니다.
+- **Engine**: renderer implementation에 결합하지 않고 framework-neutral contract/manifest를 참조해 CMS editor, validation, builder integration을 구성한다.
 - **Visual adapter**: 공식 component의 편집 편의를 제공하지만 존재 여부가 publishability를 결정하지 않는다.
 - **Publishing**: package compatibility와 실제 Site consumer build를 최종 gate로 사용한다.
 
-초기 public package 분리는 **Site 단독 변경으로 먼저 진행할 수 있다.** Engine/CMS가 package contract를 실제로 소비하는 변경은 별도 consumer change로 취급하며, canonical authoring/save-path 변경과 같은 Issue나 branch에 묶지 않는다.
+public package는 source 수준에서 React/TypeScript로 구현하되 **contract surface가 React를 import하지 않도록 분리**한다. React renderer는 framework-specific runtime surface이며 `react`를 host와 공유하는 peer dependency로 취급한다. `.astro` 파일은 public component implementation에 사용하지 않는다.
 
-public package 안에서도 **framework-neutral contract surface**와 renderer-specific implementation surface를 분리한다. TypeScript contract와 machine-readable manifest는 Astro/React/Payload 구현을 import하지 않고 독립적으로 소비할 수 있어야 한다. Site renderer는 별도 renderer export를 사용할 수 있고, Engine/CMS adapter는 rendering implementation에 의존하지 않는다.
+React source를 별도의 framework-independent DOM 구현으로 자동 변환하는 것은 초기 계약에 포함하지 않는다. 비-React renderer 수요가 실제로 생기면 별도 renderer surface(Web Components 등)를 추가할 수 있으나, 현재 Site/Engine 요구를 위해 이중 구현을 선행하지 않는다.
 
-현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 그대로 공개 계약으로 승격하지 않는다. Article MDX에서 허용할 content component surface는 일반 Site UI와 별도 경계로 둔다. 실제 package name, registry, release transport는 구현 단계에서 확정한다.
+현재 `@workspace/ui`처럼 Site 전체 UI를 담는 package를 공개 계약으로 승격하지 않는다. document/content 영역에서 사용되는 component surface만 독립 package로 둔다. exact subpath exports, initial version, release trigger와 pre-1.0 compatibility policy는 구현 전 확정한다.
 
 ## Contract surfaces
 
