@@ -2,6 +2,7 @@
 
 ## 2026-09-20
 
+- Engine #13과 병행 가능한 Site-owned public content-component package 작업을 분리하고, framework-neutral contract surface와 renderer-specific surface의 독립 import 경계를 명문화. Site draft Issue #9로 추적하며 registry/package/version/release 결정은 Q011에 유지.
 - 프로젝트 전 세션에 공통 적용할 Chat/Agent 협업 규칙을 `CONTEXT.md`에 추가: 단계적 실행, 사용자 결정 지점에서 중단, 핵심 GitHub 객체 최초 언급 시 링크 사용, 비핵심 검증의 비차단 원칙.
 - Knowledge의 raw conversation transcript 보존을 중단하고 `provenance/conversations.json` 제거 결정(D017). provenance는 source/turn metadata와 최소 요약만 유지하고 세션 연속성은 `handoff/current.md`가 담당.
 - 세션 간 live 상태를 canonical knowledge와 분리하기 위해 `handoff/current.md` checkpoint를 도입하고 Open Questions의 운영 확인 항목을 이동.
