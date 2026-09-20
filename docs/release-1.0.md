@@ -10,9 +10,9 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
-| Authoring | 선택된 authoring workflow가 자유로운 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. Obsidian은 primary candidate이고 Fumadocs Editor는 component-aware visual candidate이며, 최종 editor 선택은 실제 corpus integration evidence로 결정한다. |
-| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. 특정 subtree에 consumer-specific convention을 둘 수 있지만 docs repository 전체에 단일 Article/path schema를 강제하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
-| Extensibility | Fumadocs built-in content component를 우선 재사용하고 custom component가 필요한 경우 source semantics와 editor/renderer integration을 명시할 수 있다. Visual adapter 유무가 canonical support를 결정하지 않는다. |
+| Authoring | 선택된 authoring workflow가 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. 기존 corpus는 Obsidian 기반이므로 basic Obsidian compatibility는 전제하고, Fumadocs Editor의 custom-component/structured authoring 이점까지 비교해 editor 역할을 결정한다. |
+| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. docs layout은 free-form, discovery-based, strict convention 중 구현 목적에 맞게 선택할 수 있으며 1.0 설계가 사전에 한 형태를 금지하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
+| Extensibility | Fumadocs built-in component를 우선 재사용하고 Oomia-specific custom component가 필요한 경우 source semantics와 Site/editor integration을 명시할 수 있다. Fumadocs Editor의 custom component spec은 유력한 authoring extension 후보지만 필수로 선결하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
 | Publishing | local workspace를 검증하고 실제 Site consumer build를 통과시킨 뒤 canonical docs revision으로 확정한다. DB → Markdown export나 Visual Editor codec round-trip을 publish prerequisite로 요구하지 않는다. |
 | Presentation | Site가 canonical docs revision의 Markdown/MDX를 렌더링한다. Fumadocs UI/content tooling을 우선 재사용하되 Site framework 자체는 implementation detail이다. |
