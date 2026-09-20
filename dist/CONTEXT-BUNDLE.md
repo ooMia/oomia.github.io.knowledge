@@ -749,6 +749,7 @@ D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & P
 | Q013 | 외부 Markdown/MDX import 시 frontmatter와 canonical structured metadata의 매핑 | body raw source 원칙은 확정. imported frontmatter를 DB field로 흡수할지, import-only contract로 둘지 미결 |
 | Q014 | raw HTML 및 asset resolution의 구체적인 publish security/portability policy | Source 저장은 허용하는 방향. 어떤 HTML/asset reference를 consumer가 허용할지는 site contract에서 구체화 필요 |
 | Q015 | 공식 MDX component의 rich Markdown/MDX children 범위 | manifest는 children model을 표현할 수 있게 계획했으나 1.0 component별 실제 허용 범위는 implementation에서 결정 |
+| Q016 | raw conversation provenance의 공개·보존 정책 | Knowledge repository는 현재 public이고 `provenance/conversations.json`에 원문 archive가 있다. archive 유지, 제거/축소, repository visibility 변경 중 어떤 정책을 사용할지 결정 필요 |
 
 ## 분리 원칙
 
@@ -795,7 +796,7 @@ D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & P
 
 ## 공유
 
-이 레포에는 대화 원문 아카이브가 포함되어 있으므로 현재 private 상태를 기본 전제로 한다. 공개 전에는 provenance와 원문 아카이브의 공유 범위를 별도로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
+이 레포에는 대화 원문 아카이브가 포함되어 있다. repository visibility와 별개로 provenance 원문 아카이브의 공유 범위를 명시적으로 검토한다. Chat에 필요한 기본 첨부물은 원문 아카이브를 포함하지 않는 `dist/CONTEXT-BUNDLE.md`다.
 
 <!-- END SOURCE: CONTRIBUTING.md -->
 
