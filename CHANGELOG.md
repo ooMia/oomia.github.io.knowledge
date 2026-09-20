@@ -2,6 +2,12 @@
 
 ## 2026-09-21
 
+- 급진적 architecture 변경의 context-switch 비용을 줄이기 위해 [Architecture Transition](docs/architecture-transition.md)을 Active migration directive로 추가하고 Engine/Site/Docs의 stop/keep/adapt/retire 규칙, phased migration, #13/#14 처리 기준을 명문화.
+- CONTEXT/AGENTS/README/Project README template에서 migration 작업이 transition guide를 먼저 읽도록 routing을 변경.
+- Project Fields의 Persistence/Publishing/Publishable Projection 정의를 Git-backed workspace와 canonical docs revision 기준으로 수정하고, field name `Publishable Projection`이 generated docs ownership을 뜻하지 않음을 명시.
+- Labels의 stale `docs = generated projection` 전제를 제거하고 docs repository-level migration Issue에도 orchestration labels를 적용할 수 있게 정리.
+- Planning Model의 SoT에 local working tree와 durable docs Git revision을 추가하고 Active transition 중 Item이 migration safety rule을 따르도록 명시.
+- D025로 새 vertical slice 검증 전 big-bang legacy 제거를 금지하고, 기존 Issue/branch를 현재 Knowledge와 reconcile한 뒤 진행하도록 결정.
 - canonical content architecture를 Git-backed local filesystem workspace로 전환하고 `ooMia/oomia.github.io.docs`를 generated projection에서 durable canonical content remote로 승격(D021).
 - 1.0 authoring client를 Obsidian + Fumadocs Editor로 확정하고 Engine을 Payload/PostgreSQL CMS가 아닌 workspace validation/Git/publishing orchestrator로 재정의(D022).
 - publishing을 DB snapshot/export에서 workspace validation → Site consumer verification → docs commit/push/revision linkage로 변경(D023).
