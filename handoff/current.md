@@ -7,11 +7,12 @@ Updated: 2026-09-20 (Asia/Seoul)
 ## Active work
 
 - Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13)은 별도의 Codex 앱에서 구현 중이며, 현재 사용량 제한으로 해당 실행이 중단된 상태다.
-- 이 Chat 세션에서는 #13의 branch/code를 수정하지 않는다. 원격 [Issue #13 branch](https://github.com/ooMia/oomia.github.io.engine/tree/13-feat-decouple-canonical-source-from-visual-editor-constraints)가 아직 기존 SHA를 가리키더라도 Codex 로컬에 미push 변경이 있을 수 있으므로 **원격 identical 상태를 구현 미착수의 증거로 사용하지 않는다.**
-- 병행 작업은 Site의 [draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9) `draft: feat: establish public content-component package`다.
-- Issue #9는 `closed / not_planned` draft candidate이며 아직 Development branch와 Project activation을 만들지 않았다.
-- Site의 public content-component package boundary를 먼저 준비하고, Engine/CMS adoption은 #13과 충돌하지 않는 후속 consumer change로 분리한다.
-- 사용자 결정이 필요한 현재 gate는 Open Questions Q011의 registry / package name / initial version / release transport / compatibility policy다.
+- 이 Chat 세션에서는 #13의 branch/code를 수정하지 않는다. Codex 로컬에 미push 변경이 있을 수 있으므로 원격 상태를 구현 미착수의 증거로 사용하지 않는다.
+- 병행 작업의 canonical 방향은 **독립 content-component repository + public npm `@oomia/content-components`**다.
+- Site [draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9)는 이전 Site-owned package 안을 기록한 superseded draft이며 활성화하지 않는다.
+- package는 framework-neutral contract/manifest와 React renderer surface를 분리한다. public implementation에는 `.astro`를 사용하지 않는다.
+- Site는 React renderer consumer, Engine/CMS는 framework-neutral contract/manifest consumer다.
+- 현재 결정 gate는 Open Questions Q011/Q012/Q016: initial version/release/compatibility, exact subpath exports, 독립 GitHub repository owner/name/visibility다.
 
 ## Verified repository state
 
@@ -151,11 +152,12 @@ Updated: 2026-09-20 (Asia/Seoul)
 
 ## Next safe action
 
-1. public content-component package의 Q011 결정을 확정한다: registry, package scope/name, initial version, release trigger/transport, 최소 semantic compatibility policy.
-2. 결정은 Knowledge의 owning canonical 문서와 Decision Log에 반영한다.
-3. [Site draft Issue #9](https://github.com/ooMia/oomia.github.io/issues/9)를 활성화하고, activation automation이 만드는 Development branch에서 Site-only 구현을 시작한다.
-4. 첫 구현은 현재 `Callout` 하나를 기준으로 framework-neutral contract + manifest와 renderer surface의 package boundary를 증명한다.
-5. Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13) branch는 건드리지 않는다. Engine/CMS package adoption은 #13 상태를 재확인한 뒤 별도 Issue/PR로 진행한다.
+1. 독립 repository의 GitHub owner/name/visibility를 확정한다. 우선 후보는 public [`ooMia/content-components`](https://github.com/ooMia/content-components)다.
+2. package export surface를 확정한다. 현재 우선 설계는 framework-neutral root contract + React renderer subpath + manifest subpath다.
+3. initial version과 pre-1.0 compatibility policy, release trigger/transport를 확정한다.
+4. repository를 생성한 뒤 기존 프로젝트의 generic orchestration Action/branch 규칙 중 재사용 가치가 있는 부분만 이관한다.
+5. 첫 vertical slice는 새 repository에서 `Callout`을 새로 구현하고 package pack/install → Site consumer integration을 검증한다.
+6. Engine package adoption은 Engine Issue [#13](https://github.com/ooMia/oomia.github.io.engine/issues/13)의 실제 구현 상태를 재확인한 뒤 별도 consumer change로 진행한다.
 
 ## Deferred housekeeping
 
