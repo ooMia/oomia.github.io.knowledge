@@ -24,14 +24,14 @@ IDE / Agent ───────┘             │ validate / commit / push
 
 핵심 결정:
 
-- canonical content는 Markdown/MDX + frontmatter/assets인 Git-backed filesystem workspace다.
+- canonical content는 Git-backed filesystem document workspace다. docs repository는 특정 app/layout을 강제하지 않는 자유로운 directory tree이며 consumer-specific convention만 최소로 둘 수 있다.
 - local working tree는 draft/authoring state다.
 - [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 Git commit이 durable shared canonical revision이다.
-- Obsidian과 Fumadocs Editor가 동일 workspace를 직접 편집한다.
+- editor는 아직 확정하지 않는다. Obsidian은 primary candidate, Fumadocs Editor는 component-aware visual candidate이며 실제 기존 content corpus integration으로 역할을 결정한다.
 - [Engine](https://github.com/ooMia/oomia.github.io.engine)은 DB-backed CMS가 아니라 validation / Git / publishing orchestration을 담당하는 containerizable runtime으로 단순화한다.
 - Payload/PostgreSQL/Lexical은 target architecture가 아니라 legacy implementation/Evidence다.
 - publishing은 DB → Markdown projection이 아니라 workspace validation → Site consumer verification → docs commit/push → revision linkage다.
-- Fumadocs built-in component/tooling을 우선 사용한다.
+- Fumadocs UI/Core/MDX는 Site에서 우선 재사용한다. authoring syntax는 Obsidian-friendly Markdown/callout/plugin bridge까지 함께 비교한다.
 - 독립 `@oomia/content-components` React library bootstrap 계획은 1.0 선행 과제에서 제거했다. custom component 공유 수요가 생기면 얇은 profile/package를 다시 검토한다.
 
 Canonical references:
@@ -93,11 +93,12 @@ Issue #13의 기존 AC 상당수는 filesystem model에서 구조적으로 해�
 다음 구현에서 확인할 사항:
 
 - current docs tree와 기존 generated artifacts
-- canonical content directory layout
-- frontmatter schema
+- 기존 docs tree의 자유도를 유지하면서 Site/Engine이 실제로 요구하는 최소 path convention
+- publishable subtree에서 필요한 frontmatter schema
 - assets location/reference policy
-- local clone을 Obsidian vault로 직접 사용할 수 있는지
-- Fumadocs Editor가 같은 workspace를 안전하게 편집하는지
+- 기존 작성 content corpus를 local clone/Obsidian vault로 그대로 가져왔을 때의 호환성
+- Obsidian CSS snippets/custom callout/plugin extension으로 필요한 authoring UX를 어디까지 해결할 수 있는지
+- Fumadocs Editor가 별도 component-aware editor로 실제 필요한지
 - Site가 docs revision을 어떤 방식(submodule/checkout 등)으로 소비하는지
 - publish 시 commit/push를 Engine이 수행할지 사용자 Git action을 입력으로 받을지
 
@@ -121,9 +122,12 @@ Issue #13의 기존 AC 상당수는 filesystem model에서 구조적으로 해�
 
 - Engine container image / mount / Git credential contract
 - asset policy
-- `.md` vs `.mdx` 및 directory convention
+- consumer subtree의 `.md` vs `.mdx` 및 최소 path convention
 - Git publish semantics: auto commit/push vs user-managed commit
-- Fumadocs Studio standalone vs embedded Editor UI
+- 실제 editor 역할: Obsidian primary-only / Obsidian + optional Fumadocs Editor / Fumadocs-heavy
+- Obsidian source syntax ↔ Fumadocs Site UI bridge 방식
+- Fumadocs Editor 채택 시 Studio standalone vs embedded UI
+- Engine/Site in-place migration vs greenfield rebuild
 - raw HTML / executable MDX security policy
 - custom component shared manifest/package가 실제로 필요한 시점
 
@@ -131,17 +135,14 @@ Issue #13의 기존 AC 상당수는 filesystem model에서 구조적으로 해�
 
 다음 세션은 **코드 삭제나 중단된 #13 구현 재개부터 시작하지 않는다.** 먼저 Architecture Transition의 Phase A/B를 수행한다.
 
-1. [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 현재 tree와 Site consumption path를 live로 조사한다.
-2. 최소 canonical workspace fixture를 정의한다.
-   - frontmatter
-   - Markdown
-   - Fumadocs built-in component 1개
-   - image/asset
-   - intentionally broken draft
-3. 같은 checkout을 Obsidian과 Fumadocs Editor에서 편집하는 spike의 AC를 만든다.
-4. 현재 Engine에서 새 flow에 재사용할 generic publishing/evidence code와 Payload-specific code를 분류한다.
-5. #13/#14 및 기존 Project Item을 새 architecture에 맞게 supersede/re-scope한다.
-6. 그 이후에만 Payload/PostgreSQL 제거와 workspace-oriented Engine 구현 Issue를 활성화한다.
+1. [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 현재 tree와 Site consumption path를 live로 조사한다. fixed layout을 설계하기보다 현재 자유도를 먼저 기록한다.
+2. 사용자가 이미 작성한 실제 content corpus를 docs working tree로 import하여 integration corpus로 사용한다.
+3. 같은 corpus로 Obsidian authoring UX를 먼저 검증한다: Properties, Live Preview, CSS snippets/custom callout, links/assets, unsupported syntax preservation.
+4. Site에서 Fumadocs UI/Core/MDX를 붙이고 Obsidian-friendly Markdown을 remark/rehype adapter로 richer UI에 mapping할 수 있는지 검증한다.
+5. 그 결과로 Fumadocs Editor가 실제로 필요한 component-aware gap이 있는지 판단한다.
+6. 현재 Engine/Site에서 새 flow에 재사용할 generic code를 `keep/adapt/retire`로 분류하고, repository별 in-place vs greenfield 비용을 비교한다.
+7. #13/#14 및 기존 Project Item을 새 architecture와 editor decision gate에 맞게 supersede/re-scope한다.
+8. 그 이후에만 target implementation과 legacy retirement를 시작한다.
 
 ## Reverify before live mutations
 
@@ -157,7 +158,8 @@ Issue #13의 기존 AC 상당수는 filesystem model에서 구조적으로 해�
 - Payload/PostgreSQL이 여전히 target architecture라고 가정하지 않는다.
 - docs repository를 generated projection이라고 부르지 않는다.
 - uncommitted local files를 durable canonical revision과 동일시하지 않는다.
-- Fumadocs Editor가 모든 MDX syntax를 visual edit할 수 있다고 가정하지 않는다.
+- Fumadocs Editor가 필수 editor라고 가정하지 않는다.
+- Obsidian의 CSS customization이 arbitrary MDX semantics까지 제공한다고 가정하지 않는다.
 - Obsidian-specific syntax/plugin state를 자동으로 Site-supported canonical syntax로 간주하지 않는다.
 - standalone `@oomia/content-components` package를 이미 필요한 dependency라고 가정하지 않는다.
 - 이전 #13 구현 가설을 현재 next action으로 사용하지 않는다.
