@@ -2,6 +2,12 @@
 
 ## 2026-09-21
 
+- canonical content architecture를 Git-backed local filesystem workspace로 전환하고 `ooMia/oomia.github.io.docs`를 generated projection에서 durable canonical content remote로 승격(D021).
+- 1.0 authoring client를 Obsidian + Fumadocs Editor로 확정하고 Engine을 Payload/PostgreSQL CMS가 아닌 workspace validation/Git/publishing orchestrator로 재정의(D022).
+- publishing을 DB snapshot/export에서 workspace validation → Site consumer verification → docs commit/push/revision linkage로 변경(D023).
+- Fumadocs built-in component/editor capability를 우선 재사용하며 독립 `@oomia/content-components` React library bootstrap을 1.0 선행 과제에서 제거(D024).
+- Release 1.0, Content Authoring Contract, Implementation Map, Open Questions, Project Orchestration, README/CONTEXT/handoff를 새 filesystem architecture에 맞춰 재정렬.
+- custom component JSON Schema를 package 중심 manifest에서 deferred cross-repository profile schema로 일반화.
 - public `ooMia/content-components` source repository, npm `@oomia/content-components`, React renderer + framework-neutral contract/manifest, optional `styles.css` styling contract를 확정(D018–D020).
 - initial version `0.1.0`, public subpaths root / `./react` / `./manifest` / `./styles.css`, pre-1.0 breaking change는 minor version 정책으로 시작.
 
