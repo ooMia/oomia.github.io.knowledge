@@ -2,7 +2,7 @@
 
 기준일: 2026-09-21. 이 문서는 Publishing Platform 1.0의 **현재 Product Boundary**를 기존 검증 revision과 대조한 revision-bound snapshot이다.
 
-2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem workspace + Obsidian + Fumadocs Editor**로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
+2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + editor/integration 재검토**로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
 
 ## 기준 revision
 
@@ -33,9 +33,10 @@ Site
 현재 target:
 
 ```text
-Obsidian / Fumadocs Editor
+Obsidian / Fumadocs Editor / IDE
           ↓
-local Git content workspace
+local Git document workspace
+(editor role under evaluation)
           ↓
 validation + commit/push
           ↓
@@ -53,9 +54,9 @@ Site
 
 | Capability | 상태 | 현재 Evidence | 새 target에 남은 delta |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 동일 Git workspace를 Obsidian과 Fumadocs Editor에서 편집하는 workflow, external edit interoperability, source fallback을 검증해야 한다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. frontmatter metadata, workspace layout, Git revision semantics를 구현하고 DB dual-SoT를 제거해야 한다. |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Fumadocs built-in component 우선 정책으로 재구성하고, 필요한 custom component만 Editor spec + Site semantics로 검증한다. 별도 component package는 실제 필요 전까지 만들지 않는다. |
+| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 작성 content corpus를 실제 docs workspace에 import하고 Obsidian 중심 workflow와 Fumadocs Editor의 component-aware workflow를 비교해야 한다. 핵심 Evidence는 source preservation, authoring UX, Site/Fumadocs rendering integration 비용이다. Payload Admin 성공은 새 target 완료 Evidence가 아니다. |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동해야 한다. docs 전체를 단일 application layout으로 고정하지 않고 consumer-specific subtree/path convention만 최소화하며 Git revision semantics를 확정해야 한다. |
+| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Obsidian-native callout/CSS/plugin extension과 Fumadocs MDX/custom component 중 source portability가 더 높은 경로를 실제 corpus로 비교한다. Fumadocs built-in/UI는 Site에서 우선 재사용하되 별도 component package는 실제 필요 전까지 만들지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | trigger를 Payload endpoint에서 Git workspace publish action으로 옮기고 validation→commit/push→Site verification 흐름을 재검증해야 한다. |
 | Publishing | **부분 충족** | DB snapshot을 docs repo에 반영하고 실제 Site sync/lint/test/typecheck/build를 통과시키는 workflow가 있다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate를 제거하고 canonical workspace 자체를 검증한 뒤 docs commit으로 확정하는 publish path가 필요하다. 기존 downstream Site verification은 재사용 가능성이 높다. |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | Fumadocs UI/content tooling 도입은 UX/DX 개선 과제로 진행할 수 있으나 canonical docs content를 렌더한다는 1.0 기본 결과는 이미 충족한다. |
@@ -87,15 +88,17 @@ Site
 
 우선순위는 다음과 같다.
 
-1. **Workspace Contract**
+1. **Workspace / Docs Contract**
    - docs repository를 canonical content remote로 재정의
-   - local checkout/mount 위치와 directory/frontmatter contract 정의
+   - docs tree의 자유도를 보존하고 consumer-specific path/frontmatter convention만 필요한 범위에 한정
    - working tree draft vs committed canonical revision 구분
 
-2. **Authoring Clients**
-   - 동일 fixture를 Obsidian과 Fumadocs Editor에서 편집
-   - create/update/rename/delete, frontmatter, external edit, unsupported source preservation 확인
-   - 필요 최소 수준에서만 Engine shell 추가
+2. **Authoring + Site Integration**
+   - 기존 작성 content corpus를 docs workspace에 import
+   - Obsidian의 source/file UX, Properties, Live Preview, CSS snippets/custom callout/plugin extension 검증
+   - Fumadocs Editor의 MDX/component-aware visual editing 이점과 비용 비교
+   - Obsidian-friendly Markdown → Fumadocs Site UI transformation을 remark/rehype adapter로 구현 가능한지 검증
+   - 최종 editor 역할을 evidence로 결정
 
 3. **Engine Simplification**
    - Payload/PostgreSQL 의존 경로를 target implementation에서 제거
@@ -108,12 +111,17 @@ Site
    - docs commit/push와 revision linkage
    - idempotent publish semantics
 
-5. **Fumadocs Integration**
-   - Fumadocs Editor component support
-   - Site에서 Fumadocs UI/content tooling을 재사용할 범위 검증
+5. **Fumadocs / Obsidian Integration**
+   - Site에서 Fumadocs UI/Core/MDX를 재사용할 범위 검증
+   - Obsidian-native source syntax를 Site에서 richer UI로 변환하는 plugin/remark boundary 검증
+   - Fumadocs Editor가 실제로 필요한 component-aware editing gap만 식별
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
-6. **Regression / Migration**
+6. **Migration strategy decision**
+   - Engine/Site 각각 in-place refactor와 greenfield rebuild 비용 비교
+   - keep/adapt/retire 비율과 dependency graph를 근거로 선택
+
+7. **Regression / Migration**
    - legacy DB content가 있다면 canonical files로 일회성 migration
    - 기존 Site delivery chain 유지
    - obsolete Payload/PostgreSQL code와 infra 제거
