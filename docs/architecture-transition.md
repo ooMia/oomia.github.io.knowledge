@@ -82,10 +82,11 @@ IDE / Agent ───────┘             │ validate / commit / push
 
 ### Authoring
 
-- editor는 아직 확정하지 않는다. Obsidian은 broad file/Markdown UX의 primary candidate이고, Fumadocs Editor는 MDX/custom-component-aware visual editing candidate다.
-- 핵심 검증 대상은 두 editor를 모두 필수로 만드는 것이 아니라, 동일 docs workspace를 authoring tool과 Site가 손실 없이 공유하는 integration framework다.
-- Fumadocs Editor가 표현하지 못하는 source 때문에 canonical syntax 범위를 줄이지 않는다.
+- editor는 아직 확정하지 않는다. 기존 content corpus가 이미 Obsidian 기반이므로 Obsidian의 기본 file/Markdown authoring 가능성은 검증 대상이 아니다.
+- 핵심 검증 대상은 Fumadocs Site integration과, custom component 주입·structured editing 관점에서 Fumadocs Editor가 Obsidian보다 실질적으로 유리한지 여부다.
+- 동일 docs workspace를 editor와 Site가 불필요한 conversion 없이 공유해야 한다.
 - Source-level editing은 Obsidian/IDE/Agent로 항상 가능해야 한다.
+- Obsidian-native custom syntax/style bridge는 1.0 핵심 과제로 만들지 않는다.
 - full CMS나 자체 editor framework를 직접 재구현하지 않는다.
 
 ### Engine
@@ -128,9 +129,9 @@ Docs repository는 ownership이 가장 크게 바뀐다.
 > generated document projection
 
 현재:
-> 자유롭게 변형 가능한 document directory/tree + durable Git revision history
+> 구현 목적에 따라 layout을 자유롭게 선택할 수 있는 document repository + durable Git revision history
 
-Docs는 특정 `content/` path, Article schema, route 구조를 repository 전체에 강제하지 않는다. Site/Engine 같은 consumer가 필요한 subtree/path convention은 정의할 수 있지만 이는 consumer contract다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
+Docs는 완전 자유 tree, consumer별 discovery convention, strict repository-wide layout을 모두 허용한다. 어떤 형태를 채택할지는 Site/Fumadocs integration과 유지보수 비용을 보고 결정한다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
 
 ## 4. Repository별 migration impact
 
@@ -238,21 +239,20 @@ Site 구현자가 과거 component-package 계획을 보고 별도 library부터
 - Site의 docs consumption 방식 조사
 - 현재 publish workflow에서 generic 부분과 Payload coupling 분리
 
-### Phase B — Prove the authoring/rendering integration
+### Phase B — Prove the Fumadocs/Site integration
 
-synthetic 최소 fixture를 먼저 설계하지 않는다. 기존에 작성한 실제 content corpus를 docs workspace로 import하여 다양한 Markdown 구조, frontmatter, links, assets, code blocks, legacy syntax를 한 번에 노출시킨다.
+synthetic 최소 fixture보다 기존에 Obsidian으로 작성한 실제 content corpus를 우선 사용한다. Obsidian authoring 자체는 이미 검증된 전제이므로, spike는 다음 불확실성에 집중한다.
 
-검증 목표:
+- 기존 corpus를 Fumadocs UI/Core/MDX 기반 Site에서 얼마나 자연스럽게 소비할 수 있는가
+- custom component가 필요할 때 Site와 authoring 측에서 주입/편집 경험이 어떤가
+- Fumadocs Editor가 custom component authoring을 충분히 단순화해 별도 editor로 채택할 가치가 있는가
+- Obsidian을 primary editor로 유지해도 source와 Site rendering contract가 충분히 단순한가
+- docs layout을 free-form/discovery-based로 유지하는 편과 strict convention을 도입하는 편 중 어느 쪽이 실제 integration을 단순화하는가
+- external edits/source round-trip에서 의미 없는 normalization이나 data loss가 발생하지 않는가
 
-- existing corpus를 Obsidian vault로 열었을 때 별도 migration 없이 유용한 authoring UX가 나오는가
-- Obsidian의 Properties / Live Preview / CSS snippets / custom callout만으로 필요한 visual authoring 수준을 어디까지 충족하는가
-- arbitrary MDX/custom component가 필요할 때 Obsidian plugin extension과 Fumadocs Editor 중 어느 쪽이 더 단순한가
-- Fumadocs UI/Core/MDX가 동일 source를 Site에서 자연스럽게 소비하는가
-- Obsidian-friendly Markdown syntax를 remark/rehype adapter로 richer Fumadocs UI에 mapping할 수 있는가
-- external edits가 source loss나 강제 normalization을 일으키지 않는가
-- docs tree의 기존 자유도를 유지하면서 consumer-specific path convention만 최소로 둘 수 있는가
+Obsidian-native custom callout/plugin/CSS bridge는 1.0 spike의 필수 항목이 아니다.
 
-synthetic fixture는 intentionally broken source, edge-case component, encoding/path edge case처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
+synthetic fixture는 broken source, encoding/path edge case, custom component validation처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
 
 ### Phase C — Rewire publishing
 
@@ -279,7 +279,7 @@ synthetic fixture는 intentionally broken source, edge-case component, encoding/
 - **Site verification 생략 금지**: file parse 성공만으로 Publishable 판정을 내리지 않는다.
 - **Framework rewrite 금지**: Fumadocs 도입을 이유로 Astro 등 이미 동작하는 Site 기반을 불필요하게 전면 교체하지 않는다.
 - **Editor lock-in 금지**: Obsidian/Fumadocs Editor 중 하나를 integration evidence 없이 canonical editor로 고정하지 않는다.
-- **Repository layout overconstraint 금지**: docs 전체에 단일 application-specific directory/frontmatter schema를 강제하지 않는다.
+- **Premature layout lock-in 금지**: strict layout 자체를 금지하지 않는다. 다만 integration evidence 없이 free-form 또는 strict layout을 architecture 원칙으로 선결하지 않는다.
 - **Legacy sunk-cost bias 금지**: 과거 구현 유지가 새 모델을 더 복잡하게 만들면 제거를 우선 검토한다.
 - **Unverified convenience assumption 금지**: Obsidian plugin/Fumadocs 기능을 문서나 실제 spike 없이 canonical capability로 가정하지 않는다.
 
@@ -289,38 +289,49 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 1. 이 문서
 2. [Architecture](architecture.md)
-3. [Open Questions](open-questions.md)에서 editor / layout / rebuild decision gate 확인
-4. [Content Authoring & Publishing Contract](content-authoring-contract.md)
-5. [Release 1.0](release-1.0.md)
-6. [Implementation Map](implementation-map.md)
-7. [Current Handoff](../handoff/current.md)
-8. 변경 대상 repository의 최신 Issue/branch/code/test
+3. [Development Toolchain](development-toolchain.md)
+4. [Repository Design & Maintenance](repository-design.md)
+5. [Open Questions](open-questions.md)에서 editor / layout / Site migration decision gate 확인
+6. [Content Authoring & Publishing Contract](content-authoring-contract.md)
+7. [Release 1.0](release-1.0.md)
+8. [Implementation Map](implementation-map.md)
+9. [Current Handoff](../handoff/current.md)
+10. 변경 대상 repository의 최신 Issue/branch/code/test
 
 과거 Issue body나 branch code가 위 문서와 충돌하면 **현재 canonical Knowledge가 목표를 소유하고, 과거 구현은 migration input**으로 취급한다.
 
 단, 실제 live repository state와 미push local work는 임의로 덮어쓰지 않는다.
 
-## 10.5 Greenfield rebuild option
+## 10.5 Engine greenfield scratch build
 
-Engine 또는 Site를 기존 구조에서 점진적으로 뜯어고치는 것만이 정답은 아니다.
+Engine은 D032에 따라 **greenfield scratch build를 기본 migration 전략으로 확정**한다.
 
-다음 조건이면 **새 target을 기준으로 greenfield skeleton을 만들고 legacy에서 필요한 부분만 가져오는 방식**을 허용한다.
+목표는 Git history를 지우는 것이 아니라 legacy source tree를 새 architecture의 template로 사용하지 않는 것이다.
 
-- legacy abstraction을 제거하는 비용이 새 구현보다 크다.
-- Payload/PostgreSQL coupling 때문에 workspace boundary를 검증하기 어렵다.
-- 재사용 가능한 코드가 command runner, evidence, Git verification처럼 작고 독립적이다.
-- 기존 테스트 대부분이 target behavior보다 legacy implementation detail을 고정한다.
+원칙:
 
-반대로 Site처럼 이미 canonical docs rendering/delivery Evidence가 있고 새 target과 구조적 충돌이 적다면 incremental migration을 우선한다.
+- same repository history를 보존한다.
+- scratch implementation은 새 Issue-linked branch에서 시작한다.
+- legacy branch/worktree의 미병합 작업은 먼저 보존한다.
+- Vite+ toolchain과 repository orchestration은 새 global policy를 적용한다.
+- Payload/PostgreSQL/Lexical/DB export task taxonomy를 새 skeleton에 복제하지 않는다.
+- legacy에서 generic behavior를 가져올 때는 이유와 verification evidence를 남긴다.
 
-greenfield 여부는 아직 결정되지 않았다. Phase A에서 repository별 keep/adapt/retire 비율과 dependency graph를 확인한 뒤 결정한다.
+우선 port 후보:
+
+- process execution behavior
+- concurrency/idempotency semantics
+- evidence/revision linkage
+- Site verification logic
+
+Site는 현재 docs→Astro→Pages Evidence가 있으므로 같은 결정을 자동 적용하지 않는다. Site는 incremental Fumadocs integration을 우선 후보로 유지하고 별도 evidence로 판단한다.
 
 ## 11. Transition completion criteria
 
 다음이 모두 충족되면 이 transition guide를 Active에서 Completed/Archived 상태로 바꿀 수 있다.
 
 - Docs repository가 canonical content remote로 실제 운영된다.
-- 선택된 authoring workflow가 실제 기존 content corpus에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
+- 실제 기존 content corpus가 Fumadocs/Site integration에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
 - Engine target path가 Payload/PostgreSQL 없이 workspace를 검증·publish할 수 있다.
 - Site가 새 canonical content revision을 실제 build/deploy한다.
 - publish Evidence가 docs SHA + Engine/Site revision + delivery result로 연결된다.
