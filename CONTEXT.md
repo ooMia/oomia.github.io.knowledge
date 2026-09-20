@@ -6,9 +6,12 @@
 
 콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
 
-- canonical Article source는 CMS/Visual Editor와 독립적으로 보존한다.
-- storage / visual editing / publishing 가능성을 동일시하지 않는다.
-- 공식 MDX component는 versioned public content-component contract를 공유하고 CMS는 authoring adapter, Site는 rendering consumer로 취급한다.
+- canonical Article content는 Git-backed local filesystem workspace의 Markdown/MDX + frontmatter/assets로 보존한다.
+- local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
+- Obsidian과 Fumadocs Editor는 동일 content workspace를 편집하는 authoring client다.
+- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
+- storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
+- Fumadocs built-in component/tooling을 우선 재사용하며 custom component/shared package는 실제 필요가 생길 때만 도입한다.
 - 실제 구현 수준은 [Implementation Map](docs/implementation-map.md)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
 확정 수준은 [Provenance](provenance/README.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 먼저 [Current Handoff](handoff/current.md)를 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
@@ -20,8 +23,8 @@
 | 이전 세션 이어받기 | [Current Handoff](handoff/current.md) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
 | 전체 이해 | [Architecture](docs/architecture.md), [Release 1.0](docs/release-1.0.md) |
 | Markdown/MDX authoring·storage·publish 정책 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
-| MDX component package / Agent-readable manifest | [Content Component Manifest Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
-| 현재 1.0 구현 수준·gap | [Implementation Map](docs/implementation-map.md) → 기준 revision의 구현 레포 코드·테스트 |
+| custom MDX component profile/manifest | [Content Component Manifest Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
+| 현재 1.0 구현 수준·migration gap | [Implementation Map](docs/implementation-map.md) → 기준 revision의 구현 레포 코드·테스트 |
 | Item 작성·분류·완료 검토 | [Planning](docs/planning-model.md), [Fields](docs/fields.md), 관련 release, 실제 Item의 Outcome/AC/Evidence |
 | Issue activation / Project field / Development branch 자동화 | [Project Orchestration](docs/project-orchestration.md), [Planning](docs/planning-model.md) |
 | 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
@@ -34,12 +37,14 @@
 
 Content 관련 구현을 계획하거나 수정할 때:
 
-1. CMS editor capability를 canonical syntax requirement로 확대하지 않는다.
-2. unsupported Visual syntax를 삭제/정규화해서 손실시키기보다 Source fallback을 우선한다.
-3. 저장 가능성과 publishability를 분리한다.
-4. 공식 MDX component 변경은 Site가 소유하는 shared component contract의 영향부터 확인한다.
-5. TypeScript type만으로 runtime contract가 충분하다고 가정하지 않는다. 필요한 경우 component manifest/schema를 사용한다.
-6. 최종 Publishability는 실제 Site consumer 검증을 포함해 판단한다.
+1. PostgreSQL/Payload 같은 특정 persistence/CMS 구현을 canonical content requirement로 확대하지 않는다.
+2. content file과 frontmatter를 직접 다루는 Git-backed workspace contract를 우선한다.
+3. Fumadocs Editor가 표현하지 못하는 syntax를 삭제/정규화해서 손실시키기보다 Obsidian/IDE Source path를 유지한다.
+4. uncommitted working tree와 committed docs canonical revision을 구분한다.
+5. publish는 DB export보다 validation / Git revision / Site consumer verification에 집중한다.
+6. Fumadocs built-in component를 우선 사용하고 custom wrapper/library를 불필요하게 만들지 않는다.
+7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
+8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -53,14 +58,14 @@ Content 관련 구현을 계획하거나 수정할 때:
 
 ## 사용할 요청 예시
 
-> Content Authoring & Publishing Contract에 따라 이 Markdown/MDX 표현의 Editing, Storage, Publishing 수준을 판정하고 필요한 구현 delta를 나눠줘.
+> Git-backed Content Authoring Contract에 따라 이 Markdown/MDX 표현의 Editing, Storage, Publishing 수준을 판정하고 필요한 구현 delta를 나눠줘.
 
-> Implementation Map의 기준 revision보다 구현 레포가 진행되었는지 확인하고, 1.0 capability 상태와 남은 delta를 갱신해줘.
+> Implementation Map 기준 revision보다 구현 레포가 진행되었는지 확인하고, filesystem workspace target에 대한 1.0 capability 상태를 갱신해줘.
 
-> 공식 MDX component를 추가할 때 Site package contract, Engine authoring adapter, consumer build Evidence를 각각 어떤 Item/Issue로 나눌지 검토해줘.
+> Fumadocs built-in으로 해결 가능한지 먼저 확인하고, custom component가 정말 필요할 때만 Engine editor spec과 Site renderer contract를 분리해줘.
 
 > 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
 
 세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript는 Knowledge에 복제하지 않고 provenance에는 source/turn metadata만 유지한다.
 
-설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다. 파일을 수정할 수 없는 Chat은 변경할 **원본 파일 전체**를 제공하고, 통합본 수정이나 대화상 합의만으로 원본이 갱신되었다고 표현하지 않는다.
+설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다.
