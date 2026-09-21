@@ -5,6 +5,7 @@ Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷�
 Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 transition guide를 먼저 따릅니다.
 JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정책을 함께 적용합니다.
 Canonical lifecycle은 Authoring Draft → Engine prepare → Prepared Canonical Source → user commit → deterministic Publishable Projection입니다.
+Explicit frontmatter value는 authoritative이며 Engine은 unset/missing field만 보완하는 방향으로 시작합니다.
 Knowledge의 장시간·다문서 변경은 branch + PR + squash merge를 기본으로 합니다.
 상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.
 
