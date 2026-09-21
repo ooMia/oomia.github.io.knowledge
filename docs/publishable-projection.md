@@ -252,7 +252,7 @@ environment/workspace prerequisites를 진단한다.
 
 ### `publish`
 
-- D034에 따라 committed revision만 대상으로 한다.
+- committed revision만 대상으로 한다.
 - source를 수정하거나 새 canonical metadata를 생성하지 않는다.
 - verify를 재현한 뒤 remote push, exact Site revision linkage, delivery를 수행한다.
 
