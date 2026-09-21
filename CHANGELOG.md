@@ -2,6 +2,10 @@
 
 ## 2026-09-21
 
+- D040으로 explicit frontmatter value를 authoritative로 확정하고 Engine은 unset/missing field만 보완하도록 최소 metadata invariant를 축소.
+- D041로 timestamp derivation, file/staged/all selection, prompt UX, formatting fidelity 등 초기 구현 세부사항을 Engine repository에 위임.
+- D042로 Knowledge의 장시간·다문서 작업은 branch + PR + squash merge를 기본 workflow로 확정.
+- `main`의 누적 commit noise를 정리해 기존 155개 history를 `archive/main-before-cleanup-20260921`에 보존하고 canonical main을 bootstrap + snapshot의 2-commit history로 재구성.
 - D038로 document-local persistent metadata의 1.0 기본 저장 방식을 frontmatter-first로 확정하고 sidecar는 실제 필요가 생길 때의 extension으로 하향.
 - D039로 source-mutating pre-commit `prepare` operation을 추가하고 `prepare` / `verify` / `publish`의 mutation boundary를 분리.
 - D036/D037을 Authoring Draft → Prepared Canonical Source → user commit → Publishable Projection lifecycle로 정정.
