@@ -235,10 +235,7 @@ Canonical: [Publishable Projection & Metadata Enrichment](https://github.com/ooM
 
 현재 미결:
 
-- field ownership / defaults precedence(Q023)
-- timestamp semantics(Q026)
-- unresolved user input behavior(Q027)
-- frontmatter mutation fidelity(Q028)
+- metadata 세부 구현(timestamp derivation, staged/file/all selection, prompt UX, formatting)은 Engine implementation responsibility
 - projection을 ephemeral staging / Site working tree / artifact 중 어디에 materialize할지(Q024)
 - sidecar/stable identity는 실제 필요 시(Q025)
 
@@ -262,11 +259,9 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 현재 중요한 gate:
 
-- field ownership / precedence
-- timestamp semantics
-- unresolved user input behavior
-- frontmatter mutation fidelity
 - projection materialization location
+- docs layout / consumer convention
+- actual editor role
 - docs layout / consumer convention
 - actual editor role
 - Engine container mount/credential contract — D034/D035 기준으로 다음 설계 대상
@@ -310,7 +305,7 @@ D034에 따라 **committed-revision publish**를 사용한다.
    - D035 CLI-first one-shot skeleton
    - public command contract(`doctor` / `prepare` / `verify` / `publish`) 구체화
    - D038/D039 frontmatter-first pre-commit prepare 반영
-   - Q023/Q026/Q027/Q028 최소 contract 구체화
+   - missing-only frontmatter enrichment(D040)으로 시작하고 timestamp/selection/formatting은 구현 레포에서 실험
    - Q008 mount / Git credential contract 구체화
    - legacy product dependency/task 없음
 7. #13/#14와 관련 Project Items를 새 architecture에 맞춰 supersede/re-scope한다.
@@ -338,3 +333,15 @@ D034에 따라 **committed-revision publish**를 사용한다.
 - existing Site Turbo를 새 workflow의 기본 task runner로 확대하지 않는다.
 - `packages/utils` / `packages/infra` 같은 legacy package를 scratch structure로 복제하지 않는다.
 - 이전 #13 구현 가설을 next action으로 사용하지 않는다.
+
+
+## Knowledge history maintenance
+
+2026-09-21에 commit noise를 정리했다.
+
+- cleanup 전 `main` HEAD: `3b7d16273ff4cce90bbbdae19b796bd89b452a9b`
+- 기존 155-commit history 보존: `archive/main-before-cleanup-20260921`
+- 새 `main` 시작: 최초 bootstrap commit + canonical snapshot commit의 2-commit history
+- 이후 장시간·다문서 변경은 D042에 따라 branch → PR → squash merge가 기본이다.
+
+이 archive branch는 이전 상세 history의 보존용이며 새 canonical direction을 읽을 때는 현재 `main`을 우선한다.
