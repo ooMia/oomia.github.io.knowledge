@@ -52,8 +52,8 @@ Content 관련 구현을 계획하거나 수정할 때:
 9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
-12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다.
-13. Knowledge의 다문서·장시간·다단계 변경은 branch + PR을 사용하고 squash merge를 기본으로 한다. 작은 국소 수정만 `main` 직행을 허용한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
+12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
+13. Knowledge의 다문서·장시간·다단계 변경은 branch + PR을 사용하고 squash merge를 기본으로 한다. 작은 국소 수정만 `main` 직행을 허용한다.
 
 ## 프로젝트 협업·응답 원칙
 
