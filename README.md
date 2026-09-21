@@ -20,6 +20,7 @@ Git-backed document workspace를 editor/tooling과 분리해 유지하고, Engin
 | VP command / runtime / CI / hooks 정책 | [Development Toolchain](docs/development-toolchain.md) |
 | monorepo / package / repository 구조 | [Repository Design & Maintenance](docs/repository-design.md) |
 | Markdown/MDX workspace·편집·저장·발행 수준 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
+| metadata enrichment / publishable projection | [Publishable Projection & Metadata Enrichment](docs/publishable-projection.md) |
 | custom component manifest 계획 | [Content Component Manifest Schema](docs/content-component-schema.md) |
 | 목표·Item·Issue·완료 판정 | [Planning Model](docs/planning-model.md) |
 | Issue activation / Project·Development 자동화 | [Project Orchestration](docs/project-orchestration.md) |
