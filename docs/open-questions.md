@@ -12,7 +12,7 @@
 | Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
 | Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
 | Q015 | docs layout / consumer path convention | 현재 Site는 docs repo 전체를 `apps/web/data/articles` submodule로 mount하고 `**/*.{md,mdx}`를 하나의 `articles` collection으로 읽는다. 즉 live consumer는 사실상 docs 전체를 Article source로 가정한다. Fumadocs integration spike에서 이 가정을 유지할지, publishable view/discovery rule을 분리할지, strict layout을 둘지 결정 |
-| Q016 | Git publish ownership / semantics | **사용자 결정 필요.** durable canonical revision은 docs commit으로 확정. (A) Engine은 clean/committed HEAD만 받아 push+verify, (B) Engine이 working tree를 commit+push, (C) branch/PR 생성 중 하나를 선택해야 Q008 credential/mount contract와 public CLI를 확정할 수 있음 |
+| Q016 | Git publish ownership / semantics | **해결됨: D034.** Engine은 dirty docs working tree를 commit하지 않는다. 사용자가 확정한 docs commit을 검증하고 remote에 반영한 뒤 Site의 exact docs SHA linkage와 delivery를 orchestration한다. branch/PR publish는 향후 별도 mode가 필요할 때 검토 |
 | Q017 | 실제 authoring editor 역할 분담 | Evidence-gated. Fumadocs Editor는 local files를 SoT로 유지하고 built-in/custom component specs를 지원한다. 기존 Obsidian corpus를 Fumadocs Site에 연결한 뒤 custom-component authoring 이득을 비교해 Obsidian-only / optional Fumadocs Editor / Fumadocs-heavy 중 결정. Studio vs embedded UI는 채택 이후 하위 결정 |
 | Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
 | Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
@@ -33,8 +33,8 @@
 
 1. **Q022 — Engine execution surface**
    - 이 결정이 scratch app entrypoint, container lifecycle, command/API contract를 정한다.
-2. **Q016 — Git publish ownership**
-   - Q022와 함께 container credential/mount contract(Q008)를 결정한다.
+2. **Q016 — Git publish ownership — 해결됨(D034)**
+   - Q022가 결정되면 D034를 기준으로 container credential/mount contract(Q008)를 구체화한다.
 
 ### Evidence 이후에 닫는 gate
 
