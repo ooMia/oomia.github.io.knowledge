@@ -34,20 +34,26 @@ Astro Site
 - DB snapshot → Markdown projection
 - 별도 DB backup/restore와 dev/prod persistence 운영
 
-2026-09-21 이후 1.0은 다음 모델을 목표로 한다.
+2026-09-21 이후 1.0은 다음 모델을 목표로 한다. authoring source와 Site input은 동일할 필요가 없으며 metadata enrichment/projection이 그 사이의 핵심 경계다.
 
 ```text
-Obsidian ──────────┐
-                   │
-Fumadocs Editor ───┼──> local Git content workspace
-                   │             │
-IDE / Agent ───────┘             │ validate / commit / push
-                                 ▼
-                        oomia.github.io.docs
-                         canonical revision
-                                 │
-                                 ▼
-                         oomia.github.io Site
+Obsidian / Fumadocs Editor / IDE
+              │
+              ▼
+      local Git docs source
+              │ commit
+              ▼
+      oomia.github.io.docs
+       canonical revision
+              │
+              ▼
+     metadata enrichment
+              │
+              ▼
+    publishable projection
+              │
+              ▼
+      oomia.github.io Site
                                  │
                                  ▼
                            GitHub Pages
@@ -256,8 +262,9 @@ synthetic fixture는 broken source, encoding/path edge case, custom component va
 
 ### Phase C — Rewire publishing
 
-- DB export를 publish input에서 제거
-- workspace validation 도입
+- DB snapshot export를 publish input에서 제거
+- committed source + metadata inputs에서 deterministic projection materialization 도입
+- projection/workspace validation 도입
 - Site consumer verification 재사용
 - canonical docs commit/push semantics 구현
 - revision linkage와 idempotency 재검증
