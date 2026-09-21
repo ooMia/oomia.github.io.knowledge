@@ -2,7 +2,7 @@
 
 Updated: 2026-09-21 (Asia/Seoul)
 
-이 파일은 다음 작업 세션을 위한 **volatile checkpoint**다. 장기 정책은 `docs/*`와 Decision Log를 우선한다.
+이 파일은 다음 작업 세션을 위한 **volatile checkpoint**다. 장기 정책은 `docs/*`와 [Current Decisions](../docs/decisions.md)를 우선한다.
 
 ## Read first
 
