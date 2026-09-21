@@ -4,6 +4,7 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
 Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 transition guide를 먼저 따릅니다.
 JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정책을 함께 적용합니다.
+Canonical authoring source와 Site-consumed publishable projection은 분리될 수 있으며 Publishable Projection contract를 따릅니다.
 상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.
 
 
@@ -19,7 +20,7 @@ JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정�
 
 콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
 
-- canonical content는 Git-backed local filesystem document workspace에 보존한다. publishable 문서는 Markdown/MDX + frontmatter/assets를 사용할 수 있고, docs layout은 free-form부터 strict convention까지 아직 열려 있다.
+- canonical authoring content는 Git-backed local filesystem document workspace에 보존한다. Site가 소비하는 publishable document는 metadata enrichment를 거친 deterministic projection일 수 있으며 source와 byte-for-byte 동일할 필요가 없다. docs layout은 free-form부터 strict convention까지 아직 열려 있다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
 - authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
 - Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 stateless, invocation-driven CLI-first one-shot runtime을 목표로 한다.
@@ -134,20 +135,26 @@ Astro Site
 - DB snapshot → Markdown projection
 - 별도 DB backup/restore와 dev/prod persistence 운영
 
-2026-09-21 이후 1.0은 다음 모델을 목표로 한다.
+2026-09-21 이후 1.0은 다음 모델을 목표로 한다. authoring source와 Site input은 동일할 필요가 없으며 metadata enrichment/projection이 그 사이의 핵심 경계다.
 
 ```text
-Obsidian ──────────┐
-                   │
-Fumadocs Editor ───┼──> local Git content workspace
-                   │             │
-IDE / Agent ───────┘             │ validate / commit / push
-                                 ▼
-                        oomia.github.io.docs
-                         canonical revision
-                                 │
-                                 ▼
-                         oomia.github.io Site
+Obsidian / Fumadocs Editor / IDE
+              │
+              ▼
+      local Git docs source
+              │ commit
+              ▼
+      oomia.github.io.docs
+       canonical revision
+              │
+              ▼
+     metadata enrichment
+              │
+              ▼
+    publishable projection
+              │
+              ▼
+      oomia.github.io Site
                                  │
                                  ▼
                            GitHub Pages
@@ -356,8 +363,9 @@ synthetic fixture는 broken source, encoding/path edge case, custom component va
 
 ### Phase C — Rewire publishing
 
-- DB export를 publish input에서 제거
-- workspace validation 도입
+- DB snapshot export를 publish input에서 제거
+- committed source + metadata inputs에서 deterministic projection materialization 도입
+- projection/workspace validation 도입
 - Site consumer verification 재사용
 - canonical docs commit/push semantics 구현
 - revision linkage와 idempotency 재검증
@@ -470,7 +478,7 @@ Site는 현재 docs→Astro→Pages Evidence가 있으므로 같은 결정을 �
 |---|---|
 | `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
 | `oomia.github.io.docs` | document directory/tree와 assets의 durable Git remote 및 shared revision history. layout은 자유 tree부터 strict path/schema까지 구현 목적에 맞게 선택 가능하며 현재 Knowledge가 한 형태를 선결하지 않음 |
-| `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io` | canonical authoring revision에서 materialize된 publishable projection을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
 `mono`는 사용자가 Site repository에 붙인 로컬 별칭이며 실제 원격 repository 이름의 일부가 아니다.
@@ -562,26 +570,26 @@ Engine CLI / one-shot container
 
 ## Publishing boundary
 
-Publishing은 더 이상 DB state를 generated Markdown으로 변환하는 작업이 아니다.
+Publishing은 DB state를 Markdown으로 export하는 작업이 아니지만, **canonical authoring source를 Site-ready projection으로 enrich/transform하는 작업은 핵심 책임**이다.
 
 ```text
-local content workspace
+committed docs source revision
         ↓
-content / frontmatter / component validation
+metadata discovery / resolution
         ↓
-Site sync / typecheck / build
+publishable projection materialization
         ↓
-committed docs revision
+projection validation
         ↓
-push to oomia.github.io.docs
+actual Site sync / typecheck / build
         ↓
-canonical docs revision
+docs remote / exact source SHA
         ↓
 Site revision linkage / delivery
 ```
 
-- source content 자체가 이미 publishable document form이므로 별도 DB → docs projection은 제거한다.
-- publish 과정은 source를 의미 없이 재작성하거나 dirty working tree를 자동 commit하지 않고 **이미 확정된 docs revision의 검증 + remote 반영 + delivery linkage**에 집중한다.
+- canonical authoring source와 Site-consumed projection은 다를 수 있다. DB snapshot export는 제거하지만 metadata enrichment와 deterministic projection은 유지한다.
+- publish 과정은 dirty source working tree를 자동 commit하지 않는다. committed docs revision과 선언된 metadata inputs를 입력으로 **projection 생성 + 검증 + remote/revision linkage + delivery**를 수행한다.
 - `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
 - Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
 - 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
@@ -614,6 +622,7 @@ Content Component Manifest Schema (`docs/content-component-schema.md`)는 custom
 | Surface | 소유 위치 |
 |---|---|
 | Content workspace / authoring / storage / publish 정책 | knowledge repository |
+| Metadata enrichment / publishable projection contract | Publishable Projection (`docs/publishable-projection.md`) |
 | Canonical content revision | `oomia.github.io.docs` Git history |
 | Workspace validation / Git / publish orchestration | engine |
 | Authoring UX | editor selection 미확정: Obsidian primary candidate, Fumadocs Editor component-aware candidate, IDE/Agent source client |
@@ -1460,7 +1469,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 > Canonical content는 Git-backed filesystem document workspace에 보존한다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
-이 문서는 **Editing, Storage, Canonical Revision, Publishing**을 분리해 정의한다.
+이 문서는 **Editing, Storage, Canonical Revision, Projection, Publishing**을 분리해 정의한다.
 
 ## Editing
 
@@ -1504,6 +1513,23 @@ canonical content의 물리적 표현은 local Git working tree의 files다.
 
 따라서 `oomia.github.io.docs`는 generated projection이 아니라 **canonical content remote**다.
 
+## Projection
+
+Canonical authoring source와 Site가 소비하는 publishable document는 동일할 필요가 없다.
+
+projection은 다음 입력을 deterministic하게 composition할 수 있다.
+
+- source document
+- inline frontmatter
+- sidecar/reference metadata
+- repository/consumer defaults
+- content/Git에서 유도한 deterministic metadata
+- 명시적인 publish-time override
+
+Engine은 source를 불필요하게 mutation하지 않고 publishable projection을 materialize한다. projection은 재생성 가능한 derived artifact이며 새 SoT가 아니다.
+
+구체적인 metadata 위치, precedence, document identity/linkage, materialization 위치는 Publishable Projection & Metadata Enrichment Contract (`docs/publishable-projection.md`)가 소유한다.
+
 ## Publishing
 
 | 수준 | 보장 |
@@ -1516,20 +1542,20 @@ Visual editing compatibility는 Publishability의 필수조건이 아니다.
 목표 흐름:
 
 ```text
-local Git working tree
+committed docs source revision
         ↓
-source / frontmatter / component validation
+metadata resolve / enrichment
         ↓
-Site sync / typecheck / build
+publishable projection materialization
         ↓
-git commit + push
+projection validation
         ↓
-oomia.github.io.docs canonical revision
+actual Site consumer build
         ↓
-Site revision linkage / delivery
+revision linkage / delivery
 ```
 
-Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아니다. canonical source가 이미 Markdown/MDX이므로 **validation, revision finalization, consumer verification**이 핵심이다.
+Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment와 deterministic projection materialization은 핵심 product behavior**다. source revision과 projection을 구분하며, Site는 projection contract를 만족하는 입력을 소비한다.
 
 ## 1.0 목표 정책 테이블
 
@@ -1669,6 +1695,299 @@ Source를 publish 전에 visual editor codec으로 decode/encode하는 절차는
 - custom component library를 실제 수요 전에 선행 구축
 
 <!-- END SOURCE: docs/content-authoring-contract.md -->
+
+
+---
+
+<!-- BEGIN SOURCE: docs/publishable-projection.md -->
+
+# Publishable Projection & Metadata Enrichment Contract
+
+상태: 2026-09-21 canonical design contract.
+
+## 목적
+
+Publishing Platform은 **사람이 작성하는 원본 문서**와 **Site가 실제로 소비하는 publishable document**가 같다고 가정하지 않는다.
+
+핵심 모델:
+
+```text
+Canonical Authoring Source
+        │
+        ├─ inline metadata
+        ├─ sidecar/reference metadata
+        ├─ repository/consumer defaults
+        └─ deterministic derived metadata
+        │
+        ▼
+Metadata Resolution / Enrichment
+        │
+        ▼
+Publishable Projection
+        │
+        ▼
+Site Consumer
+```
+
+DB-backed export는 제거하지만, **publish-time enrichment/transformation은 플랫폼의 핵심 기능**으로 유지한다.
+
+## 1. Canonical Authoring Source
+
+Canonical Authoring Source는 사람이 Obsidian, Fumadocs Editor, IDE/Agent 등에서 직접 다루는 문서와 관련 입력이다.
+
+- durable shared revision은 `ooMia/oomia.github.io.docs`의 Git commit으로 식별한다.
+- source document는 Site contract를 만족하는 모든 metadata를 직접 포함할 필요가 없다.
+- authoring 편의를 위해 source frontmatter를 최소화할 수 있다.
+- publish-only metadata를 source body에 강제로 섞지 않는다.
+- source revision을 publish하기 위해 Engine이 dirty working tree를 자동 commit하지 않는다(D034).
+
+## 2. Metadata Inputs
+
+metadata는 한 가지 저장 위치로 강제하지 않는다.
+
+후보:
+
+### Inline frontmatter
+
+```yaml
+---
+title: Example
+tags: [java, architecture]
+---
+```
+
+장점:
+- 문서와 함께 이동
+- Obsidian Properties와 직접 호환
+- 이해하기 쉬움
+
+단점:
+- publish-only/generated metadata가 authoring source를 오염시킬 수 있음
+- 자동 생성 값 변경이 문서 diff를 크게 만들 수 있음
+
+### Sidecar / reference file
+
+예:
+
+```text
+article.md
+article.meta.yaml
+```
+
+또는:
+
+```text
+metadata/
+└─ article.yaml
+```
+
+장점:
+- author-written source와 publish metadata 분리
+- Agent/automation이 metadata만 갱신하기 쉬움
+- 같은 source를 여러 consumer projection에 재사용하기 쉬움
+
+단점:
+- source와 metadata의 linkage rule이 필요
+- rename/move 시 referential integrity를 관리해야 함
+
+### Repository / consumer defaults
+
+예:
+
+- 기본 author
+- 기본 locale
+- route prefix
+- taxonomy defaults
+- Site-specific rendering option
+
+document마다 반복하지 않아도 되는 값에 사용한다.
+
+### Deterministic derived metadata
+
+source revision이나 content에서 재현 가능하게 계산할 수 있는 값.
+
+예:
+
+- slug / route
+- reading time
+- content hash
+- Git-derived created/updated revision metadata
+- summary/description
+- normalized tags
+- heading index / TOC input
+
+Agent/LLM이 값을 생성하는 경우에도 publish reproducibility를 위해 결과를 고정된 input으로 기록할지, build-time deterministic generation으로 취급할지 별도 정책이 필요하다.
+
+## 3. Metadata Resolution
+
+projection 생성 전에 metadata input을 하나의 resolved model로 합친다.
+
+필수 원칙:
+
+1. metadata source precedence가 명시적이어야 한다.
+2. 같은 입력에서 같은 resolved metadata가 나와야 한다.
+3. conflict가 silent overwrite되지 않아야 한다.
+4. required publish metadata가 누락되면 document-level diagnostic을 제공한다.
+5. source document를 mutation해야만 resolution이 가능한 구조를 피한다.
+
+정확한 precedence는 아직 미결이다.
+
+예시 후보:
+
+```text
+consumer defaults
+      ↓
+repository defaults
+      ↓
+sidecar/reference metadata
+      ↓
+inline frontmatter
+      ↓
+explicit publish override
+```
+
+이 순서는 예시이며 현재 확정된 policy가 아니다.
+
+## 4. Publishable Projection
+
+Publishable Projection은 Site consumer contract를 만족하도록 materialize한 document set이다.
+
+projection은 source와 다음이 달라질 수 있다.
+
+- frontmatter field 추가/정규화
+- derived metadata 주입
+- route/slug metadata 추가
+- component registry 정보 주입
+- asset reference 정규화
+- consumer-specific metadata 변환
+- publish-only/generated field 추가
+- 필요 시 body-level deterministic transform
+
+그러나 projection은 **새 SoT가 아니다**.
+
+- canonical input은 docs source revision + declared metadata inputs다.
+- projection은 재생성 가능해야 한다.
+- projection 수정 사항을 다시 source에 수동 merge하는 workflow를 기본으로 만들지 않는다.
+
+## 5. Reproducibility
+
+최소 invariant:
+
+> 동일한 source revision + 동일한 declared metadata inputs + 동일한 projection contract/version은 동일한 publishable projection을 만든다.
+
+Engine Evidence에는 가능하면 다음을 연결한다.
+
+- source docs SHA
+- projection contract/version
+- metadata input revision/hash
+- projection hash 또는 manifest
+- Site revision/build result
+
+## 6. Materialization Location
+
+projection을 어디에 materialize할지는 아직 확정하지 않는다.
+
+후보:
+
+### A. Ephemeral staging projection
+
+```text
+docs source SHA
+     ↓
+Engine temp/staging
+     ↓
+Site build
+```
+
+장점:
+- generated files를 Git에 남기지 않음
+- source/projection dual-SoT 위험 낮음
+
+### B. Site working-tree projection
+
+```text
+docs source SHA
+     ↓
+Engine materialize
+     ↓
+Site generated/content directory
+     ↓
+Site commit/build
+```
+
+장점:
+- Site revision에서 실제 consumed files를 그대로 확인 가능
+- deployment artifact provenance 단순
+
+단점:
+- generated diff가 Site repository에 누적될 수 있음
+
+### C. Dedicated projection artifact/repository
+
+별도 artifact 또는 projection repo를 둘 수 있으나 1.0에는 비용 대비 필요성이 증명되지 않았다.
+
+현재는 A/B를 Site/Fumadocs integration과 함께 비교한다.
+
+## 7. Site Consumer Boundary
+
+Site는 canonical authoring source 자체가 아니라 **projection contract**를 소비한다.
+
+현재 live Site가 docs submodule의 모든 `md/mdx`를 직접 Article collection으로 읽는 것은 기존 implementation detail이다.
+
+새 target에서는 다음 두 방식이 모두 가능하다.
+
+- Site loader가 source + metadata inputs를 직접 resolve
+- Engine이 projection을 먼저 materialize하고 Site는 projection만 읽음
+
+Engine이 projection ownership을 가진다는 제품 목표를 고려하면 후자가 더 명시적일 수 있으나, 실제 Fumadocs/Astro integration complexity를 보고 결정한다.
+
+## 8. Engine Responsibility
+
+Engine의 핵심 operation은 단순 validate/push 이상이다.
+
+```text
+resolve source revision
+        ↓
+discover publishable documents
+        ↓
+resolve metadata
+        ↓
+materialize projection
+        ↓
+validate projection
+        ↓
+run actual Site consumer verification
+        ↓
+publish revision linkage / delivery
+```
+
+따라서 public command 후보는 이후 다음 semantics를 중심으로 정의한다.
+
+- `doctor`: environment/workspace prerequisites 진단
+- `verify`: source + metadata → projection materialization + Site consumer validation, external mutation 없음
+- `publish`: committed source revision을 verify한 뒤 remote/revision linkage/delivery 수행
+
+## 9. Non-goals
+
+1.0에서 다음을 강제하지 않는다.
+
+- 모든 metadata를 source frontmatter에 직접 기록
+- 모든 metadata를 sidecar file로 분리
+- projection을 canonical source로 승격
+- projection을 반드시 Git commit으로 저장
+- DB를 metadata SoT로 재도입
+- authoring editor가 모든 publish metadata를 표시/편집
+
+## 10. 다음 결정
+
+- metadata location / precedence
+- document identity와 sidecar linkage rule
+- generated/LLM metadata를 재현 가능 input으로 만드는 방식
+- projection materialization location
+- Site가 source를 직접 resolve할지 projection만 소비할지
+- projection manifest schema
+
+<!-- END SOURCE: docs/publishable-projection.md -->
 
 
 ---
@@ -1947,7 +2266,7 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 | Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. docs layout은 free-form, discovery-based, strict convention 중 구현 목적에 맞게 선택할 수 있으며 1.0 설계가 사전에 한 형태를 금지하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
 | Extensibility | Fumadocs built-in component를 우선 재사용하고 Oomia-specific custom component가 필요한 경우 source semantics와 Site/editor integration을 명시할 수 있다. Fumadocs Editor의 custom component spec은 유력한 authoring extension 후보지만 필수로 선결하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
-| Publishing | local workspace를 검증하고 실제 Site consumer build를 통과시킨 뒤 canonical docs revision으로 확정한다. DB → Markdown export나 Visual Editor codec round-trip을 publish prerequisite로 요구하지 않는다. |
+| Publishing | committed canonical source revision과 선언된 metadata inputs에서 deterministic publishable projection을 materialize하고 실제 Site consumer build를 통과시킨 뒤 revision linkage/delivery를 확정한다. DB snapshot export나 Visual Editor codec round-trip을 prerequisite로 요구하지 않는다. |
 | Presentation | Site가 canonical docs revision의 Markdown/MDX를 렌더링한다. Fumadocs UI/content tooling을 우선 재사용하되 Site framework 자체는 implementation detail이다. |
 | Delivery | 검증된 canonical docs revision이 Site revision과 연결되어 GitHub Pages에 배포되고 성공 Evidence를 남길 수 있다. |
 
@@ -1973,7 +2292,7 @@ local Git document workspace
                            GitHub Pages
 ```
 
-Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
+Engine은 workspace validation, metadata enrichment/projection, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. authoring source와 Site-consumed projection은 동일할 필요가 없다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
@@ -2066,7 +2385,7 @@ Site
 | Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | authority를 PostgreSQL에서 docs-backed Git workspace로 이동하고 Git revision semantics를 확정해야 한다. layout은 free-form/discovery/strict convention 모두 후보이며 integration/maintenance Evidence로 의도적으로 선택한다. |
 | Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | Fumadocs built-in/custom component와 Editor component-spec workflow를 실제 Site integration에서 검증한다. Obsidian-native custom syntax bridge는 1.0 범위 밖이며 별도 component package는 실제 cross-repo 공유 수요 전까지 만들지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | trigger를 Payload endpoint에서 Git workspace publish action으로 옮기고 validation→commit/push→Site verification 흐름을 재검증해야 한다. |
-| Publishing | **부분 충족** | DB snapshot을 docs repo에 반영하고 실제 Site sync/lint/test/typecheck/build를 통과시키는 workflow가 있다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate를 제거하고 canonical workspace 자체를 검증한 뒤 docs commit으로 확정하는 publish path가 필요하다. 기존 downstream Site verification은 재사용 가능성이 높다. |
+| Publishing | **부분 충족** | legacy workflow는 DB snapshot을 docs repo에 materialize하고 실제 Site sync/lint/test/typecheck/build를 통과시켰다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | DB export/Visual codec gate는 제거하되, canonical authoring source + metadata inputs → deterministic publishable projection이라는 핵심 transformation을 새로 정의해야 한다. downstream Site verification은 재사용 가능성이 높다. |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | Fumadocs UI/content tooling 도입은 UX/DX 개선 과제로 진행할 수 있으나 canonical docs content를 렌더한다는 1.0 기본 결과는 이미 충족한다. |
 | Delivery | **충족** | docs SHA를 소비하는 Site revision의 GitHub Pages build/deploy가 성공했다. [run 35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484) / [artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312) | 새 canonical workspace에서 content delta를 publish한 뒤 동일 delivery chain이 유지되는 regression Evidence를 추가한다. |
 
@@ -2113,11 +2432,12 @@ Site
    - container + mounted workspace model
    - validation / Git / publishing orchestration만 유지
 
-4. **Publishing Rewrite**
-   - source/frontmatter/component/assets validation
-   - actual Site consumer verification
-   - docs commit/push와 revision linkage
-   - idempotent publish semantics
+4. **Projection / Publishing Rewrite**
+   - source discovery + metadata resolution
+   - deterministic publishable projection materialization
+   - projection validation + actual Site consumer verification
+   - committed docs revision push와 Site revision linkage
+   - projection manifest/hash와 idempotent publish semantics
 
 5. **Fumadocs / Obsidian Integration**
    - Site에서 Fumadocs UI/Core/MDX를 재사용할 범위 검증
@@ -2228,7 +2548,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D020 | React content components는 semantic markup과 optional baseline CSS를 제공한다. 기본 스타일은 `@oomia/content-components/styles.css`를 소비자가 명시적으로 import하고, CSS custom properties·stable class/data hooks·`className`/`style` passthrough로 override한다 | **대체됨: D024**, 사용자 요구 + Fumadocs/Nextra/Docusaurus 패턴 조사, 2026-09-21 | CSS 자동 주입, Tailwind/runtime theme 강제, 완전 unstyled-only package |
 | D021 | canonical Article content는 Markdown/MDX와 frontmatter/assets로 구성된 Git-backed filesystem workspace다. local working tree는 authoring/draft state이고 `ooMia/oomia.github.io.docs`의 commit이 durable shared canonical revision이다 | 사용자 명시, 2026-09-21 | D002의 generated projection 모델; PostgreSQL을 canonical content store로 사용하는 모델 |
 | D022 | 1.0 기본 authoring client는 Obsidian과 Fumadocs Editor다. 둘은 같은 local content workspace를 직접 편집하며 Engine은 DB-backed CMS가 아니라 workspace validation/publishing orchestration을 담당한다 | **대체됨: D027**, 사용자 명시, 2026-09-21 | Payload + PostgreSQL + Lexical을 1.0 CMS/persistence로 유지 |
-| D023 | publishing은 DB를 Markdown으로 export하는 작업이 아니라 content workspace를 검증하고 canonical docs revision으로 commit/push한 뒤 실제 Site consumer build/delivery를 검증하는 흐름이다 | D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
+| D023 | publishing은 DB snapshot을 Markdown으로 export하는 작업이 아니라 canonical docs revision을 입력으로 검증·projection·Site delivery를 수행한다 | **D036에서 보강**, D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
 | D024 | Fumadocs의 built-in UI/Editor component capability를 우선 재사용한다. 독립 `@oomia/content-components` React library는 1.0 선행 과제에서 제거하고, 실제 custom component가 생겨 cross-repository contract가 필요할 때 얇은 profile/adapter package를 도입한다 | 사용자 방향 전환 및 오버엔지니어링 회피, 2026-09-21 | D018–D020의 독립 renderer/component library 선행 구축 |
 | D025 | architecture migration은 새 Git-backed vertical slice를 먼저 검증한 뒤 legacy Payload/PostgreSQL path를 단계적으로 retire한다. 과거 Issue/branch는 현재 Knowledge와 reconciliation 후에만 계속하며 미병합 작업을 먼저 보존한다 | 사용자 요청에 따른 migration context/정합성 강화, 2026-09-21 | 기존 구현 중단 상태를 그대로 재개하거나 새 path 검증 전에 big-bang delete |
 | D026 | `oomia.github.io.docs`의 layout은 구현 목적에 따라 자유롭게 결정할 수 있다. 자유는 unconstrained document tree뿐 아니라 strict directory/path/frontmatter convention을 의도적으로 선택해 강제하는 방식까지 포함한다. Knowledge는 현재 어느 쪽도 선결하지 않는다 | 사용자 정정, 2026-09-21 | “layout 자유”를 strict layout을 배제하거나 convention을 항상 최소화해야 한다는 뜻으로 해석 |
@@ -2241,6 +2561,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D033 | Engine scratch bootstrap baseline은 Node.js `24.20.0`, pnpm `12.3.4`, Vite+ `0.3.3`으로 pin한다. Site와 동일 Node/pnpm baseline을 재사용하고 현재 Engine/최신 Vite+ 0.3.3을 사용하며, 이후 upgrade는 별도 Maintenance change로 다룬다 | 현재 repository state + Fumadocs Node 24+ requirement + Vite+ 0.3.3 latest release 조사, 2026-09-21 | scratch 시작과 동시에 unrelated Node/pnpm/toolchain upgrade를 섞거나 floating latest 사용 |
 | D034 | publish는 **committed-revision publish**를 사용한다. Engine은 dirty docs working tree를 자동 stage/commit하지 않고, 사용자가 확정한 docs commit을 입력으로 검증·push하고 Site가 exact docs SHA를 소비하도록 revision linkage와 delivery를 orchestration한다 | 사용자 명시, 2026-09-21 | Engine이 authoring working tree를 자동 commit하는 one-click publish; 기본 branch/PR 생성 publish |
 | D035 | Engine 1.0은 **stateless, invocation-driven CLI-first one-shot runtime**으로 구현한다. Engine은 명령 실행 시 시작해 filesystem/Git/Site 작업을 수행하고 exit code/log를 남긴 뒤 종료한다. long-running HTTP service, job queue, server-side session/state lifecycle은 1.0 비목표이며 필요 시 동일 operation API 위에 별도 adapter로 추가한다 | 사용자 명시, 2026-09-21 | resident HTTP/service Engine을 1.0부터 운영 |
+| D036 | **Canonical Authoring Source와 Publishable Projection을 분리한다.** `oomia.github.io.docs`의 committed revision은 사람이 편집하는 canonical source/input을 식별하며, Site가 실제 소비하는 문서는 Engine이 해당 revision과 선언된 metadata inputs를 사용해 deterministic하게 materialize한 projection일 수 있다 | 사용자 정정, 2026-09-21 | canonical source file과 Site input이 항상 byte-for-byte 동일하다고 가정; DB export 제거와 publish-time transformation 제거를 동일시 |
+| D037 | metadata enrichment는 Publishing Platform의 핵심 책임으로 취급한다. authoring source 자체를 불필요하게 mutation하지 않고 inline frontmatter, sidecar/reference metadata, repository/consumer defaults, deterministic derived metadata 등 선언된 입력을 composition하여 publishable projection을 만든다. 구체적인 storage/precedence policy는 별도 contract에서 결정한다 | 사용자 명시, 2026-09-21 | 모든 publish metadata를 author가 원본 frontmatter에 직접 작성해야 한다고 강제 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -2249,7 +2571,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D035가 현재 1.0 persistence/authoring/integration 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D037이 현재 1.0 persistence/authoring/integration, projection 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -2279,6 +2601,9 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
 | Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
 | Q022 | Engine 1.0 실행 표면 | **해결됨: D035.** stateless, invocation-driven CLI-first one-shot runtime/container를 사용한다. long-running HTTP/service shell은 1.0 비목표이며 향후 필요 시 operation API 위 adapter로 추가 |
+| Q023 | metadata composition / precedence | **사용자 결정 또는 spike 필요.** inline frontmatter, sidecar/reference file, repository/consumer defaults, derived metadata 중 어떤 source를 1.0에 허용하고 conflict precedence를 어떻게 둘지 결정해야 함 |
+| Q024 | projection materialization 위치 | ephemeral staging, Site working-tree generated projection, 별도 artifact 중 선택 필요. source/projection 이중 SoT를 만들지 않으면서 inspectability와 reproducibility를 어떻게 확보할지 Fumadocs/Site integration과 함께 검증 |
+| Q025 | document identity / metadata linkage | sidecar/reference metadata를 사용할 경우 path-based linkage, explicit document id, manifest mapping 등 rename/move에 안전한 identity 규약이 필요할 수 있음 |
 
 ## 분리 원칙
 
@@ -2298,13 +2623,22 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 2. **Q016 — Git publish ownership — 해결됨(D034)**
    - Q022가 결정되면 D034를 기준으로 container credential/mount contract(Q008)를 구체화한다.
 
+### 다음 설계에서 구체화할 gate
+
+3. **Q023 — metadata composition / precedence**
+   - metadata enrichment가 제품 핵심이므로 Engine public command contract 전에 최소 model을 정해야 한다.
+4. **Q024 — projection materialization**
+   - `verify`와 `publish`가 무엇을 생성하는지, Site가 어떤 directory를 읽는지 결정한다.
+5. **Q025 — document identity / metadata linkage**
+   - sidecar/reference metadata를 채택할 경우 함께 결정한다.
+
 ### Evidence 이후에 닫는 gate
 
-3. **Q015 — docs layout**
+6. **Q015 — docs layout**
    - 현재 Site의 “docs 전체 = articles” consumer assumption을 Fumadocs integration에서 실제로 검증한 뒤 결정한다.
-4. **Q017 — authoring editor 역할**
+7. **Q017 — authoring editor 역할**
    - custom component authoring과 source round-trip Evidence 후 결정한다.
-5. **Q019 / Q021 — Site migration와 Turbo retirement**
+8. **Q019 / Q021 — Site migration와 Turbo retirement**
    - 기존 delivery Evidence를 보존하며 incremental하게 판단한다.
 
 ### 1.0 구현 중 또는 실제 필요 발생 시 결정
