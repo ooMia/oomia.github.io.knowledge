@@ -11,10 +11,10 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 | Capability | 요구되는 관찰 가능한 결과 |
 |---|---|
 | Authoring | 선택된 authoring workflow가 local docs workspace를 직접 편집하고 source를 손실 없이 보존한다. 기존 corpus는 Obsidian 기반이므로 basic Obsidian compatibility는 전제하고, Fumadocs Editor의 custom-component/structured authoring 이점까지 비교해 editor 역할을 결정한다. |
-| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. docs layout은 free-form, discovery-based, strict convention 중 구현 목적에 맞게 선택할 수 있으며 1.0 설계가 사전에 한 형태를 금지하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
+| Canonical Content | 다양한 Markdown-like documents와 assets가 Git-backed filesystem tree에 존재한다. Engine `prepare`는 commit 전에 frontmatter-first persistent metadata를 보완할 수 있고, 사용자가 검토·commit한 revision이 durable canonical source가 된다. docs layout은 free-form, discovery-based, strict convention 중 구현 목적에 맞게 선택할 수 있으며 1.0 설계가 사전에 한 형태를 금지하지 않는다. 공유·재현 가능한 canonical state는 `oomia.github.io.docs` Git commit으로 식별된다. |
 | Extensibility | Fumadocs built-in component를 우선 재사용하고 Oomia-specific custom component가 필요한 경우 source semantics와 Site/editor integration을 명시할 수 있다. Fumadocs Editor의 custom component spec은 유력한 authoring extension 후보지만 필수로 선결하지 않는다. |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. |
-| Publishing | committed canonical source revision과 선언된 metadata inputs에서 deterministic publishable projection을 materialize하고 실제 Site consumer build를 통과시킨 뒤 revision linkage/delivery를 확정한다. DB snapshot export나 Visual Editor codec round-trip을 prerequisite로 요구하지 않는다. |
+| Publishing | prepared/committed canonical source revision에서 deterministic publishable projection을 materialize하고 실제 Site consumer build를 통과시킨 뒤 revision linkage/delivery를 확정한다. DB snapshot export나 Visual Editor codec round-trip을 prerequisite로 요구하지 않는다. |
 | Presentation | Site가 canonical docs revision의 Markdown/MDX를 렌더링한다. Fumadocs UI/content tooling을 우선 재사용하되 Site framework 자체는 implementation detail이다. |
 | Delivery | 검증된 canonical docs revision이 Site revision과 연결되어 GitHub Pages에 배포되고 성공 Evidence를 남길 수 있다. |
 
@@ -40,7 +40,7 @@ local Git document workspace
                            GitHub Pages
 ```
 
-Engine은 workspace validation, metadata enrichment/projection, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. authoring source와 Site-consumed projection은 동일할 필요가 없다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
+Engine은 pre-commit frontmatter preparation, workspace validation, deterministic projection, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. authoring source와 Site-consumed projection은 동일할 필요가 없다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
