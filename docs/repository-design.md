@@ -320,7 +320,7 @@ port하지 않는 기본값:
 
 ## 14.5 Engine runtime shape
 
-D035에 따라 Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
+Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
 
 권장 adapter/application 분리:
 

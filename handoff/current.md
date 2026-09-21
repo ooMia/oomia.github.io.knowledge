@@ -2,7 +2,7 @@
 
 Updated: 2026-09-21 (Asia/Seoul)
 
-이 파일은 다음 작업 세션을 위한 **volatile checkpoint**다. 장기 정책은 `docs/*`와 Decision Log를 우선한다.
+이 파일은 다음 작업 세션을 위한 **volatile checkpoint**다. 장기 정책은 `docs/*`와 [Current Decisions](../docs/decisions.md)를 우선한다.
 
 ## Read first
 
@@ -45,15 +45,15 @@ GitHub Pages
 
 - canonical authoring content는 Git-backed filesystem document workspace다. Engine `prepare`가 commit 전에 frontmatter-first persistent metadata를 보완하며, 사용자가 검토·commit한 상태가 durable canonical revision이다. Site가 실제 소비하는 문서는 이후 deterministic projection일 수 있다.
 - [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 Git commit이 durable shared canonical revision이다.
-- docs layout은 아직 결정하지 않았다. free-form tree, consumer discovery convention, strict repository-wide layout을 모두 허용한다. D026의 “자유”는 strict layout을 금지한다는 뜻이 아니다.
+- docs layout은 아직 결정하지 않았다. free-form tree, consumer discovery convention, strict repository-wide layout을 모두 허용하며 strict layout도 유효한 후보다.
 - 기존 content는 이미 Obsidian에서 작성된 corpus이므로 basic Obsidian authoring compatibility는 1.0의 핵심 불확실성이 아니다.
 - editor 역할은 아직 확정하지 않는다. Fumadocs Editor가 custom component 주입·structured editing에서 실제 UX/DX 이점을 주는지가 핵심 비교점이다.
 - Obsidian-native custom syntax/CSS/plugin bridge는 1.0 필수 고려사항이 아니다.
 - Fumadocs UI/Core/MDX는 Site integration의 주요 재사용 후보다.
 - Engine은 DB-backed CMS가 아니라 stateless, invocation-driven CLI-first one-shot workspace validation / Git / publish / Site verification orchestrator다.
 - Payload/PostgreSQL/Lexical은 legacy implementation/Evidence다.
-- Engine의 새 target implementation은 D032에 따라 **greenfield scratch build**를 기본 전략으로 한다.
-- JavaScript/TypeScript repository는 D030의 **VP-first** toolchain과 D031의 **monorepo-ready, package-light** 구조를 기본값으로 사용한다.
+- Engine의 새 target implementation은 **greenfield scratch build**를 기본 전략으로 한다.
+- JavaScript/TypeScript repository는 **VP-first** toolchain과 **monorepo-ready, package-light** 구조를 기본값으로 사용한다.
 
 ## Engine legacy / Issue #13
 
@@ -104,7 +104,7 @@ VP 자체는 폐기 대상이 아니다. scratch build에서 toolchain policy는
 - Vite+ native `.vite-hooks`와 root lint/fmt/staged config 사용
 - root task execution은 아직 Turbo scripts가 중심
 
-D030에 따라 **새 workflow에서 Turbo 의존성을 확대하지 않는다.** Turbo 제거는 Q021에 따라 VP recursive/filter/cache parity와 existing Site build/deploy Evidence를 보존하는 별도 Maintenance change로 수행한다.
+**새 workflow에서 Turbo 의존성을 확대하지 않는다.** Turbo 제거는 Q021에 따라 VP recursive/filter/cache parity와 existing Site build/deploy Evidence를 보존하는 별도 Maintenance change로 수행한다.
 
 Site는 이미 docs → Astro → GitHub Pages delivery Evidence가 있으므로 Engine과 달리 greenfield scratch를 기본값으로 하지 않는다.
 
@@ -174,7 +174,7 @@ Engine scratch 기본 shape:
 
 ## Docs layout decision
 
-D026에 따라 어떤 layout도 현재 선결하지 않는다.
+어떤 docs layout도 현재 선결하지 않는다.
 
 후보 예:
 
@@ -262,7 +262,7 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 - projection materialization location
 - docs layout / consumer convention
 - actual editor role
-- Engine container mount/credential contract — D034/D035 기준으로 다음 설계 대상
+- Engine container mount/credential contract — committed-revision publish + one-shot CLI 기준으로 다음 설계 대상
 - custom component shared profile/package 필요 시점
 - Site Turbo retirement timing
 - Site incremental migration 범위
@@ -271,7 +271,7 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 ### Q022 — Engine execution surface — 결정됨
 
-D035에 따라 **stateless, invocation-driven CLI-first one-shot runtime/container**를 사용한다.
+**stateless, invocation-driven CLI-first one-shot runtime/container**를 사용한다.
 
 - command invocation마다 Engine process가 시작·종료한다.
 - 1.0 public adapter는 CLI다.
@@ -281,7 +281,7 @@ D035에 따라 **stateless, invocation-driven CLI-first one-shot runtime/contain
 
 ### Q016 — Git publish ownership — 결정됨
 
-D034에 따라 **committed-revision publish**를 사용한다.
+**committed-revision publish**를 사용한다.
 
 - Engine은 dirty docs working tree를 자동 stage/commit하지 않는다.
 - 사용자가 확정한 docs commit을 publish candidate로 받는다.
@@ -299,11 +299,11 @@ D034에 따라 **committed-revision publish**를 사용한다.
 5. docs layout 후보(free/discovery/strict)를 integration 결과로 비교한다.
 6. Engine scratch bootstrap Issue를 설계한다.
    - first change: stale Copilot instructions 교체
-   - D033 toolchain baseline 적용
-   - D035 CLI-first one-shot skeleton
+   - Node.js 24.20.0 / pnpm 12.3.4 / Vite+ 0.3.3 baseline 적용
+   - CLI-first one-shot skeleton
    - public command contract(`doctor` / `prepare` / `verify` / `publish`) 구체화
-   - D038/D039 frontmatter-first pre-commit prepare 반영
-   - missing-only frontmatter enrichment(D040)으로 시작하고 timestamp/selection/formatting은 구현 레포에서 실험
+   - frontmatter-first pre-commit `prepare` 반영
+   - missing-only frontmatter enrichment로 시작하고 timestamp/selection/formatting은 구현 레포에서 실험
    - Q008 mount / Git credential contract 구체화
    - legacy product dependency/task 없음
 7. #13/#14와 관련 Project Items를 새 architecture에 맞춰 supersede/re-scope한다.
@@ -331,15 +331,3 @@ D034에 따라 **committed-revision publish**를 사용한다.
 - existing Site Turbo를 새 workflow의 기본 task runner로 확대하지 않는다.
 - `packages/utils` / `packages/infra` 같은 legacy package를 scratch structure로 복제하지 않는다.
 - 이전 #13 구현 가설을 next action으로 사용하지 않는다.
-
-
-## Knowledge history maintenance
-
-2026-09-21에 commit noise를 정리했다.
-
-- cleanup 전 `main` HEAD: `3b7d16273ff4cce90bbbdae19b796bd89b452a9b`
-- 기존 155-commit history 보존: `archive/main-before-cleanup-20260921`
-- 새 `main` 시작: 최초 bootstrap commit + canonical snapshot commit의 2-commit history
-- 이후 장시간·다문서 변경은 D042에 따라 branch → PR → squash merge가 기본이다.
-
-이 archive branch는 이전 상세 history의 보존용이며 새 canonical direction을 읽을 때는 현재 `main`을 우선한다.

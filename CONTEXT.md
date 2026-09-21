@@ -15,7 +15,7 @@
 - JavaScript/TypeScript 구현에서는 [Development Toolchain](docs/development-toolchain.md)의 VP-first 정책과 [Repository Design](docs/repository-design.md)의 monorepo-ready/package-light 원칙을 적용한다.
 - 실제 구현 수준은 [Implementation Map](docs/implementation-map.md)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
-현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 [Architecture Transition](docs/architecture-transition.md)을 읽는다. 확정 수준은 [Provenance](provenance/README.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
+현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 [Architecture Transition](docs/architecture-transition.md)을 읽는다. 현재 유효한 방향은 [Current Decisions](docs/decisions.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
 
 ## 작업별 읽기
 
@@ -33,9 +33,9 @@
 | Issue activation / Project field / Development branch 자동화 | [Project Orchestration](docs/project-orchestration.md), [Planning](docs/planning-model.md) |
 | 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
 | 주간 계획·발표 | [Operating Rhythm](docs/operating-rhythm.md), 실제 Project Status Update, 실제 Evidence |
-| 설계 수정 | 해당 원본 문서, [Decisions](docs/decisions.md), [CONTRIBUTING](CONTRIBUTING.md) |
+| 설계 수정 | 해당 원본 문서, [Current Decisions](docs/decisions.md), [CONTRIBUTING](CONTRIBUTING.md) |
 | GitHub Project README 정리 | [Project README 템플릿](templates/project-readme.md) |
-| 과거 발언 확인 | [Provenance](provenance/README.md)의 source/turn metadata → 필요 시 원본 대화 링크 |
+| 과거 설계/history 확인 | `archive/main-before-cleanup-20260921` branch |
 
 ## Agent 작업 원칙
 
@@ -49,7 +49,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. custom component authoring UX/DX가 editor 선택의 핵심 비교점이며 Obsidian-native custom syntax bridge는 1.0 범위 밖이다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
 12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
@@ -75,6 +75,6 @@ Content 관련 구현을 계획하거나 수정할 때:
 
 > 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
 
-세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript는 Knowledge에 복제하지 않고 provenance에는 source/turn metadata만 유지한다.
+세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript와 과거 decision chronology는 현재 `main`에 복제하지 않는다. 필요하면 historical archive branch를 참조한다.
 
 설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다.

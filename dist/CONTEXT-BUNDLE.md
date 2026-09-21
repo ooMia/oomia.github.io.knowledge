@@ -4,10 +4,8 @@ GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접
 Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
 Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 transition guide를 먼저 따릅니다.
 JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정책을 함께 적용합니다.
-Canonical lifecycle은 Authoring Draft → Engine prepare → Prepared Canonical Source → user commit → deterministic Publishable Projection입니다.
-Explicit frontmatter value는 authoritative이며 Engine은 unset/missing field만 보완하는 방향으로 시작합니다.
-Knowledge의 장시간·다문서 변경은 branch + PR + squash merge를 기본으로 합니다.
-상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.
+현재 main은 현재 목표·계약·미결 사항을 설명하며 과거 상세 history는 archive/main-before-cleanup-20260921 branch에 보존됩니다.
+상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조합니다.
 
 
 ---
@@ -31,7 +29,7 @@ Knowledge의 장시간·다문서 변경은 branch + PR + squash merge를 기본
 - JavaScript/TypeScript 구현에서는 Development Toolchain (`docs/development-toolchain.md`)의 VP-first 정책과 Repository Design (`docs/repository-design.md`)의 monorepo-ready/package-light 원칙을 적용한다.
 - 실제 구현 수준은 Implementation Map (`docs/implementation-map.md`)의 기준 revision과 책임 레포 Evidence로 판정한다.
 
-현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 Architecture Transition (`docs/architecture-transition.md`)을 읽는다. 확정 수준은 Provenance (`provenance/README.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다. 이전 작업을 이어받는 경우에는 Architecture Transition (`docs/architecture-transition.md`) → Current Handoff (`handoff/current.md`) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
+현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 Architecture Transition (`docs/architecture-transition.md`)을 읽는다. 현재 유효한 방향은 Current Decisions (`docs/decisions.md`), 남은 결정은 Open Questions (`docs/open-questions.md`)을 따른다. 이전 작업을 이어받는 경우에는 Architecture Transition (`docs/architecture-transition.md`) → Current Handoff (`handoff/current.md`) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
 
 ## 작업별 읽기
 
@@ -49,9 +47,9 @@ Knowledge의 장시간·다문서 변경은 branch + PR + squash merge를 기본
 | Issue activation / Project field / Development branch 자동화 | Project Orchestration (`docs/project-orchestration.md`), Planning (`docs/planning-model.md`) |
 | 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
 | 주간 계획·발표 | Operating Rhythm (`docs/operating-rhythm.md`), 실제 Project Status Update, 실제 Evidence |
-| 설계 수정 | 해당 원본 문서, Decisions (`docs/decisions.md`), CONTRIBUTING (`CONTRIBUTING.md`) |
+| 설계 수정 | 해당 원본 문서, Current Decisions (`docs/decisions.md`), CONTRIBUTING (`CONTRIBUTING.md`) |
 | GitHub Project README 정리 | Project README 템플릿 (`templates/project-readme.md`) |
-| 과거 발언 확인 | Provenance (`provenance/README.md`)의 source/turn metadata → 필요 시 원본 대화 링크 |
+| 과거 설계/history 확인 | `archive/main-before-cleanup-20260921` branch |
 
 ## Agent 작업 원칙
 
@@ -65,7 +63,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. custom component authoring UX/DX가 editor 선택의 핵심 비교점이며 Obsidian-native custom syntax bridge는 1.0 범위 밖이다.
 7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
 8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
+9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
 12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
@@ -91,7 +89,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 
 > 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
 
-세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript는 Knowledge에 복제하지 않고 provenance에는 source/turn metadata만 유지한다.
+세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript와 과거 decision chronology는 현재 `main`에 복제하지 않는다. 필요하면 historical archive branch를 참조한다.
 
 설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다.
 
@@ -415,7 +413,7 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 ## 10.5 Engine greenfield scratch build
 
-Engine은 D032에 따라 **greenfield scratch build를 기본 migration 전략으로 확정**한다.
+Engine은 **greenfield scratch build를 기본 migration 전략으로 사용한다**.
 
 목표는 Git history를 지우는 것이 아니라 legacy source tree를 새 architecture의 template로 사용하지 않는 것이다.
 
@@ -1354,7 +1352,7 @@ port하지 않는 기본값:
 
 ## 14.5 Engine runtime shape
 
-D035에 따라 Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
+Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
 
 권장 adapter/application 분리:
 
@@ -1981,7 +1979,7 @@ environment/workspace prerequisites를 진단한다.
 
 ### `publish`
 
-- D034에 따라 committed revision만 대상으로 한다.
+- committed revision만 대상으로 한다.
 - source를 수정하거나 새 canonical metadata를 생성하지 않는다.
 - verify를 재현한 뒤 remote push, exact Site revision linkage, delivery를 수행한다.
 
@@ -2473,7 +2471,7 @@ Site
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
 6. **Engine Scratch Bootstrap**
-   - D032에 따라 greenfield skeleton 생성
+   - greenfield scratch skeleton 생성
    - Development Toolchain (`docs/development-toolchain.md`)과 Repository Design (`docs/repository-design.md`) 적용
    - legacy code는 keep/adapt/retire review 후 필요한 generic behavior만 port
 
@@ -2547,66 +2545,88 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 <!-- BEGIN SOURCE: docs/decisions.md -->
 
-# Decision Log
+# Current Decisions
 
-과거 제안과 현재 정리 기준을 구분한다. D001–D008의 날짜는 최초 수집일 2026-09-18이며 원래 결정일을 추정하지 않는다. 이후 결정은 실제 반영일을 기준으로 기록한다.
+이 문서는 **현재 유효한 cross-repository / product-level 결정만** 요약한다.
 
-| ID | 현재 기준 | 상태 / 근거 | 대체하거나 제한한 과거 안 |
-|---|---|---|---|
-| D001 | 유일한 최상위 구현 레포를 만들지 않는다 | 사용자 명시, S2 `138f8f89` | 임의의 root repository 및 submodule 집합으로 제품 계층을 표현 |
-| D002 | docs는 generated projection | **대체됨: D021**, 사용자 명시, S2 `4c1f839e` | docs를 canonical authoring source로 취급 |
-| D003 | 필드 이름은 Work Type | 사용자 명시, S2 `178bf729` | Category / Type |
-| D004 | Target Release와 Objective를 분리 | 사용자 후속 확인, S3 `5a382a65` | Release Target에 버전/목표를 결합 |
-| D005 | Scope는 직접 바뀌는 책임만 최소 선택 | 사용자 README 반영 + 최신 제안, S3 `924e880a`, S2 `82ef0a72` | 단일 주영역만 선택하던 중간 제안; 모든 dependency 태깅 |
-| D006 | Objective 5개와 Authoring Experience를 보존 | 실제 옵션은 사용자 명시, description/유지는 최신 제안, S3 `f55d6e75` | 4개만 적힌 이전 답변 |
-| D007 | Item은 완료 가능한 delta | 최신 설계 제안, S2 `4a49654f` | 영구 capability를 릴리스마다 복제해 Done 처리 |
-| D008 | 지식은 Markdown 레포, 운영 상태는 Project | knowledge repo 생성 및 현재 운영 방식 | Project README가 모든 장기 지식을 소유 |
-| D009 | Project README는 canonical 문서의 짧은 인덱스로 유지한다 | 사용자 명시, 2026-09-18 | Product Boundary·Planning Model·필드 정의를 README에 중복 보관 |
-| D010 | 설계 정의 Item은 canonical 문서의 immutable permalink를 Evidence로 사용할 수 있다 | 사용자 명시, 2026-09-18 | 설계 정의 완료에도 별도 산출물을 중복 생성 |
-| D011 | 1.0 구현 수준은 revision이 고정된 Implementation Map으로 관리한다 | 사용자 요청 + 구현 레포 검증, 2026-09-18 | 설계 문서 또는 대화만으로 구현 완료 여부 추론 |
-| D012 | canonical Article source는 CMS/Visual Editor와 독립적인 raw Markdown/MDX string으로 보존한다 | 사용자 승인, 2026-09-20 | Visual Editor가 무손실 표현 가능한 Markdown subset을 canonical 저장 범위로 취급 |
-| D013 | Storage, Editing, Publishing 가능성을 서로 독립된 계약으로 판정한다 | 사용자 승인, 2026-09-20 | 저장 가능 = Visual 편집 가능 = 발행 가능으로 묶는 모델 |
-| D014 | 공식 MDX component contract는 Site 쪽에서 소스 변경을 소유하는 versioned public content-component package로 공유한다 | **대체됨: D018**, 사용자 제안 및 승인, 2026-09-20 | engine과 site가 component spec을 각각 암묵적으로 복제 |
-| D015 | CMS는 공식 component의 authoring adapter이고 Site는 rendering consumer다. Visual adapter 유무는 publishability를 결정하지 않는다 | 사용자 승인, 2026-09-20 | CMS registry가 플랫폼 전체 MDX 지원 범위를 결정 |
-| D016 | Publishability는 CMS codec round-trip이 아니라 content/component contract와 실제 Site consumer 검증으로 판정한다 | D012–D015의 구현 원칙, 2026-09-20 | 모든 DB body에 Visual Editor representability를 요구하는 global publish gate |
-| D017 | Knowledge에는 raw conversation transcript를 저장하지 않고 source/turn provenance metadata와 canonical knowledge만 유지한다 | 사용자 위임에 따른 agent 결정, 2026-09-20 | `provenance/conversations.json`에 원문 대화를 장기 보존하거나 handoff와 세션 transcript archive를 결합 |
-| D018 | 공식 content component는 독립 repository가 소유하고 npm public package `@oomia/content-components`로 배포한다. framework-neutral contract/manifest와 React renderer surface를 분리하며 Site와 Engine은 각각 consumer다 | **대체됨: D024**, 사용자 명시, 2026-09-21 | D014의 Site-owned source 모델; `.astro` 기반 public renderer; 개인 unscoped package |
-| D019 | content-component source repository는 public `ooMia/content-components`로 둔다. npm organization scope `@oomia`와 GitHub owner를 억지로 일치시키지 않고, 기존 프로젝트 repository ownership과 일관성을 우선한다 | **대체됨: D024**, 사용자 위임에 따른 agent 결정, 2026-09-21 | 별도 GitHub organization으로 즉시 이동하거나 Site/Engine 내부 package로 유지 |
-| D020 | React content components는 semantic markup과 optional baseline CSS를 제공한다. 기본 스타일은 `@oomia/content-components/styles.css`를 소비자가 명시적으로 import하고, CSS custom properties·stable class/data hooks·`className`/`style` passthrough로 override한다 | **대체됨: D024**, 사용자 요구 + Fumadocs/Nextra/Docusaurus 패턴 조사, 2026-09-21 | CSS 자동 주입, Tailwind/runtime theme 강제, 완전 unstyled-only package |
-| D021 | canonical Article content는 Markdown/MDX와 frontmatter/assets로 구성된 Git-backed filesystem workspace다. local working tree는 authoring/draft state이고 `ooMia/oomia.github.io.docs`의 commit이 durable shared canonical revision이다 | 사용자 명시, 2026-09-21 | D002의 generated projection 모델; PostgreSQL을 canonical content store로 사용하는 모델 |
-| D022 | 1.0 기본 authoring client는 Obsidian과 Fumadocs Editor다. 둘은 같은 local content workspace를 직접 편집하며 Engine은 DB-backed CMS가 아니라 workspace validation/publishing orchestration을 담당한다 | **대체됨: D027**, 사용자 명시, 2026-09-21 | Payload + PostgreSQL + Lexical을 1.0 CMS/persistence로 유지 |
-| D023 | publishing은 DB snapshot을 Markdown으로 export하는 작업이 아니라 canonical docs revision을 입력으로 검증·projection·Site delivery를 수행한다 | **D036에서 보강**, D021–D022의 직접 결과, 2026-09-21 | DB snapshot → generated docs projection → Site 흐름 |
-| D024 | Fumadocs의 built-in UI/Editor component capability를 우선 재사용한다. 독립 `@oomia/content-components` React library는 1.0 선행 과제에서 제거하고, 실제 custom component가 생겨 cross-repository contract가 필요할 때 얇은 profile/adapter package를 도입한다 | 사용자 방향 전환 및 오버엔지니어링 회피, 2026-09-21 | D018–D020의 독립 renderer/component library 선행 구축 |
-| D025 | architecture migration은 새 Git-backed vertical slice를 먼저 검증한 뒤 legacy Payload/PostgreSQL path를 단계적으로 retire한다. 과거 Issue/branch는 현재 Knowledge와 reconciliation 후에만 계속하며 미병합 작업을 먼저 보존한다 | 사용자 요청에 따른 migration context/정합성 강화, 2026-09-21 | 기존 구현 중단 상태를 그대로 재개하거나 새 path 검증 전에 big-bang delete |
-| D026 | `oomia.github.io.docs`의 layout은 구현 목적에 따라 자유롭게 결정할 수 있다. 자유는 unconstrained document tree뿐 아니라 strict directory/path/frontmatter convention을 의도적으로 선택해 강제하는 방식까지 포함한다. Knowledge는 현재 어느 쪽도 선결하지 않는다 | 사용자 정정, 2026-09-21 | “layout 자유”를 strict layout을 배제하거나 convention을 항상 최소화해야 한다는 뜻으로 해석 |
-| D027 | 1.0 editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware/visual candidate로 비교하며 핵심 과제는 두 도구와 Site가 동일 filesystem workspace를 공유하는 integration framework를 검증하는 것이다 | 사용자 명시 + 조사 결과, 2026-09-21 | Obsidian과 Fumadocs Editor를 동등한 필수 1급 client로 미리 확정 |
-| D028 | authoring/integration 검증은 synthetic 최소 fixture보다 기존 작성 content corpus를 우선 import해 실제 구조·문법·스타일 충돌을 빠르게 드러낸다. 최소 fixture는 edge-case regression에만 보조적으로 사용한다 | 사용자 명시, 2026-09-21 | 최소 fixture 자체를 핵심 migration outcome으로 삼는 접근 |
-| D029 | Obsidian-native custom syntax/style bridge는 1.0 필수 고려사항이 아니다. 기존 content가 이미 Obsidian 기반이므로 1.0 integration은 기존 corpus와 Fumadocs/Site 호환, editor 선택, custom component 주입 경험에 집중한다 | 사용자 명시, 2026-09-21 | Obsidian custom callout/plugin ↔ Fumadocs transformation을 1.0 핵심 과제로 선행 |
-| D030 | JavaScript/TypeScript repository의 전역 toolchain entry point는 Vite+ `vp`다. package management, check/lint/fmt/test/build/task/hooks에서 VP를 우선하고 동등 역할의 Turbo/Husky/Prettier/ESLint wrapper를 새로 중복 도입하지 않는다 | 사용자 명시 + Vite+ 공식 문서 조사, 2026-09-21 | repository마다 package manager/task runner/check/hook interface를 별도로 조합 |
-| D031 | implementation repository는 monorepo-ready but package-light 구조를 기본으로 한다. `apps/*`는 실행 단위, `packages/*`는 검증된 재사용/dependency boundary, `tools/*`는 repository-only 개발 도구이며 추측성 `utils/shared/infra` package를 선행 생성하지 않는다 | 사용자 요청 + Vite+/pnpm/Astro repository 조사, 2026-09-21 | 처음부터 많은 layer/package를 만들어 architecture diagram을 filesystem에 그대로 투영 |
-| D032 | Engine의 새 target implementation은 같은 repository history를 보존한 채 greenfield scratch build를 기본 migration 전략으로 한다. legacy tree는 template가 아니라 reference이며 generic verified behavior만 의도적으로 port한다 | 사용자 명시, 2026-09-21 | Payload/PostgreSQL 중심 tree를 계속 깎아내는 in-place refactor를 기본값으로 사용 |
-| D033 | Engine scratch bootstrap baseline은 Node.js `24.20.0`, pnpm `12.3.4`, Vite+ `0.3.3`으로 pin한다. Site와 동일 Node/pnpm baseline을 재사용하고 현재 Engine/최신 Vite+ 0.3.3을 사용하며, 이후 upgrade는 별도 Maintenance change로 다룬다 | 현재 repository state + Fumadocs Node 24+ requirement + Vite+ 0.3.3 latest release 조사, 2026-09-21 | scratch 시작과 동시에 unrelated Node/pnpm/toolchain upgrade를 섞거나 floating latest 사용 |
-| D034 | publish는 **committed-revision publish**를 사용한다. Engine은 dirty docs working tree를 자동 stage/commit하지 않고, 사용자가 확정한 docs commit을 입력으로 검증·push하고 Site가 exact docs SHA를 소비하도록 revision linkage와 delivery를 orchestration한다 | 사용자 명시, 2026-09-21 | Engine이 authoring working tree를 자동 commit하는 one-click publish; 기본 branch/PR 생성 publish |
-| D035 | Engine 1.0은 **stateless, invocation-driven CLI-first one-shot runtime**으로 구현한다. Engine은 명령 실행 시 시작해 filesystem/Git/Site 작업을 수행하고 exit code/log를 남긴 뒤 종료한다. long-running HTTP service, job queue, server-side session/state lifecycle은 1.0 비목표이며 필요 시 동일 operation API 위에 별도 adapter로 추가한다 | 사용자 명시, 2026-09-21 | resident HTTP/service Engine을 1.0부터 운영 |
-| D036 | **Authoring Draft → Prepared Canonical Source → committed Canonical Revision → Publishable Projection**을 분리한다. Engine은 commit 전에 working-tree source를 enrich할 수 있고, 사용자가 검토·commit한 revision이 durable canonical source가 된다. Site 입력은 그 revision에서 deterministic하게 materialize한 projection일 수 있다 | 사용자 정정, 2026-09-21 | metadata enrichment를 commit 이후에만 수행한다고 가정; canonical source file과 Site input이 항상 byte-for-byte 동일하다고 가정 |
-| D037 | metadata enrichment는 Publishing Platform의 핵심 책임으로 취급한다. Engine은 commit 전 `prepare` 단계에서 persistent/user-meaningful metadata를 canonical source에 보완할 수 있고, commit 이후에는 source를 mutation하지 않는 deterministic projection을 수행한다 | 사용자 명시, 2026-09-21 | DB export 제거와 source enrichment 제거를 동일시; 모든 metadata를 publish 시점의 ephemeral 값으로만 계산 |
-| D038 | 1.0의 document-local persistent metadata는 **frontmatter-first**로 관리한다. Obsidian Properties 등 editor에서 통합 관리할 수 있도록 사람이 확인·수정하거나 장기 보존해야 하는 metadata는 기본적으로 문서 frontmatter에 저장한다. sidecar/reference metadata는 frontmatter가 부적합한 실제 사례가 생길 때 쓰는 extension으로 둔다 | 사용자 명시, 2026-09-21 | sidecar와 frontmatter를 동등한 기본 저장 방식으로 시작; 모든 metadata를 별도 registry/file에 강제 |
-| D039 | Engine에 **source-mutating pre-commit `prepare` operation**을 둔다. `prepare`는 frontmatter를 보완/검증하지만 Git stage/commit/push는 하지 않는다. `verify`는 working tree 또는 committed input을 read-only로 검증하고, `publish`는 D034에 따라 committed revision만 대상으로 source를 수정하지 않는다 | 사용자 요구에서 직접 도출, 2026-09-21 | metadata 보완을 commit 이후 projection 단계에서만 수행; `publish`가 dirty source를 자동 수정·commit |
-| D040 | frontmatter에 **사용자가 명시적으로 설정한 값이 있으면 해당 field는 authoritative**하며 Engine은 그 field를 재계산·덮어쓰지 않는다. Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다 | 사용자 명시, 2026-09-21 | Engine-generated default/derived value가 explicit user metadata를 덮어씀 |
-| D041 | timestamp derivation, prepare 대상 선택(file/staged/all), interactive UX, YAML/source formatting 수준 같은 세부 동작은 초기 Knowledge contract로 고정하지 않고 Engine 구현 레포에 위임한다. 구현·실험을 통해 바꾸기 쉬운 상태를 우선하며 Knowledge는 user-value preservation, frontmatter-first, prepare-before-commit 같은 핵심 경계만 소유한다 | 사용자 명시, 2026-09-21 | 초기 설계에서 모든 CLI/mutation/formatting semantics를 선결 |
-| D042 | Knowledge repository의 **장시간·다문서·다단계 변경은 별도 branch에서 작업하고 PR로 검토 후 기본적으로 squash merge**한다. `main` 직행은 작은 국소 수정에 한정해 main history를 고수준 변화 단위로 유지한다 | 사용자 명시, 2026-09-21 | 긴 작업을 여러 작은 commit으로 main에 직접 누적 |
-| D043 | canonical source의 **byte-exact formatting 보존은 1.0 contract가 아니다**. VP formatter/linter, editor, YAML/Markdown tooling이 의미를 유지하는 범위에서 formatting을 normalize할 수 있으며, 핵심 보장은 explicit user metadata와 semantic content를 임의로 덮어쓰지 않는 것이다 | 사용자 명시, 2026-09-21 | YAML key order/quoting/whitespace/body bytes까지 exact preservation을 필수 계약으로 고정 |
+과거 제안, superseded decision chain, 정리 전 상세 Git history가 필요하면
+`archive/main-before-cleanup-20260921` branch를 참고한다.
 
+세부 규칙은 각 owning document가 canonical source이며, 이 문서는 현재 방향을 빠르게 파악하기 위한 index다.
 
-D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
+## Knowledge
 
-D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현·품질·배포 성공은 구현 레포의 코드·테스트·commit/PR·실행/deployment Evidence가 별도로 필요하다.
+- Knowledge `main`은 과거 변화 기록보다 **현재 목표·계약·미결 사항**을 설명한다.
+- 장시간·다문서·다단계 변경은 별도 branch에서 수행하고 PR로 검토한 뒤 **squash merge**를 기본으로 한다.
+- 작은 국소 수정만 `main`에 직접 반영할 수 있다.
+- live 작업 상태는 `handoff/current.md`, 구현 수준은 revision-bound Implementation Map (`docs/implementation-map.md`), 실제 작업 상태는 GitHub Project와 책임 구현 repository가 소유한다.
 
-D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
+## Canonical content
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D043이 현재 1.0 persistence/authoring/integration, enrichment/projection, implementation-bootstrap 및 Knowledge 운영 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+- canonical authoring content는 Git-backed filesystem document workspace에 둔다.
+- local working tree는 draft/uncommitted state이며, `ooMia/oomia.github.io.docs`의 commit이 durable shared canonical revision이다.
+- document-local persistent metadata는 **frontmatter-first**다.
+- explicit frontmatter value가 있으면 그 값을 authoritative로 보고 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
+- Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다.
+- byte-exact formatting preservation은 contract가 아니다. formatter/editor/tooling이 semantic content와 explicit metadata 의미를 보존하는 범위에서 source를 normalize할 수 있다.
+- sidecar/reference metadata는 frontmatter가 실제로 부적합한 사례가 생길 때 도입한다.
+- docs layout은 free-form, consumer-specific convention, strict repository-wide convention 중 어느 형태도 현재 사전에 금지하지 않는다.
 
-D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
+## Authoring
+
+- 기존 content corpus는 Obsidian 기반이며 basic Obsidian Markdown/file authoring은 이미 가능한 경로로 본다.
+- 최종 editor 역할은 아직 확정하지 않는다.
+- Fumadocs Editor는 custom component authoring/structured editing에서 실제 이점이 있는지 기존 corpus로 검증한다.
+- Obsidian-native custom syntax/CSS/plugin bridge는 1.0 필수 범위가 아니다.
+- synthetic fixture보다 기존 작성 corpus를 integration evidence로 우선 사용하고, fixture는 edge-case regression에 보조적으로 사용한다.
+
+## Engine
+
+- Engine 1.0은 **stateless, invocation-driven, CLI-first one-shot runtime**이다.
+- 기본 operation surface는 `doctor / prepare / verify / publish` 방향으로 설계한다.
+- `prepare`는 commit 전에 working-tree source를 수정할 수 있지만 stage/commit/push하지 않는다.
+- `verify`는 source mutation 없이 검증한다.
+- `publish`는 사용자가 확정한 committed docs revision을 대상으로 하며 dirty source를 자동 commit하지 않는다.
+- timestamp derivation, file/staged/all selection, prompt UX, formatting 방식 같은 초기 구현 세부사항은 Engine repository에서 유연하게 실험한다.
+- Engine은 Payload/PostgreSQL 기반 CMS를 target architecture로 유지하지 않는다.
+
+## Publishable projection
+
+- canonical authoring source와 Site가 실제 소비하는 document는 동일할 필요가 없다.
+- persistent/user-meaningful metadata는 commit 전에 canonical source에 저장할 수 있다.
+- committed canonical revision 이후에는 consumer-specific/derived 정보를 deterministic publishable projection으로 만들 수 있다.
+- projection은 derived artifact이며 새로운 source of truth가 아니다.
+- 최종 publishability에는 실제 Site consumer validation/build가 포함되어야 한다.
+- projection materialization 위치는 Site/Fumadocs integration evidence를 보고 결정한다.
+
+## Site / components
+
+- Site는 현재 Astro 기반 delivery evidence를 보존하며 incremental migration을 우선한다.
+- Fumadocs UI/Core/MDX 등 검증된 built-in capability를 우선 재사용한다.
+- 별도 custom component package/profile은 실제 cross-repository sharing contract가 필요해질 때만 만든다.
+- Turbo 사용을 새 workflow에서 확대하지 않으며, 제거 여부는 Vite+ task parity와 existing build/CI evidence를 확인한 뒤 결정한다.
+
+## Engineering
+
+- JavaScript/TypeScript repository의 primary command surface는 Vite+ `vp`다.
+- Vite+가 제공하는 package/check/lint/fmt/test/build/task/hook 기능을 우선 사용하고 동등 역할 wrapper를 새로 중복 도입하지 않는다.
+- repository structure는 **monorepo-ready, package-light**를 기본으로 한다.
+- `apps/*`는 실행 단위, `packages/*`는 실제 reusable/dependency boundary, `tools/*`는 repository-only tooling에 사용한다.
+- 새 Engine target은 기존 repository history를 유지하면서 **greenfield scratch implementation**으로 시작한다.
+- legacy tree는 template가 아니라 reference이며 generic verified behavior만 의도적으로 port한다.
+- scratch bootstrap baseline은 현재 Node.js `24.20.0`, pnpm `12.3.4`, Vite+ `0.3.3`이다. 이후 upgrade는 별도 maintenance change로 다룬다.
+- 새 Git-backed vertical slice가 검증되기 전에 legacy path를 big-bang delete하지 않는다.
+
+## Planning / Project
+
+- GitHub Project 분류 필드 이름은 **Work Type**을 사용한다.
+- Objective와 Target Release는 서로 다른 목적의 필드로 유지한다.
+- Scope는 작업이 직접 변경하는 책임을 표현하며 불필요한 dependency tagging을 피한다.
+- Project README는 장기 설계를 복제하지 않고 canonical Knowledge 문서를 찾기 위한 index로 유지한다.
+
+## Historical reference
+
+과거 상세 설계·provenance·변경 순서가 실제로 필요할 때만 `archive/main-before-cleanup-20260921` branch를 참고한다. 현재 방향은 항상 현재 `main`의 canonical documents를 우선한다.
 
 <!-- END SOURCE: docs/decisions.md -->
 
@@ -2653,9 +2673,9 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 
 ## 고정된 최소 metadata invariant
 
-- document-local persistent metadata는 frontmatter-first다(D038).
-- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다(D039).
-- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**(D040).
+- document-local persistent metadata는 frontmatter-first다.
+- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다.
+- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**.
 - Engine은 unset/missing field를 보완하는 방향으로 시작한다.
 - formatting 변화 자체는 contract violation이 아니다. VP formatter/linter 또는 구현 도구가 deterministic consistency를 위해 source 형식을 normalize할 수 있다.
 - 다만 formatter/enrichment가 사용자가 명시한 metadata의 의미를 바꾸거나 unrelated semantic content를 임의로 변경해서는 안 된다.
@@ -2681,9 +2701,9 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 
 1. CONTEXT.md (`CONTEXT.md`)에서 해당 규칙을 소유하는 파일을 찾는다.
 2. 원본 Markdown을 수정한다. 새로운 제안은 확정된 규칙으로 섞지 말고 open-questions.md (`docs/open-questions.md`)에 기록한다.
-3. 의미 있는 방향 변경에는 decisions.md (`docs/decisions.md`)에 stable ID, 상태, 이유, 출처, 대체한 결정을 남긴다. 과거 기록을 삭제하지 않는다.
+3. cross-repository/product 방향이 바뀌면 Current Decisions (`docs/decisions.md`)를 **현재 유효한 상태**로 갱신한다. superseded chain이나 과거 chronology는 현재 `main`에 유지하지 않는다.
 4. 구현 상태를 변경하려면 Implementation Map (`docs/implementation-map.md`)의 기준 revision보다 구현 레포가 진행되었는지 확인하고 실제 코드·테스트·commit/deployment Evidence를 다시 조사한다.
-5. CHANGELOG.md (`CHANGELOG.md`)를 갱신하고 `python3 scripts/bundle.py`를 실행한다.
+5. `python3 scripts/bundle.py`를 실행해 context bundle을 갱신한다.
 6. 변경 내용을 Git diff로 검토하고 커밋한다.
 
 규칙의 중복 복사는 피한다. GitHub Project README와 필드 description은 이 레포의 canonical 정의를 가리키는 탐색 계층으로 유지한다. 별도 레포의 코드와 계약을 함께 바꾸는 경우 관련 PR/commit을 서로 연결한다.
@@ -2715,77 +2735,10 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 
 ## 대화에서 변경을 가져올 때
 
-사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 과거 대화에 근거하는 항목은 provenance의 source/turn metadata를 유지하고, 현재 요청으로 새로 확정한 내용은 실제 날짜와 변경 commit으로 추적한다. raw transcript는 repository에 복제하지 않는다.
+사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 `main`은 과거 대화 provenance를 별도 원장으로 유지하지 않는다. 과거 근거가 꼭 필요하면 `archive/main-before-cleanup-20260921` branch를 확인하고, 현재 문서에는 현재 유효한 결론만 반영한다.
 
 ## 공유
 
-이 레포는 raw conversation transcript를 보관하지 않는다. provenance에는 source/turn metadata와 최소 요약만 남기고, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
+이 레포의 현재 `main`은 raw conversation transcript나 source/turn provenance chronology를 보관하지 않는다. 과거 자료는 historical archive branch에 보존하며, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
 
 <!-- END SOURCE: CONTRIBUTING.md -->
-
-
----
-
-<!-- BEGIN SOURCE: provenance/README.md -->
-
-# Provenance
-
-수집일: 2026-09-18 (Asia/Seoul). 같은 프로젝트의 대화 3개, 모든 반환 페이지를 수집했다. 대화 당시 인용된 외부 링크와 도구 기능 주장은 현재 사실로 재검증하지 않았다.
-
-## 확정 수준
-
-- **사용자 명시**: 직접 요구하거나 정정한 내용.
-- **사용자 후속 확인 / README 반영**: 이후 사용자 메시지에 포함된 규칙. 전체 세부사항의 개별 승인을 뜻하지 않는다.
-- **최신 제안**: 최신 assistant 답변을 정리 기준으로 사용했으나 명시적 승인 및 실제 적용을 주장하지 않는다.
-- **이번 구성**: 현재 요청을 수행하기 위한 파일 구조·템플릿·편집 요약.
-- **미검증**: 실제 구현 또는 외부 운영 상태를 확인하지 않음.
-
-최신 제안은 이전 초안보다 우선하되 사용자의 명시적 요구를 덮어쓰지 않는다. 문서의 짧은 turn ID는 아래 전체 ID에 대응한다.
-
-Knowledge repository에는 **raw conversation transcript를 보존하지 않는다.** 아래 source/turn index와 최소 발언 요약만 provenance metadata로 유지한다. 장기적으로 필요한 내용은 owning canonical 문서와 Decision Log에 승격하고, 아직 진행 중인 실행 상태는 `handoff/current.md`가 담당한다. 원문이 꼭 필요한 경우에는 아래 원본 대화 링크처럼 원래 시스템의 source를 확인하며, Knowledge 자체를 대화 archive로 사용하지 않는다.
-
-## Sources and Turns
-
-### S1 — 활동 계획 수립
-
-[원본 대화](https://chatgpt.com/c/6aa8c18b-d9a4-83ee-9bc9-5bfeec691330)
-
-| Turn ID | 사용자 발언 시작 |
-|---|---|
-| `33b898b1-671f-4436-a0bc-b5c8cb071482` | 직접 구현하는 것보다, 이미 잘 만들어진 도구를 잘 활용하고자 노력하는 방향성이, 핵심 기능이 아닌 곳에 시간을 할애할 때의 마음가짐이 되어야 한다고 본다. 따라서, 나의… |
-| `1f288b42-a887-4948-b7d2-1249a2d210fe` | 내게 필요한 것은 다양한 답변보다, 자동화 가능성 높은 루틴과 사고/계획 프레임워크입니다. 지금은 뭔가 실속 없는 내용들을 장황하게 늘어놓는 느낌입니다. 제가 최종 목표를… |
-| `e0a335ad-74c3-43fd-93c4-eb3c40770b42` | 1. 주말 이전에 브리핑 약속을 사전에 잡고 진행하면 되며, 일반적으로 토요일 밤이나 일요일 낮이 될 것 같다. 2. 공식 형식은 없으나, 단순 결과물이 아닌 A-Z의 스… |
-| `17efd584-bf83-437d-8f17-72d6185e0c94` | LilysAI_일반_엠버서더 활동에 대한 계획을 세워보자. 다음은 해당 프로그램에 대한 간략한 요약이다. 링크를 직접 참조하여 내용을 파악해보자. http… |
-
-### S2 — GitHub Project 초안 작성
-
-[원본 대화](https://chatgpt.com/c/6aa991ee-6238-83ee-bef8-5d330246837a)
-
-| Turn ID | 사용자 발언 시작 |
-|---|---|
-| `82ef0a72-fc2e-480c-b4b5-53a941b93465` | Scope는 다중 선택 옵션으로 만들 수도 있다. 단일 선택 옵션의 경우, 어떤 작업은 어떤 영역으로 두어야 할 지 고민할 수 있다. 서로 다른 두 영역에 걸쳐 있는 작업… |
-| `4a49654f-9727-4bef-a51f-b8c2c6a4ed3b` | 1. Release Target의 용법에 대한 설명: SemVer 뒤에 붙는 context를 별도의 필드로 추출하지 않아야만 하는 이유는? 2. Scope 필드는 sing… |
-| `3e786a51-3bc0-4c70-af4c-a726b8d5adb4` | - application boundary와 관련된 답변에서 표현을 \Article을 API를 통해 생성·조회·수정할 수 있고, 그 상태가 canonical state로 … |
-| `d7815342-69e8-47ae-9512-15aff0ec8cb7` | - 1.0 Product Boundary와 Release Target에서 1.0과 관련된 용어들 사이의 차이 (1.0 Definition부터 1.0 Readiness까지)… |
-| `178bf729-4b1d-4bc9-ab65-203481022f60` | 1. Category 대신 Work Type을 사용했으니 앞으로의 표현에 참고하도록. 2. milestone을 목표처럼 사용하는 것에 대한 의견. 의견을 내기 전에 Git… |
-| `4c1f839e-0f53-4803-99ca-f84cd5724030` | - Type은 예약되어있는 필드명이라 Category로 바꿨는데, 대안이 있을까? - Acceptance Criteria와 DoD의 혼용에 혼란스럽다. 간단한 예시를 통해… |
-| `138f8f89-0c4a-450e-9abd-677215c6d8de` | GOAL: Make the canonical content persistence path executable through the existing application c… |
-| `2877a148-8c99-425b-8896-d738308e239a` | Area와 Component를 만드는 것 자체는 좋지만,Area A에 Component A1, A2, A3가 속하는 느낌이라면, 차라리 A:A1 같이 합치는 것이 유지보수… |
-| `9e4fc270-7151-4b7d-8044-ce625803cd70` | 사용자/시스템 기능보다는 기술 구조가 더 편하게 느껴진다. 그러나 Database, CMS와는 달리, Astro는 Web App 중 실제 문서와 기타 기술 블로그를 구성하… |
-| `5b7f689f-9eb1-410a-8c62-549b49124eb1` | 이슈 생성 시, default assignee, default label, 그리고 Milestone 설정을 할 수 있어? 할 수 있다면 하는 게 좋을까? 또 모든 작업에 … |
-| `ab0703f8-90a7-4e66-b788-12e8a81acf63` | Project의 각 아이템은 레포의 이슈인지, Item을 할당하려면 반드시 특정한 레포를 명시해야하는지, 그리고 기본적으로 모든 이슈는 draft로 생성되도록 강제할 수 … |
-| `d7f1bf49-931a-4fd8-b056-a873fcfba13f` | 일단 나도 Iteration 스타일을 선호한다. 이에 맞는 방식을 처음부터 진행하는 것이 적응에 도움이 되리라 본다. 그리고 현재의 README는 다소 장황하다. 핵심 가… |
-| `833044bb-289f-454c-b891-cc9fe77cca17` | 기본 레포지토리 설정 없이 GitHub Project의 이름을 \Publishing Platform\로 설정하고, 거의 처음으로 본격적으로 GitHub Project를… |
-
-### S3 — README Evidence Planning
-
-[원본 대화](https://chatgpt.com/c/6aac4ab0-1e38-83e8-a671-8cbbfa4173ae)
-
-| Turn ID | 사용자 발언 시작 |
-|---|---|
-| `b0174bce-6fff-4f18-bd3a-d931088e34c7` | [@GitHub](plugin://github@openai-curated-remote) https://github.com/users/ooMia/projects/11/ (`provenance/… |
-| `72f26f1b-8a12-4af1-b990-b95223fb8d41` | GitHub Project에 README로 설계안을 기록해두는 게 LLM을 사용하는 동안 컨텍스트 전달이 불편한데, Notion이나 다른 MCP 붙이고 별도로 정리해두는 … |
-| `f55d6e75-29f6-4b53-a2b8-121a27384873` | 실제 필드에 **Authoring Experience가 있는데, 이건 유지하는 게 좋을까 삭제해도 좋나** - **Authoring Experience** - **Cano… |
-| `353c6aa1-89d0-450f-b803-f87a069dfbd8` | 1. Canonical Content&`)에 기록한다. GitHub Project의 live 필드·Item·Status Update는 여전히 이 provenance 수집 범위가 아니다. 최신 canonical 문서에 승격되지 않은 초기 제안은 현재 정책으로 간주하지 않는다.
-
-<!-- END SOURCE: provenance/README.md -->

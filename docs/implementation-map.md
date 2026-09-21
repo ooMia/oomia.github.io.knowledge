@@ -119,7 +119,7 @@ Site
    - custom component는 실제 수요가 있을 때만 shared profile/spec 추가
 
 6. **Engine Scratch Bootstrap**
-   - D032에 따라 greenfield skeleton 생성
+   - greenfield scratch skeleton 생성
    - [Development Toolchain](development-toolchain.md)과 [Repository Design](repository-design.md) 적용
    - legacy code는 keep/adapt/retire review 후 필요한 generic behavior만 port
 

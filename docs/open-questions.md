@@ -36,9 +36,9 @@
 
 ## 고정된 최소 metadata invariant
 
-- document-local persistent metadata는 frontmatter-first다(D038).
-- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다(D039).
-- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**(D040).
+- document-local persistent metadata는 frontmatter-first다.
+- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다.
+- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**.
 - Engine은 unset/missing field를 보완하는 방향으로 시작한다.
 - formatting 변화 자체는 contract violation이 아니다. VP formatter/linter 또는 구현 도구가 deterministic consistency를 위해 source 형식을 normalize할 수 있다.
 - 다만 formatter/enrichment가 사용자가 명시한 metadata의 의미를 바꾸거나 unrelated semantic content를 임의로 변경해서는 안 된다.
