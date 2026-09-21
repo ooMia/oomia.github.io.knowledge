@@ -9,7 +9,7 @@
 - canonical content는 Git-backed local filesystem document workspace에 보존한다. publishable 문서는 Markdown/MDX + frontmatter/assets를 사용할 수 있고, docs layout은 free-form부터 strict convention까지 아직 열려 있다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
 - authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
-- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
+- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 stateless, invocation-driven CLI-first one-shot runtime을 목표로 한다.
 - storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
 - Fumadocs UI/Core/MDX를 Site에서 우선 재사용하고, Fumadocs Editor는 custom-component authoring 이점이 실제로 필요한지 비교한다. Obsidian-native custom syntax bridge는 1.0 필수 고려사항이 아니다.
 - JavaScript/TypeScript 구현에서는 [Development Toolchain](docs/development-toolchain.md)의 VP-first 정책과 [Repository Design](docs/repository-design.md)의 monorepo-ready/package-light 원칙을 적용한다.
@@ -52,6 +52,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
+12. Engine 1.0은 one-shot CLI adapter를 사용한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
 
 ## 프로젝트 협업·응답 원칙
 
