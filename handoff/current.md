@@ -44,7 +44,7 @@ GitHub Pages
 - editor 역할은 아직 확정하지 않는다. Fumadocs Editor가 custom component 주입·structured editing에서 실제 UX/DX 이점을 주는지가 핵심 비교점이다.
 - Obsidian-native custom syntax/CSS/plugin bridge는 1.0 필수 고려사항이 아니다.
 - Fumadocs UI/Core/MDX는 Site integration의 주요 재사용 후보다.
-- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publish / Site verification orchestrator다.
+- Engine은 DB-backed CMS가 아니라 stateless, invocation-driven CLI-first one-shot workspace validation / Git / publish / Site verification orchestrator다.
 - Payload/PostgreSQL/Lexical은 legacy implementation/Evidence다.
 - Engine의 새 target implementation은 D032에 따라 **greenfield scratch build**를 기본 전략으로 한다.
 - JavaScript/TypeScript repository는 D030의 **VP-first** toolchain과 D031의 **monorepo-ready, package-light** 구조를 기본값으로 사용한다.
@@ -223,21 +223,22 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 - docs layout / consumer convention
 - actual editor role
-- Engine container mount/credential contract
+- Engine container mount/credential contract — D034/D035 기준으로 다음 설계 대상
 - custom component shared profile/package 필요 시점
 - Site Turbo retirement timing
 - Site incremental migration 범위
 
-## Immediate user decision gates
+## Resolved bootstrap gates
 
-현재 scratch bootstrap을 실제로 막는 사용자 선택은 두 개다.
+### Q022 — Engine execution surface — 결정됨
 
-### Q022 — Engine execution surface
+D035에 따라 **stateless, invocation-driven CLI-first one-shot runtime/container**를 사용한다.
 
-- **A. CLI-first one-shot runtime/container**: Engine은 명령 실행 후 종료. `verify`, `publish`, `doctor` 같은 command surface 중심.
-- **B. long-running service 포함**: HTTP/API process와 lifecycle을 1.0부터 소유.
-
-현재 architecture와 오버엔지니어링 회피 기준에서는 A를 권장한다.
+- command invocation마다 Engine process가 시작·종료한다.
+- 1.0 public adapter는 CLI다.
+- persistent state는 filesystem/Git/Site/Evidence에 둔다.
+- HTTP server, job queue, server-side session/status lifecycle은 1.0 비목표다.
+- core operations는 CLI parsing/stdout/process exit와 분리해 향후 다른 adapter를 추가할 수 있게 한다.
 
 ### Q016 — Git publish ownership — 결정됨
 
@@ -259,8 +260,10 @@ D034에 따라 **committed-revision publish**를 사용한다.
 5. docs layout 후보(free/discovery/strict)를 integration 결과로 비교한다.
 6. Engine scratch bootstrap Issue를 설계한다.
    - first change: stale Copilot instructions 교체
-   - VP exact pin 결정
-   - minimal workspace skeleton
+   - D033 toolchain baseline 적용
+   - D035 CLI-first one-shot skeleton
+   - public command contract(`doctor` / `verify` / `publish`) 구체화
+   - Q008 mount / Git credential contract 구체화
    - legacy product dependency/task 없음
 7. #13/#14와 관련 Project Items를 새 architecture에 맞춰 supersede/re-scope한다.
 8. 그 이후 Engine scratch implementation을 Codex에 handoff한다.
