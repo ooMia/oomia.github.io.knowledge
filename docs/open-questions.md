@@ -16,7 +16,7 @@
 | Q017 | 실제 authoring editor 역할 분담 | Evidence-gated. Fumadocs Editor는 local files를 SoT로 유지하고 built-in/custom component specs를 지원한다. 기존 Obsidian corpus를 Fumadocs Site에 연결한 뒤 custom-component authoring 이득을 비교해 Obsidian-only / optional Fumadocs Editor / Fumadocs-heavy 중 결정. Studio vs embedded UI는 채택 이후 하위 결정 |
 | Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
 | Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
-| Q022 | Engine 1.0 실행 표면 | **사용자 결정 필요.** (A) CLI-first one-shot runtime/container, (B) long-running HTTP/service shell 포함. scratch directory, public command contract, container ENTRYPOINT가 달라지므로 bootstrap 전에 결정 |
+| Q022 | Engine 1.0 실행 표면 | **해결됨: D035.** stateless, invocation-driven CLI-first one-shot runtime/container를 사용한다. long-running HTTP/service shell은 1.0 비목표이며 향후 필요 시 operation API 위 adapter로 추가 |
 
 ## 분리 원칙
 
@@ -31,8 +31,8 @@
 
 ### 지금 사용자 결정이 필요한 gate
 
-1. **Q022 — Engine execution surface**
-   - 이 결정이 scratch app entrypoint, container lifecycle, command/API contract를 정한다.
+1. **Q022 — Engine execution surface — 해결됨(D035)**
+   - scratch app entrypoint는 CLI-first one-shot으로 고정. 다음 설계는 public commands와 container mount/credential contract(Q008) 구체화.
 2. **Q016 — Git publish ownership — 해결됨(D034)**
    - Q022가 결정되면 D034를 기준으로 container credential/mount contract(Q008)를 구체화한다.
 
@@ -47,7 +47,7 @@
 
 ### 1.0 구현 중 또는 실제 필요 발생 시 결정
 
-- Q008 container distribution/mount/credential 세부사항 — Q022/Q016 이후
+- Q008 container distribution/mount/credential 세부사항 — D034/D035 기준으로 이제 구체화 가능
 - Q010 asset/large binary policy
 - Q012 shared custom-component profile/package
 - Q014 raw HTML/executable MDX security 세부 정책
