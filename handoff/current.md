@@ -62,7 +62,7 @@ GitHub Pages
 현재 target에서는 기존 AC 대부분이 filesystem boundary로 이동한다.
 
 - raw source create/update → filesystem editing
-- Exact preservation → source/file semantics
+- source preservation → filesystem/source semantics
 - unsupported visual content fallback → source editor
 - broken draft storage → working tree
 - metadata preservation → file/frontmatter operation
