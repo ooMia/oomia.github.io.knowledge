@@ -21,12 +21,17 @@ Architecture migration 관련 작업은 다음 순서로 읽는다.
 authoring editor(s)
         │
         ▼
-local Git docs workspace
-        │
-        │ validate / commit / push
+local Git docs source
+        │ commit
         ▼
 oomia.github.io.docs
- canonical revision
+ canonical source revision
+        │
+        ▼
+metadata enrichment / projection
+        │
+        ▼
+Site-consumable documents
         │
         ▼
 oomia.github.io Site
@@ -37,7 +42,7 @@ GitHub Pages
 
 현재 핵심 결정:
 
-- canonical content는 Git-backed filesystem document workspace다.
+- canonical authoring content는 Git-backed filesystem document workspace다. Site가 실제 소비하는 문서는 metadata enrichment를 거친 deterministic projection일 수 있으며 source와 동일할 필요가 없다.
 - [Docs repository](https://github.com/ooMia/oomia.github.io.docs)의 Git commit이 durable shared canonical revision이다.
 - docs layout은 아직 결정하지 않았다. free-form tree, consumer discovery convention, strict repository-wide layout을 모두 허용한다. D026의 “자유”는 strict layout을 금지한다는 뜻이 아니다.
 - 기존 content는 이미 Obsidian에서 작성된 corpus이므로 basic Obsidian authoring compatibility는 1.0의 핵심 불확실성이 아니다.
@@ -201,6 +206,40 @@ strict layout을 선택하는 것도 완전히 유효하다. 선택 기준은 Fu
 - Engine이 자신의 docs submodule pointer까지 매 publish마다 commit하는 self-recording
 - Engine이 authoring working tree를 자동으로 생성/교체/commit하는 legacy export ownership
 
+## Metadata enrichment / projection boundary
+
+사용자 정정으로 다음을 명시적으로 구분한다.
+
+```text
+authoring source
+   + inline frontmatter
+   + sidecar/reference metadata
+   + defaults
+   + deterministic derived metadata
+        ↓
+metadata resolution
+        ↓
+publishable projection
+        ↓
+Site
+```
+
+핵심:
+
+- DB export를 제거한다고 publish-time transformation까지 제거하는 것이 아니다.
+- 다양한 metadata를 배포 전에 주입하는 것은 Publishing Platform의 핵심 product behavior다.
+- authoring source를 Site contract에 맞추기 위해 불필요하게 mutation하지 않는다.
+- same source revision + same metadata inputs + same projection contract에서는 same projection을 재현해야 한다.
+- projection은 derived artifact이며 canonical source를 대체하지 않는다.
+
+Canonical: [Publishable Projection & Metadata Enrichment](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/publishable-projection.md)
+
+현재 미결:
+
+- inline frontmatter / sidecar / defaults / derived metadata 허용 범위와 precedence(Q023)
+- projection을 ephemeral staging / Site working tree / artifact 중 어디에 materialize할지(Q024)
+- sidecar를 사용할 경우 document identity/linkage(Q025)
+
 ## Current capability status
 
 [Implementation Map](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/implementation-map.md) 기준:
@@ -221,6 +260,9 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 현재 중요한 gate:
 
+- metadata composition / precedence
+- projection materialization location
+- sidecar 사용 시 document identity/linkage
 - docs layout / consumer convention
 - actual editor role
 - Engine container mount/credential contract — D034/D035 기준으로 다음 설계 대상
@@ -263,6 +305,8 @@ D034에 따라 **committed-revision publish**를 사용한다.
    - D033 toolchain baseline 적용
    - D035 CLI-first one-shot skeleton
    - public command contract(`doctor` / `verify` / `publish`) 구체화
+   - projection/metadata resolution boundary 반영
+   - Q023/Q024/Q025 중 bootstrap에 필요한 최소 contract 구체화
    - Q008 mount / Git credential contract 구체화
    - legacy product dependency/task 없음
 7. #13/#14와 관련 Project Items를 새 architecture에 맞춰 supersede/re-scope한다.
