@@ -5,6 +5,8 @@ Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷�
 Architecture Transition이 Active인 동안 Engine/Site/Docs 구현은 해당 transition guide를 먼저 따릅니다.
 JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정책을 함께 적용합니다.
 Canonical lifecycle은 Authoring Draft → Engine prepare → Prepared Canonical Source → user commit → deterministic Publishable Projection입니다.
+Explicit frontmatter value는 authoritative이며 Engine은 unset/missing field만 보완하는 방향으로 시작합니다.
+Knowledge의 장시간·다문서 변경은 branch + PR + squash merge를 기본으로 합니다.
 상대 링크는 원본 레포 기준입니다. JSON Schema와 템플릿은 별도로 참조하며, provenance에는 raw transcript가 아닌 source/turn metadata만 포함됩니다.
 
 
@@ -66,7 +68,8 @@ Content 관련 구현을 계획하거나 수정할 때:
 9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
-12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source를 수정할 수 있지만 stage/commit/push하지 않고, `verify`/`publish`는 source mutation과 분리한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
+12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
+13. Knowledge의 다문서·장시간·다단계 변경은 branch + PR을 사용하고 squash merge를 기본으로 한다. 작은 국소 수정만 `main` 직행을 허용한다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -1499,14 +1502,14 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 | 수준 | 보장 |
 |---|---|
-| Exact | source-oriented client가 저장한 Markdown/MDX bytes와 의미 있는 frontmatter를 불필요하게 재작성하지 않는다. |
-| Normalized | Visual Editor에서 실제 content를 수정한 경우 해당 editor가 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
+| Preserved | 사용자가 명시한 content와 metadata의 의미를 보존한다. byte-for-byte 동일성은 contract가 아니다. |
+| Normalized | Editor, VP formatter/linter 또는 선택한 tooling이 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
 | Reject | workspace/file contract 자체를 만족하지 못하거나 안전하게 파일로 보존할 수 없는 경우에만 저장을 거부한다. |
 
 기본 원칙:
 
-- source-oriented editing은 **Exact**를 우선한다.
-- visual/editor-specific tooling에서 실제 수정한 부분은 **Normalized 허용**일 수 있으나, editor 채택 전에 normalization behavior를 실제 corpus로 검증한다.
+- source-oriented editing도 byte-exact 보존을 요구하지 않는다. 사용자가 명시한 의미와 explicit frontmatter value를 보존하는 것이 우선이다.
+- visual/editor/formatter-specific tooling의 **Normalized** output을 허용하며, format/lint에 따른 일관된 source 변화 자체는 실패가 아니다.
 - Markdown/MDX 문법 오류나 현재 Site가 지원하지 않는 expression은 draft file로 저장할 수 있고 publish 단계에서 Blocked될 수 있다.
 - storage contract는 DB schema나 rich-text serialization compatibility를 요구하지 않는다.
 
@@ -1529,10 +1532,9 @@ canonical content의 물리적 표현은 local Git working tree의 files다. 다
 
 - document-local persistent metadata의 기본 저장소는 frontmatter다.
 - Engine이 자동 생성 가능한 값은 정책에 따라 frontmatter에 materialize할 수 있다.
-- 사용자의 판단이 필요한 required 값은 명확히 unresolved로 보고한다.
-- 기존 valid user-owned value를 임의로 덮어쓰지 않는다.
-- unknown frontmatter key를 보존한다.
-- body rewrite는 metadata update의 부수 효과로 발생해서는 안 된다.
+- existing explicit frontmatter value가 있으면 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
+- unset/missing field를 어떻게 채울지와 unresolved UX는 Engine 구현이 선택한다.
+- formatting/serialization normalization은 허용하지만 사용자가 명시한 content/metadata 의미를 임의로 바꾸지 않는다.
 - Git stage/commit/push는 하지 않는다.
 
 `prepare` 이후 사용자가 diff를 검토하고 필요한 값을 조정한 뒤 commit한다.
@@ -1585,23 +1587,23 @@ Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment�
 
 | 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
 |---|---|---|---|---|
-| 기본 Markdown | Source + 필요 시 Visual | Exact / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
-| 일반 GFM table | Visual 또는 Source | Exact / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
-| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Exact | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
-| 임의 code fence language | Visual 또는 Source | Exact | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
-| 일반 Markdown image | Visual 또는 Source | Exact | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
-| workspace-relative asset | Visual 또는 Source | Exact | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
-| durable external asset URL | Visual 또는 Source | Exact | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
-| raw HTML | Source | Exact | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
-| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Exact / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
-| Fumadocs built-in MDX component | Visual 또는 Source | Exact / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
+| 기본 Markdown | Source + 필요 시 Visual | Preserved / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
+| 일반 GFM table | Visual 또는 Source | Preserved / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
+| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Preserved | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
+| 임의 code fence language | Visual 또는 Source | Preserved | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
+| 일반 Markdown image | Visual 또는 Source | Preserved | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
+| workspace-relative asset | Visual 또는 Source | Preserved | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
+| durable external asset URL | Visual 또는 Source | Preserved | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
+| raw HTML | Source | Preserved | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
+| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Preserved / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
+| Fumadocs built-in MDX component | Visual 또는 Source | Preserved / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
 | custom MDX component + visual spec | Visual | Normalized | Publishable | 명시된 component contract와 Site consumer 검증을 통과해야 한다. |
-| custom MDX component + visual spec 없음 | Source | Exact | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
-| contract에 없는 MDX component | Source | Exact | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
-| 잘못된 component props | Source | Exact | Blocked | file 저장과 publish validation을 분리한다. |
-| arbitrary JavaScript expression | Source | Exact | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
-| 문서 내부 임의 import/export | Source | Exact | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
-| 문법 오류가 있는 draft | Source | Exact | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
+| custom MDX component + visual spec 없음 | Source | Preserved | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
+| contract에 없는 MDX component | Source | Preserved | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
+| 잘못된 component props | Source | Preserved | Blocked | file 저장과 publish validation을 분리한다. |
+| arbitrary JavaScript expression | Source | Preserved | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
+| 문서 내부 임의 import/export | Source | Preserved | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
+| 문법 오류가 있는 draft | Source | Preserved | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
 
 ## Authoring clients
 
@@ -1844,15 +1846,14 @@ source에서 언제든 재현 가능하고 사람이 보존·수정할 이유가
 
 필수 원칙:
 
-1. 이미 유효한 user-owned frontmatter를 임의로 덮어쓰지 않는다.
-2. Engine이 자동 결정 가능한 값과 사용자의 판단이 필요한 값을 구분한다.
-3. 자동 생성 값은 가능한 한 idempotent해야 한다.
-4. missing/invalid field는 document-level diagnostic으로 식별한다.
-5. unknown frontmatter key를 삭제하지 않는다.
-6. body를 metadata update의 부수 효과로 재작성하지 않는다.
-7. `prepare`는 Git stage/commit/push를 하지 않는다.
+1. **explicit frontmatter value가 있으면 authoritative**하며 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
+2. Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다.
+3. unknown frontmatter key와 사용자가 명시한 metadata 의미를 보존한다.
+4. `prepare`는 Git stage/commit/push를 하지 않는다.
+5. formatting/serialization normalization 자체는 금지하지 않는다. VP formatter/linter나 선택한 YAML/Markdown tooling이 일관된 형식으로 정리할 수 있다.
+6. metadata enrichment/formatting이 unrelated semantic content를 임의로 변경해서는 안 된다.
 
-정확한 field ownership, timestamp 의미, interactive/non-interactive behavior는 구현 전 결정이 필요하다.
+field generator, timestamp derivation, file/staged/all selection, prompt/diagnostic UX, normalization 수준은 초기 Knowledge contract로 고정하지 않고 Engine 구현 레포에 위임한다.
 
 ## 4. Publishable Projection
 
@@ -1999,10 +2000,8 @@ environment/workspace prerequisites를 진단한다.
 
 Engine scratch의 `prepare` 구현 전에:
 
-- persistent field ownership/generation policy
-- `createdAt` / `updatedAt` / `publishedAt` 등의 정확한 의미
-- interactive vs non-interactive missing-value resolution
-- frontmatter mutation safety / normalization 허용 범위
+- actual Site/Fumadocs integration에서 projection materialization 위치
+- public publish 전에 필요한 security/credential contract
 
 Vertical slice의 Site integration 전에:
 
@@ -2593,6 +2592,10 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D037 | metadata enrichment는 Publishing Platform의 핵심 책임으로 취급한다. Engine은 commit 전 `prepare` 단계에서 persistent/user-meaningful metadata를 canonical source에 보완할 수 있고, commit 이후에는 source를 mutation하지 않는 deterministic projection을 수행한다 | 사용자 명시, 2026-09-21 | DB export 제거와 source enrichment 제거를 동일시; 모든 metadata를 publish 시점의 ephemeral 값으로만 계산 |
 | D038 | 1.0의 document-local persistent metadata는 **frontmatter-first**로 관리한다. Obsidian Properties 등 editor에서 통합 관리할 수 있도록 사람이 확인·수정하거나 장기 보존해야 하는 metadata는 기본적으로 문서 frontmatter에 저장한다. sidecar/reference metadata는 frontmatter가 부적합한 실제 사례가 생길 때 쓰는 extension으로 둔다 | 사용자 명시, 2026-09-21 | sidecar와 frontmatter를 동등한 기본 저장 방식으로 시작; 모든 metadata를 별도 registry/file에 강제 |
 | D039 | Engine에 **source-mutating pre-commit `prepare` operation**을 둔다. `prepare`는 frontmatter를 보완/검증하지만 Git stage/commit/push는 하지 않는다. `verify`는 working tree 또는 committed input을 read-only로 검증하고, `publish`는 D034에 따라 committed revision만 대상으로 source를 수정하지 않는다 | 사용자 요구에서 직접 도출, 2026-09-21 | metadata 보완을 commit 이후 projection 단계에서만 수행; `publish`가 dirty source를 자동 수정·commit |
+| D040 | frontmatter에 **사용자가 명시적으로 설정한 값이 있으면 해당 field는 authoritative**하며 Engine은 그 field를 재계산·덮어쓰지 않는다. Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다 | 사용자 명시, 2026-09-21 | Engine-generated default/derived value가 explicit user metadata를 덮어씀 |
+| D041 | timestamp derivation, prepare 대상 선택(file/staged/all), interactive UX, YAML/source formatting 수준 같은 세부 동작은 초기 Knowledge contract로 고정하지 않고 Engine 구현 레포에 위임한다. 구현·실험을 통해 바꾸기 쉬운 상태를 우선하며 Knowledge는 user-value preservation, frontmatter-first, prepare-before-commit 같은 핵심 경계만 소유한다 | 사용자 명시, 2026-09-21 | 초기 설계에서 모든 CLI/mutation/formatting semantics를 선결 |
+| D042 | Knowledge repository의 **장시간·다문서·다단계 변경은 별도 branch에서 작업하고 PR로 검토 후 기본적으로 squash merge**한다. `main` 직행은 작은 국소 수정에 한정해 main history를 고수준 변화 단위로 유지한다 | 사용자 명시, 2026-09-21 | 긴 작업을 여러 작은 commit으로 main에 직접 누적 |
+| D043 | canonical source의 **byte-exact formatting 보존은 1.0 contract가 아니다**. VP formatter/linter, editor, YAML/Markdown tooling이 의미를 유지하는 범위에서 formatting을 normalize할 수 있으며, 핵심 보장은 explicit user metadata와 semantic content를 임의로 덮어쓰지 않는 것이다 | 사용자 명시, 2026-09-21 | YAML key order/quoting/whitespace/body bytes까지 exact preservation을 필수 계약으로 고정 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -2601,7 +2604,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D039가 현재 1.0 persistence/authoring/integration, enrichment/projection 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D043이 현재 1.0 persistence/authoring/integration, enrichment/projection, implementation-bootstrap 및 Knowledge 운영 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -2614,95 +2617,58 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 
 # Open Questions / Verification Gaps
 
-현재 canonical 정책에서 **사용자 결정이나 설계 선택이 아직 필요한 항목**만 유지한다. GitHub live 상태처럼 조회로 해결되는 운영 확인 사항은 Current Handoff (`handoff/current.md`)에 두고, 구현 수준과 revision-bound Evidence는 Implementation Map (`docs/implementation-map.md`)이 소유한다.
+현재 canonical 정책에서 **제품 경계나 cross-repository contract 수준에서 아직 실제 결정이 필요한 항목**만 유지한다.
+
+구현 중 쉽게 바꿀 수 있는 CLI UX, timestamp 계산 방식, staged/file/all 선택, formatting/normalization 방식은 Open Question으로 승격하지 않는다. 이런 세부사항은 책임 구현 repository에서 실험하고 필요할 때 Knowledge로 승격한다.
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q003 | 1.0 final release gate | Git-backed authoring/publishing boundary는 확정. 실제 acceptance/evidence chain과 최종 release gate를 구현 과정에서 구체화해야 함 |
-| Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | 명시적으로 확정할 필요 있음 |
-| Q007 | Work Type Validation 추가 | 보류. 현재 기본값은 5개 유지 |
-| Q008 | Engine container artifact와 workspace mount contract | Q022 실행 표면과 Q016 Git ownership 결정 뒤 구체화. one-shot CLI면 bind mount + ephemeral container가 기본 후보이고, Engine이 remote push까지 소유하면 credential injection contract가 추가로 필요 |
-| Q010 | 미디어 공개 범위·asset 저장 위치 | workspace-relative asset과 durable external URL을 허용하는 방향. public/private 범위와 large/binary asset policy는 추가 결정 필요 |
-| Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
-| Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
-| Q015 | docs layout / consumer path convention | 현재 Site는 docs repo 전체를 `apps/web/data/articles` submodule로 mount하고 `**/*.{md,mdx}`를 하나의 `articles` collection으로 읽는다. 즉 live consumer는 사실상 docs 전체를 Article source로 가정한다. Fumadocs integration spike에서 이 가정을 유지할지, publishable view/discovery rule을 분리할지, strict layout을 둘지 결정 |
-| Q016 | Git publish ownership / semantics | **해결됨: D034.** Engine은 dirty docs working tree를 commit하지 않는다. 사용자가 확정한 docs commit을 검증하고 remote에 반영한 뒤 Site의 exact docs SHA linkage와 delivery를 orchestration한다. branch/PR publish는 향후 별도 mode가 필요할 때 검토 |
-| Q017 | 실제 authoring editor 역할 분담 | Evidence-gated. Fumadocs Editor는 local files를 SoT로 유지하고 built-in/custom component specs를 지원한다. 기존 Obsidian corpus를 Fumadocs Site에 연결한 뒤 custom-component authoring 이득을 비교해 Obsidian-only / optional Fumadocs Editor / Fumadocs-heavy 중 결정. Studio vs embedded UI는 채택 이후 하위 결정 |
-| Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
-| Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
-| Q022 | Engine 1.0 실행 표면 | **해결됨: D035.** stateless, invocation-driven CLI-first one-shot runtime/container를 사용한다. long-running HTTP/service shell은 1.0 비목표이며 향후 필요 시 operation API 위 adapter로 추가 |
-| Q023 | persistent metadata field ownership / precedence | **부분 해결: D038/D039.** document-local persistent metadata는 frontmatter-first. 남은 핵심은 field별로 user-owned / Engine-generated / projection-derived를 어떻게 구분하고 defaults가 existing frontmatter를 언제까지 보완할 수 있는지 결정하는 것 |
-| Q024 | projection materialization 위치 | ephemeral staging, Site working-tree generated projection, 별도 artifact 중 선택 필요. source/projection 이중 SoT를 만들지 않으면서 inspectability와 reproducibility를 어떻게 확보할지 Fumadocs/Site integration과 함께 검증 |
-| Q025 | document identity / sidecar linkage | frontmatter-first로 초기 blocker에서 제외. stable document ID, path-independent cross-reference 또는 sidecar가 실제 필요해질 때 path-based linkage / explicit ID / manifest mapping을 결정 |
-| Q026 | timestamp semantics | **Engine `prepare` 시작 전 결정 권장.** `createdAt`, `updatedAt`, `publishedAt` 각각이 최초 prepare / authoring change / Git commit / successful delivery 중 무엇을 의미하는지 정의해야 자동 생성·write-once·projection-only 정책을 구현할 수 있음 |
-| Q027 | missing user-owned metadata resolution | **Engine `prepare` 시작 전 결정 권장.** required 값이 없고 Engine이 추론할 수 없을 때 interactive prompt를 제공할지, structured diagnostic으로 실패시키고 Obsidian/Agent에서 수정하게 할지, 두 mode를 모두 지원할지 결정 |
-| Q028 | frontmatter mutation fidelity | **Engine `prepare` 시작 전 결정 권장.** metadata 수정 시 body bytes와 unknown keys는 보존해야 함. YAML key order/comments/quoting/formatting까지 exact preserve할지, frontmatter region의 controlled normalization을 허용할지 결정 |
-| Q029 | metadata schema declaration | `required`, owner, generator, mutability, validation을 어디에 선언할지 결정 필요. Knowledge는 semantics를 소유하고 구현은 TypeScript/config/schema 중 최소한의 표현을 선택할 수 있으므로 scratch skeleton 자체의 blocker는 아님 |
-| Q030 | prepare target selection / discovery | docs layout(Q015)이 미결이어도 초기 `prepare`는 explicit file/path 입력으로 시작 가능. repository-wide discovery 규칙은 layout 결정과 함께 확장 가능 |
-| Q031 | bulk prepare atomicity | 여러 문서를 한 번에 prepare할 때 unresolved document 때문에 전체 write를 취소할지, 해결 가능한 document만 수정할지 결정 필요. single/explicit-document vertical slice에는 blocker가 아님 |
+| Q003 | 1.0 final release gate | 실제 acceptance/evidence chain과 최종 release gate는 새 vertical slice가 구현된 뒤 구체화 |
+| Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
+| Q007 | Work Type Validation 추가 | 보류. 현재 기본값 유지 |
+| Q008 | Engine container artifact와 workspace mount / Git credential contract | local CLI scratch의 blocker는 아님. containerized prepare/verify/publish를 연결할 때 구체화 |
+| Q010 | 미디어 공개 범위·asset 저장 위치 | workspace-relative asset과 durable external URL 방향은 유지. public/private와 large/binary policy는 실제 asset workflow 전에 결정 |
+| Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in 우선. 실제 custom component의 cross-repository 공유 계약이 필요할 때만 활성화 |
+| Q014 | raw HTML 및 executable MDX publish security policy | source 저장과 별개. 실제 public publish gate 전에 허용 범위를 반드시 결정 |
+| Q015 | docs layout / consumer discovery convention | free-form / consumer-specific / strict layout 모두 허용. Fumadocs/Site vertical slice 결과로 결정 |
+| Q017 | 실제 authoring editor 역할 분담 | 기존 Obsidian corpus + Fumadocs custom-component authoring Evidence 후 결정 |
+| Q019 | Site migration 방식 | 기존 Astro/docs/Pages Evidence를 보존하는 incremental migration이 현재 우선 후보. Fumadocs spike 후 재평가 |
+| Q021 | Site Turbo retirement | VP parity와 기존 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
+| Q024 | projection materialization 위치 | ephemeral staging vs Site working-tree generated projection을 실제 consumer integration으로 비교 |
+| Q025 | stable document identity / sidecar linkage | frontmatter-first이므로 초기 범위 밖. 실제 path-independent identity나 sidecar 필요가 생길 때 결정 |
 
-## 분리 원칙
+## 이미 구현 레포에 위임한 세부사항
 
-- **결정이 필요한 질문** → 이 문서
-- **현재 GitHub/branch/Project 상태를 다시 확인해야 하는 항목** → Current Handoff (`handoff/current.md`)
-- **특정 revision에서 검증된 capability와 남은 구현 delta** → Implementation Map (`docs/implementation-map.md`)
-- **이미 확정된 방향과 대체된 결정** → Decision Log (`docs/decisions.md`)
+다음은 **현재 Knowledge-level Open Question이 아니다.**
 
-초기 지식 레포 구성에 사용한 대화의 source/turn metadata는 provenance에 역사적 근거로 남기되 raw transcript는 저장하지 않는다. 현재 정책과 실제 repository 검증 결과가 있는 항목은 canonical 문서와 Implementation Map을 우선한다.
+- 어떤 persistent metadata field를 언제 추가할지
+- timestamp를 현재 시각, Git history, editor template 등 어떤 방식으로 유도할지
+- `prepare`를 단일 file, staged files, glob, 전체 workspace 중 어떤 입력 표면으로 제공할지
+- missing field를 prompt, diagnostic, Agent 보완 등 어떤 UX로 해결할지
+- YAML key order, quoting, whitespace 또는 Markdown formatting을 어느 정도 normalize할지
+- metadata schema를 TypeScript, Zod, config 또는 다른 방식으로 표현할지
+- bulk prepare의 partial-success / atomicity 정책
 
-## Decision order
+이들은 Engine 구현에서 가장 단순한 형태로 시작하고, 실제 제약이나 반복되는 패턴이 생기면 구현 Evidence와 함께 Knowledge decision으로 승격한다.
 
-### Engine scratch 구현 전에 닫는 것이 좋은 gate
+## 고정된 최소 metadata invariant
 
-1. **Q023 — persistent metadata field ownership**
-   - 최소 field taxonomy를 먼저 정한다: user-owned / Engine-generated persistent / projection-derived.
-   - 모든 최종 field name을 확정할 필요는 없지만 ownership rule이 없으면 `prepare`의 책임이 불명확하다.
-2. **Q026 — timestamp semantics**
-   - 적어도 `createdAt`의 의미와 write-once/override 규칙은 첫 `prepare` 전에 정한다.
-   - `updatedAt`, `publishedAt`은 필요 없으면 1차 구현에서 제외할 수 있다.
-3. **Q027 — unresolved user input 처리**
-   - interactive prompt / non-interactive failure / dual-mode 중 public CLI behavior를 정한다.
-4. **Q028 — source mutation fidelity**
-   - body와 unknown metadata 보존은 필수.
-   - frontmatter formatting normalization을 어디까지 허용할지 정한다.
+- document-local persistent metadata는 frontmatter-first다(D038).
+- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다(D039).
+- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**(D040).
+- Engine은 unset/missing field를 보완하는 방향으로 시작한다.
+- formatting 변화 자체는 contract violation이 아니다. VP formatter/linter 또는 구현 도구가 deterministic consistency를 위해 source 형식을 normalize할 수 있다.
+- 다만 formatter/enrichment가 사용자가 명시한 metadata의 의미를 바꾸거나 unrelated semantic content를 임의로 변경해서는 안 된다.
 
-이 네 항목이 정리되면 `prepare` core contract를 구현할 수 있다.
+## 다음 실제 설계 gate
 
-### Scratch skeleton과 병행해서 결정 가능
+Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 
-5. **Q029 — metadata schema declaration**
-   - TypeScript/config/schema 중 구현 표현은 core semantics 이후 선택 가능.
-6. **Q030 — prepare target selection**
-   - 초기에는 explicit path 입력으로 시작해 Q015 layout 결정을 blocker로 만들지 않는다.
-7. **Q008 — container mount / credential**
-   - local CLI core에는 blocker가 아니다.
-   - containerized `prepare`는 docs mount가 read-write, `verify`는 원칙적으로 read-only 가능하다.
-   - `publish` integration 전에 Git credential contract를 확정한다.
-
-### Site/Fumadocs vertical slice 전후로 결정
-
-8. **Q024 — projection materialization**
-   - ephemeral staging vs Site working-tree generated projection을 실제 consumer integration으로 비교한다.
-9. **Q015 — docs layout / consumer convention**
-   - projection/discovery boundary를 확인한 뒤 결정한다.
-10. **Q017 — authoring editor 역할**
-    - custom component authoring Evidence 후 결정한다.
-11. **Q019 / Q021 — Site migration / Turbo retirement**
-    - delivery Evidence를 보존하면서 별도 Maintenance 판단으로 둔다.
-
-### 실제 요구가 생길 때까지 보류 가능
-
-- **Q025** stable document identity / sidecar linkage
-- **Q031** bulk prepare atomicity
-- **Q010** asset / large binary policy
-- **Q012** shared custom-component profile/package
-- **Q014** raw HTML / executable MDX security의 세부 정책 — actual public publish gate 전에는 반드시 닫아야 함
-- **Q003** final 1.0 release gate
-
-### 현재 migration bootstrap의 blocker가 아닌 운영 질문
-
-- Q006 Project field 빈 값 규칙
-- Q007 Work Type Validation
+1. minimal `doctor / prepare / verify / publish` skeleton을 만든다.
+2. `prepare`는 frontmatter-first + missing-only enrichment로 시작한다.
+3. 실제 Obsidian corpus에서 구현해보고 field/timestamp/selection/formatting 전략을 책임 레포에서 조정한다.
+4. Site/Fumadocs vertical slice에 들어갈 때 Q024/Q015/Q017을 Evidence 기반으로 좁힌다.
+5. 실제 public publish 전에 Q014와 Q008의 필요한 부분을 닫는다.
 
 <!-- END SOURCE: docs/open-questions.md -->
 
@@ -2721,6 +2687,19 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 6. 변경 내용을 Git diff로 검토하고 커밋한다.
 
 규칙의 중복 복사는 피한다. GitHub Project README와 필드 description은 이 레포의 canonical 정의를 가리키는 탐색 계층으로 유지한다. 별도 레포의 코드와 계약을 함께 바꾸는 경우 관련 PR/commit을 서로 연결한다.
+
+## Branch / PR workflow
+
+`main`은 **고수준 knowledge change history**를 유지한다.
+
+- typo, 링크 수정, 작은 문구 정정처럼 국소적이고 한 번에 검토 가능한 변경은 `main`에 직접 반영할 수 있다.
+- 다문서 변경, architecture 재정렬, context bundle까지 연쇄적으로 바뀌는 작업, 여러 번의 중간 commit이 예상되는 장시간 작업은 **반드시 별도 branch에서 수행한다**.
+- 장시간 작업 branch는 작업 중 자유롭게 여러 commit을 사용할 수 있다.
+- 완료 시 PR에서 전체 diff와 canonical consistency를 검토하고, 기본적으로 **squash merge**하여 `main`에는 하나의 의미 단위 commit만 남긴다.
+- merge 후 불필요한 head branch는 삭제한다.
+- history rewrite나 force update가 필요한 maintenance는 먼저 기존 `main`을 archive branch/tag 등으로 보존한 뒤 수행한다.
+
+작업이 길어질지 불확실하면 branch를 선택하는 쪽을 기본으로 한다.
 
 ## Evidence
 

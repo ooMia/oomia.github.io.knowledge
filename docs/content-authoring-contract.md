@@ -30,14 +30,14 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 | 수준 | 보장 |
 |---|---|
-| Exact | source-oriented client가 저장한 Markdown/MDX bytes와 의미 있는 frontmatter를 불필요하게 재작성하지 않는다. |
-| Normalized | Visual Editor에서 실제 content를 수정한 경우 해당 editor가 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
+| Preserved | 사용자가 명시한 content와 metadata의 의미를 보존한다. byte-for-byte 동일성은 contract가 아니다. |
+| Normalized | Editor, VP formatter/linter 또는 선택한 tooling이 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
 | Reject | workspace/file contract 자체를 만족하지 못하거나 안전하게 파일로 보존할 수 없는 경우에만 저장을 거부한다. |
 
 기본 원칙:
 
-- source-oriented editing은 **Exact**를 우선한다.
-- visual/editor-specific tooling에서 실제 수정한 부분은 **Normalized 허용**일 수 있으나, editor 채택 전에 normalization behavior를 실제 corpus로 검증한다.
+- source-oriented editing도 byte-exact 보존을 요구하지 않는다. 사용자가 명시한 의미와 explicit frontmatter value를 보존하는 것이 우선이다.
+- visual/editor/formatter-specific tooling의 **Normalized** output을 허용하며, format/lint에 따른 일관된 source 변화 자체는 실패가 아니다.
 - Markdown/MDX 문법 오류나 현재 Site가 지원하지 않는 expression은 draft file로 저장할 수 있고 publish 단계에서 Blocked될 수 있다.
 - storage contract는 DB schema나 rich-text serialization compatibility를 요구하지 않는다.
 
@@ -60,10 +60,9 @@ canonical content의 물리적 표현은 local Git working tree의 files다. 다
 
 - document-local persistent metadata의 기본 저장소는 frontmatter다.
 - Engine이 자동 생성 가능한 값은 정책에 따라 frontmatter에 materialize할 수 있다.
-- 사용자의 판단이 필요한 required 값은 명확히 unresolved로 보고한다.
-- 기존 valid user-owned value를 임의로 덮어쓰지 않는다.
-- unknown frontmatter key를 보존한다.
-- body rewrite는 metadata update의 부수 효과로 발생해서는 안 된다.
+- existing explicit frontmatter value가 있으면 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
+- unset/missing field를 어떻게 채울지와 unresolved UX는 Engine 구현이 선택한다.
+- formatting/serialization normalization은 허용하지만 사용자가 명시한 content/metadata 의미를 임의로 바꾸지 않는다.
 - Git stage/commit/push는 하지 않는다.
 
 `prepare` 이후 사용자가 diff를 검토하고 필요한 값을 조정한 뒤 commit한다.
@@ -116,23 +115,23 @@ Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment�
 
 | 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
 |---|---|---|---|---|
-| 기본 Markdown | Source + 필요 시 Visual | Exact / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
-| 일반 GFM table | Visual 또는 Source | Exact / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
-| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Exact | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
-| 임의 code fence language | Visual 또는 Source | Exact | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
-| 일반 Markdown image | Visual 또는 Source | Exact | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
-| workspace-relative asset | Visual 또는 Source | Exact | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
-| durable external asset URL | Visual 또는 Source | Exact | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
-| raw HTML | Source | Exact | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
-| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Exact / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
-| Fumadocs built-in MDX component | Visual 또는 Source | Exact / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
+| 기본 Markdown | Source + 필요 시 Visual | Preserved / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
+| 일반 GFM table | Visual 또는 Source | Preserved / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
+| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Preserved | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
+| 임의 code fence language | Visual 또는 Source | Preserved | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
+| 일반 Markdown image | Visual 또는 Source | Preserved | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
+| workspace-relative asset | Visual 또는 Source | Preserved | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
+| durable external asset URL | Visual 또는 Source | Preserved | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
+| raw HTML | Source | Preserved | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
+| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Preserved / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
+| Fumadocs built-in MDX component | Visual 또는 Source | Preserved / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
 | custom MDX component + visual spec | Visual | Normalized | Publishable | 명시된 component contract와 Site consumer 검증을 통과해야 한다. |
-| custom MDX component + visual spec 없음 | Source | Exact | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
-| contract에 없는 MDX component | Source | Exact | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
-| 잘못된 component props | Source | Exact | Blocked | file 저장과 publish validation을 분리한다. |
-| arbitrary JavaScript expression | Source | Exact | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
-| 문서 내부 임의 import/export | Source | Exact | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
-| 문법 오류가 있는 draft | Source | Exact | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
+| custom MDX component + visual spec 없음 | Source | Preserved | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
+| contract에 없는 MDX component | Source | Preserved | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
+| 잘못된 component props | Source | Preserved | Blocked | file 저장과 publish validation을 분리한다. |
+| arbitrary JavaScript expression | Source | Preserved | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
+| 문서 내부 임의 import/export | Source | Preserved | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
+| 문법 오류가 있는 draft | Source | Preserved | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
 
 ## Authoring clients
 
