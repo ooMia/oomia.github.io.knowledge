@@ -89,10 +89,11 @@ Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
-Engine의 1.0 목표는 DB-backed CMS가 아니라 **containerizable workspace orchestrator**다.
+Engine의 1.0 목표는 DB-backed CMS가 아니라 **stateless, invocation-driven, CLI-first one-shot workspace orchestrator**다.
 
 ```text
-Engine container
+Engine CLI / one-shot container
+├─ doctor / verify / publish
 ├─ workspace discovery
 ├─ content/frontmatter validation
 ├─ authoring-tool integration hooks
@@ -104,9 +105,10 @@ Engine container
                  local content repository
 ```
 
+- Engine process는 command invocation마다 시작·종료하며 persistent application/job/session state를 소유하지 않는다.
 - Engine image 자체의 ephemeral filesystem을 canonical storage로 사용하지 않는다.
 - content repository는 host bind mount 또는 durable volume로 Engine에 제공한다.
-- application-level user/database/auth model은 1.0의 필수조건이 아니다. 외부 공개가 필요해질 때 별도 access boundary를 추가한다.
+- application-level user/database/auth model, HTTP server, job queue, long-running service lifecycle은 1.0의 필수조건이 아니다. 외부 공개나 remote control이 필요해질 때 같은 operation API 위에 별도 adapter를 추가한다.
 - 검색·인덱싱·복잡한 query가 필요해지면 DB를 **derived index**로 추가할 수 있지만 canonical source를 대체하지 않는다.
 - Payload, PostgreSQL, Lexical 기반 `cms-lab` 구현은 기존 실험/legacy Evidence로 취급하며 새 target architecture의 전제가 아니다.
 
@@ -121,7 +123,9 @@ content / frontmatter / component validation
         ↓
 Site sync / typecheck / build
         ↓
-git commit + push to oomia.github.io.docs
+committed docs revision
+        ↓
+push to oomia.github.io.docs
         ↓
 canonical docs revision
         ↓
@@ -129,7 +133,7 @@ Site revision linkage / delivery
 ```
 
 - source content 자체가 이미 publishable document form이므로 별도 DB → docs projection은 제거한다.
-- publish 과정은 source를 의미 없이 재작성하지 않고 **검증 + revision 확정 + delivery linkage**에 집중한다.
+- publish 과정은 source를 의미 없이 재작성하거나 dirty working tree를 자동 commit하지 않고 **이미 확정된 docs revision의 검증 + remote 반영 + delivery linkage**에 집중한다.
 - `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
 - Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
 - 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
