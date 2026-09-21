@@ -2,6 +2,10 @@
 
 ## 2026-09-21
 
+- D038로 document-local persistent metadata의 1.0 기본 저장 방식을 frontmatter-first로 확정하고 sidecar는 실제 필요가 생길 때의 extension으로 하향.
+- D039로 source-mutating pre-commit `prepare` operation을 추가하고 `prepare` / `verify` / `publish`의 mutation boundary를 분리.
+- D036/D037을 Authoring Draft → Prepared Canonical Source → user commit → Publishable Projection lifecycle로 정정.
+- Open Questions를 재정렬해 prepare 시작 전 Q023(field ownership), Q026(timestamp semantics), Q027(unresolved user input), Q028(frontmatter mutation fidelity)을 우선 gate로 지정.
 - D036으로 canonical authoring source와 Site-consumed publishable projection을 분리하고 docs commit을 canonical input revision으로 정의.
 - D037로 publish-time metadata enrichment를 플랫폼 핵심 책임으로 명시하고 inline frontmatter / sidecar / defaults / deterministic derived metadata를 composition 가능한 입력으로 정의.
 - [Publishable Projection & Metadata Enrichment Contract](docs/publishable-projection.md) 추가. projection은 derived/reproducible artifact이며 source를 대체하지 않음.
