@@ -2,6 +2,10 @@
 
 ## 2026-09-21
 
+- D036으로 canonical authoring source와 Site-consumed publishable projection을 분리하고 docs commit을 canonical input revision으로 정의.
+- D037로 publish-time metadata enrichment를 플랫폼 핵심 책임으로 명시하고 inline frontmatter / sidecar / defaults / deterministic derived metadata를 composition 가능한 입력으로 정의.
+- [Publishable Projection & Metadata Enrichment Contract](docs/publishable-projection.md) 추가. projection은 derived/reproducible artifact이며 source를 대체하지 않음.
+- Open Questions에 metadata precedence(Q023), projection materialization(Q024), document identity/sidecar linkage(Q025)를 추가.
 - D035로 Engine 1.0 실행 표면을 stateless, invocation-driven CLI-first one-shot runtime/container로 확정하고 HTTP service/job/session lifecycle을 1.0 비목표로 설정.
 - D033으로 Engine scratch bootstrap baseline을 Node 24.20.0 / pnpm 12.3.4 / Vite+ 0.3.3으로 고정하고 unrelated toolchain upgrade를 scratch 범위에서 제외.
 - Open Questions에 decision order를 추가해 즉시 사용자 결정이 필요한 Q022(Engine execution surface), Q016(Git publish ownership)과 evidence-gated/later decisions를 분리.
