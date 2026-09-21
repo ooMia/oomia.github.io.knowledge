@@ -223,7 +223,6 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 - docs layout / consumer convention
 - actual editor role
-- Git publish semantics
 - Engine container mount/credential contract
 - custom component shared profile/package 필요 시점
 - Site Turbo retirement timing
@@ -240,15 +239,14 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 
 현재 architecture와 오버엔지니어링 회피 기준에서는 A를 권장한다.
 
-### Q016 — Git publish ownership
+### Q016 — Git publish ownership — 결정됨
 
-current submodule linkage를 유지한다는 전제에서:
+D034에 따라 **committed-revision publish**를 사용한다.
 
-- **A. committed-revision publish**: Engine은 docs working tree를 commit하지 않는다. clean/committed docs HEAD를 검증하고 필요 시 docs push, Site submodule pointer commit/push, delivery verification을 orchestration한다.
-- **B. one-click author+publish**: Engine이 dirty docs working tree를 stage/commit한 뒤 A의 과정을 수행한다.
-- **C. review-first publish**: Engine이 branch/PR를 만들고 merge 이후 Site pointer를 갱신한다.
-
-canonical revision이 Git commit이고 Obsidian working tree에 unrelated/draft 변경이 섞일 수 있으므로 A를 권장한다.
+- Engine은 dirty docs working tree를 자동 stage/commit하지 않는다.
+- 사용자가 확정한 docs commit을 publish candidate로 받는다.
+- Engine은 해당 revision을 검증하고 필요 시 docs push → Site exact docs SHA linkage → Site commit/push → delivery verification을 orchestration한다.
+- branch/PR publish는 1.0 기본 mode가 아니며 실제 review workflow 필요 시 별도 확장한다.
 
 ## Next safe action
 
