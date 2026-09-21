@@ -329,10 +329,12 @@ apps/engine/src/
 ├─ cli.ts
 ├─ commands/
 │  ├─ doctor.ts
+│  ├─ prepare.ts
 │  ├─ verify.ts
 │  └─ publish.ts
 └─ engine/
    ├─ doctor.ts
+   ├─ prepare.ts
    ├─ verify.ts
    └─ publish.ts
 ```
@@ -347,6 +349,8 @@ apps/engine/src/
 - publish job database
 - server-side progress/session store
 - cancellation API
+
+`prepare`는 mounted docs workspace에 write access가 필요하고, `verify`는 원칙적으로 source read-only로 동작할 수 있다. `publish`는 committed source를 수정하지 않지만 remote Git/Site linkage를 변경할 수 있다.
 
 one-shot container는 command invocation 단위로 실행·종료한다. persistent state는 mounted Git workspace, remote Git, Site repository, Evidence artifact에 둔다.
 
