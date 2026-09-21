@@ -311,7 +311,7 @@ Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순�
 
 ## 10.5 Engine greenfield scratch build
 
-Engine은 D032에 따라 **greenfield scratch build를 기본 migration 전략으로 확정**한다.
+Engine은 **greenfield scratch build를 기본 migration 전략으로 사용한다**.
 
 목표는 Git history를 지우는 것이 아니라 legacy source tree를 새 architecture의 template로 사용하지 않는 것이다.
 
