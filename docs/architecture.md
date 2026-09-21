@@ -34,15 +34,20 @@
 ```text
 Obsidian ──────────────┐
                       │
-Fumadocs Editor ───────┼──> local content working tree
+Fumadocs Editor ───────┼──> Authoring Draft
                       │      Markdown / MDX
-Source editor / Agent ┘      frontmatter / assets
+Source editor / Agent ┘      partial frontmatter / assets
                                   │
-                                  │ git commit / push
+                                  │ engine prepare
                                   ▼
-                       oomia.github.io.docs
-                        canonical Git revision
+                         Prepared Canonical Source
                                   │
+                                  │ user review + git commit
+                                  ▼
+                         oomia.github.io.docs
+                          canonical Git revision
+                                  │
+                                  │ deterministic projection
                                   ▼
                             Site consumer
                                   │
@@ -50,7 +55,7 @@ Source editor / Agent ┘      frontmatter / assets
                              Live Site
 ```
 
-- local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다.
+- local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다. Engine `prepare`는 commit 전에 frontmatter-first persistent metadata를 보완해 Prepared Canonical Source를 만들 수 있다.
 - 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
 - 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있다.
 - consumer 또는 repository 자체가 필요하면 subtree 또는 repository-wide directory/path/frontmatter convention을 강제할 수 있다. 핵심은 어떤 layout도 사전에 금지하지 않고 실제 integration/maintenance 비용을 근거로 선택하는 것이다.
@@ -93,7 +98,7 @@ Engine의 1.0 목표는 DB-backed CMS가 아니라 **stateless, invocation-drive
 
 ```text
 Engine CLI / one-shot container
-├─ doctor / verify / publish
+├─ doctor / prepare / verify / publish
 ├─ workspace discovery
 ├─ content/frontmatter validation
 ├─ authoring-tool integration hooks
@@ -114,14 +119,15 @@ Engine CLI / one-shot container
 
 ## Publishing boundary
 
-Publishing은 DB state를 Markdown으로 export하는 작업이 아니지만, **canonical authoring source를 Site-ready projection으로 enrich/transform하는 작업은 핵심 책임**이다.
+Publishing Platform은 DB state를 Markdown으로 export하지 않지만, **commit 전 canonical-source enrichment와 commit 후 Site-ready projection을 서로 다른 단계로 수행**한다.
 
 ```text
+Authoring Draft
+        ↓ engine prepare
+Prepared Canonical Source
+        ↓ user commit
 committed docs source revision
-        ↓
-metadata discovery / resolution
-        ↓
-publishable projection materialization
+        ↓ deterministic publishable projection
         ↓
 projection validation
         ↓
@@ -132,7 +138,7 @@ docs remote / exact source SHA
 Site revision linkage / delivery
 ```
 
-- canonical authoring source와 Site-consumed projection은 다를 수 있다. DB snapshot export는 제거하지만 metadata enrichment와 deterministic projection은 유지한다.
+- canonical authoring source와 Site-consumed projection은 다를 수 있다. persistent/user-meaningful metadata enrichment는 기본적으로 `prepare`에서 frontmatter에 반영하고, 재현 가능한 consumer-derived metadata는 committed revision에서 projection할 수 있다.
 - publish 과정은 dirty source working tree를 자동 commit하지 않는다. committed docs revision과 선언된 metadata inputs를 입력으로 **projection 생성 + 검증 + remote/revision linkage + delivery**를 수행한다.
 - `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
 - Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
