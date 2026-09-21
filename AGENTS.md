@@ -16,3 +16,4 @@
 14. Do not perform a big-bang legacy deletion before the new Git-backed workspace path has a verified vertical slice through Site build/delivery.
 15. Use Vite+ `vp` as the default JS/TS command surface. Distinguish built-ins (`vp check`, `vp test`, `vp build`) from repository scripts/tasks (`vp run` / `vpr`). Do not introduce a second task runner, hook manager, formatter, or linter when Vite+ already satisfies the requirement.
 16. For the Engine migration, treat greenfield scratch build as the default target strategy. Preserve Git history and unmerged work, but do not copy legacy Payload/PostgreSQL directory structure or task taxonomy into the new skeleton.
+17. For substantial Knowledge changes—multi-document edits, architecture reorganization, or work expected to require multiple commits—create a branch first, finish and review the whole diff in a PR, and squash merge by default. Direct `main` writes are reserved for small localized corrections.
