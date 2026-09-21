@@ -2,9 +2,9 @@
 
 1. [CONTEXT.md](CONTEXT.md)에서 해당 규칙을 소유하는 파일을 찾는다.
 2. 원본 Markdown을 수정한다. 새로운 제안은 확정된 규칙으로 섞지 말고 [open-questions.md](docs/open-questions.md)에 기록한다.
-3. 의미 있는 방향 변경에는 [decisions.md](docs/decisions.md)에 stable ID, 상태, 이유, 출처, 대체한 결정을 남긴다. 과거 기록을 삭제하지 않는다.
+3. cross-repository/product 방향이 바뀌면 [Current Decisions](docs/decisions.md)를 **현재 유효한 상태**로 갱신한다. superseded chain이나 과거 chronology는 현재 `main`에 유지하지 않는다.
 4. 구현 상태를 변경하려면 [Implementation Map](docs/implementation-map.md)의 기준 revision보다 구현 레포가 진행되었는지 확인하고 실제 코드·테스트·commit/deployment Evidence를 다시 조사한다.
-5. [CHANGELOG.md](CHANGELOG.md)를 갱신하고 `python3 scripts/bundle.py`를 실행한다.
+5. `python3 scripts/bundle.py`를 실행해 context bundle을 갱신한다.
 6. 변경 내용을 Git diff로 검토하고 커밋한다.
 
 규칙의 중복 복사는 피한다. GitHub Project README와 필드 description은 이 레포의 canonical 정의를 가리키는 탐색 계층으로 유지한다. 별도 레포의 코드와 계약을 함께 바꾸는 경우 관련 PR/commit을 서로 연결한다.
@@ -36,8 +36,8 @@
 
 ## 대화에서 변경을 가져올 때
 
-사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 과거 대화에 근거하는 항목은 provenance의 source/turn metadata를 유지하고, 현재 요청으로 새로 확정한 내용은 실제 날짜와 변경 commit으로 추적한다. raw transcript는 repository에 복제하지 않는다.
+사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 `main`은 과거 대화 provenance를 별도 원장으로 유지하지 않는다. 과거 근거가 꼭 필요하면 `archive/main-before-cleanup-20260921` branch를 확인하고, 현재 문서에는 현재 유효한 결론만 반영한다.
 
 ## 공유
 
-이 레포는 raw conversation transcript를 보관하지 않는다. provenance에는 source/turn metadata와 최소 요약만 남기고, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
+이 레포의 현재 `main`은 raw conversation transcript나 source/turn provenance chronology를 보관하지 않는다. 과거 자료는 historical archive branch에 보존하며, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
