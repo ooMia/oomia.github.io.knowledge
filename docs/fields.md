@@ -23,13 +23,13 @@ Field description:
 | Option | Description |
 |---|---|
 | Content | Article semantics, authoring, validation, and user/developer-facing content operations. |
-| Persistence | Durable storage, retrieval, consistency, and lifecycle of canonical platform state. |
+| Persistence | Durable storage, retrieval, consistency, revisioning, and lifecycle of canonical platform state, including Git-backed filesystem state. |
 | Automation | Agent-assisted, scheduled, triggered, or background execution of platform workflows. |
-| Publishing | Deterministic transformation of canonical content into contracted publishable documents. |
+| Publishing | Validation, revision finalization, and preparation of canonical content for reproducible Site consumption and release. |
 | Presentation | Rendering, composition, navigation, and visual presentation of publishable content as a user-facing site. |
 | Delivery | Propagation, deployment, and verification of validated site output in the live environment. |
 
-예: 기존 DB를 읽어 export 로직만 개선하면 Publishing. API 수정 기능과 영속화 계약을 함께 추가하면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
+예: canonical docs commit을 만들기 전 validation/Git revision flow를 바꾸면 Publishing. workspace layout/frontmatter 저장 계약을 바꾸면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
 
 최신 Scope 제안은 6개 옵션과 다중 선택이다. 사용자가 초기에 확인한 옵션은 Delivery를 제외한 5개였으므로 Delivery의 실제 등록 여부와 다중 선택 적용 여부는 미확인이다.
 
@@ -44,11 +44,11 @@ Field description:
 |---|---|
 | Authoring Experience | Select when the item improves how authors create, edit, inspect, or validate content through tooling or user-facing authoring interactions. |
 | Canonical Content | Select when the item improves the authoritative content model, persistence, lifecycle, or rules governing canonical state. |
-| Publishable Projection | Select when the item improves how canonical content is deterministically transformed into publishable artifacts. |
+| Publishable Projection | Select when the item improves how canonical content is validated, finalized as a reproducible revision, and made consumable by the Site/publishing path. The historical field name does not imply that docs must be a generated projection. |
 | Extensible Workflow | Select when the item adds or improves supported extension points, custom logic, components, or automation in the publishing workflow. |
 | Live Delivery | Select when the item improves how publishable artifacts are rendered, deployed, or propagated to the live user-facing site. |
 
-Authoring Experience는 CMS UI에 한정되지 않는다. CLI, IDE, form, agent-assisted authoring도 포함할 수 있다. Scope는 책임 영역, Objective는 개선된 제품 결과이므로 서로 일대일 대응하지 않는다.
+Authoring Experience는 CMS UI에 한정되지 않는다. Obsidian, Fumadocs Editor, CLI, IDE, form, agent-assisted authoring도 포함할 수 있다. Scope는 책임 영역, Objective는 개선된 제품 결과이므로 서로 일대일 대응하지 않는다.
 
 ## Work Type
 
