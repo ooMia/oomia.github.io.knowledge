@@ -10,7 +10,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 > Canonical content는 Git-backed filesystem document workspace에 보존한다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
-이 문서는 **Editing, Storage, Canonical Revision, Publishing**을 분리해 정의한다.
+이 문서는 **Editing, Storage, Canonical Revision, Projection, Publishing**을 분리해 정의한다.
 
 ## Editing
 
@@ -54,6 +54,23 @@ canonical content의 물리적 표현은 local Git working tree의 files다.
 
 따라서 `oomia.github.io.docs`는 generated projection이 아니라 **canonical content remote**다.
 
+## Projection
+
+Canonical authoring source와 Site가 소비하는 publishable document는 동일할 필요가 없다.
+
+projection은 다음 입력을 deterministic하게 composition할 수 있다.
+
+- source document
+- inline frontmatter
+- sidecar/reference metadata
+- repository/consumer defaults
+- content/Git에서 유도한 deterministic metadata
+- 명시적인 publish-time override
+
+Engine은 source를 불필요하게 mutation하지 않고 publishable projection을 materialize한다. projection은 재생성 가능한 derived artifact이며 새 SoT가 아니다.
+
+구체적인 metadata 위치, precedence, document identity/linkage, materialization 위치는 [Publishable Projection & Metadata Enrichment Contract](publishable-projection.md)가 소유한다.
+
 ## Publishing
 
 | 수준 | 보장 |
@@ -66,20 +83,20 @@ Visual editing compatibility는 Publishability의 필수조건이 아니다.
 목표 흐름:
 
 ```text
-local Git working tree
+committed docs source revision
         ↓
-source / frontmatter / component validation
+metadata resolve / enrichment
         ↓
-Site sync / typecheck / build
+publishable projection materialization
         ↓
-git commit + push
+projection validation
         ↓
-oomia.github.io.docs canonical revision
+actual Site consumer build
         ↓
-Site revision linkage / delivery
+revision linkage / delivery
 ```
 
-Publishing은 DB snapshot을 Markdown으로 export하는 transformation이 아니다. canonical source가 이미 Markdown/MDX이므로 **validation, revision finalization, consumer verification**이 핵심이다.
+Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment와 deterministic projection materialization은 핵심 product behavior**다. source revision과 projection을 구분하며, Site는 projection contract를 만족하는 입력을 소비한다.
 
 ## 1.0 목표 정책 테이블
 
