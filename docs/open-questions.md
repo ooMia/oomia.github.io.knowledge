@@ -17,9 +17,15 @@
 | Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
 | Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
 | Q022 | Engine 1.0 실행 표면 | **해결됨: D035.** stateless, invocation-driven CLI-first one-shot runtime/container를 사용한다. long-running HTTP/service shell은 1.0 비목표이며 향후 필요 시 operation API 위 adapter로 추가 |
-| Q023 | metadata composition / precedence | **사용자 결정 또는 spike 필요.** inline frontmatter, sidecar/reference file, repository/consumer defaults, derived metadata 중 어떤 source를 1.0에 허용하고 conflict precedence를 어떻게 둘지 결정해야 함 |
+| Q023 | persistent metadata field ownership / precedence | **부분 해결: D038/D039.** document-local persistent metadata는 frontmatter-first. 남은 핵심은 field별로 user-owned / Engine-generated / projection-derived를 어떻게 구분하고 defaults가 existing frontmatter를 언제까지 보완할 수 있는지 결정하는 것 |
 | Q024 | projection materialization 위치 | ephemeral staging, Site working-tree generated projection, 별도 artifact 중 선택 필요. source/projection 이중 SoT를 만들지 않으면서 inspectability와 reproducibility를 어떻게 확보할지 Fumadocs/Site integration과 함께 검증 |
-| Q025 | document identity / metadata linkage | sidecar/reference metadata를 사용할 경우 path-based linkage, explicit document id, manifest mapping 등 rename/move에 안전한 identity 규약이 필요할 수 있음 |
+| Q025 | document identity / sidecar linkage | frontmatter-first로 초기 blocker에서 제외. stable document ID, path-independent cross-reference 또는 sidecar가 실제 필요해질 때 path-based linkage / explicit ID / manifest mapping을 결정 |
+| Q026 | timestamp semantics | **Engine `prepare` 시작 전 결정 권장.** `createdAt`, `updatedAt`, `publishedAt` 각각이 최초 prepare / authoring change / Git commit / successful delivery 중 무엇을 의미하는지 정의해야 자동 생성·write-once·projection-only 정책을 구현할 수 있음 |
+| Q027 | missing user-owned metadata resolution | **Engine `prepare` 시작 전 결정 권장.** required 값이 없고 Engine이 추론할 수 없을 때 interactive prompt를 제공할지, structured diagnostic으로 실패시키고 Obsidian/Agent에서 수정하게 할지, 두 mode를 모두 지원할지 결정 |
+| Q028 | frontmatter mutation fidelity | **Engine `prepare` 시작 전 결정 권장.** metadata 수정 시 body bytes와 unknown keys는 보존해야 함. YAML key order/comments/quoting/formatting까지 exact preserve할지, frontmatter region의 controlled normalization을 허용할지 결정 |
+| Q029 | metadata schema declaration | `required`, owner, generator, mutability, validation을 어디에 선언할지 결정 필요. Knowledge는 semantics를 소유하고 구현은 TypeScript/config/schema 중 최소한의 표현을 선택할 수 있으므로 scratch skeleton 자체의 blocker는 아님 |
+| Q030 | prepare target selection / discovery | docs layout(Q015)이 미결이어도 초기 `prepare`는 explicit file/path 입력으로 시작 가능. repository-wide discovery 규칙은 layout 결정과 함께 확장 가능 |
+| Q031 | bulk prepare atomicity | 여러 문서를 한 번에 prepare할 때 unresolved document 때문에 전체 write를 취소할지, 해결 가능한 document만 수정할지 결정 필요. single/explicit-document vertical slice에는 blocker가 아님 |
 
 ## 분리 원칙
 
@@ -32,38 +38,52 @@
 
 ## Decision order
 
-### 지금 사용자 결정이 필요한 gate
+### Engine scratch 구현 전에 닫는 것이 좋은 gate
 
-1. **Q022 — Engine execution surface — 해결됨(D035)**
-   - scratch app entrypoint는 CLI-first one-shot으로 고정. 다음 설계는 public commands와 container mount/credential contract(Q008) 구체화.
-2. **Q016 — Git publish ownership — 해결됨(D034)**
-   - Q022가 결정되면 D034를 기준으로 container credential/mount contract(Q008)를 구체화한다.
+1. **Q023 — persistent metadata field ownership**
+   - 최소 field taxonomy를 먼저 정한다: user-owned / Engine-generated persistent / projection-derived.
+   - 모든 최종 field name을 확정할 필요는 없지만 ownership rule이 없으면 `prepare`의 책임이 불명확하다.
+2. **Q026 — timestamp semantics**
+   - 적어도 `createdAt`의 의미와 write-once/override 규칙은 첫 `prepare` 전에 정한다.
+   - `updatedAt`, `publishedAt`은 필요 없으면 1차 구현에서 제외할 수 있다.
+3. **Q027 — unresolved user input 처리**
+   - interactive prompt / non-interactive failure / dual-mode 중 public CLI behavior를 정한다.
+4. **Q028 — source mutation fidelity**
+   - body와 unknown metadata 보존은 필수.
+   - frontmatter formatting normalization을 어디까지 허용할지 정한다.
 
-### 다음 설계에서 구체화할 gate
+이 네 항목이 정리되면 `prepare` core contract를 구현할 수 있다.
 
-3. **Q023 — metadata composition / precedence**
-   - metadata enrichment가 제품 핵심이므로 Engine public command contract 전에 최소 model을 정해야 한다.
-4. **Q024 — projection materialization**
-   - `verify`와 `publish`가 무엇을 생성하는지, Site가 어떤 directory를 읽는지 결정한다.
-5. **Q025 — document identity / metadata linkage**
-   - sidecar/reference metadata를 채택할 경우 함께 결정한다.
+### Scratch skeleton과 병행해서 결정 가능
 
-### Evidence 이후에 닫는 gate
+5. **Q029 — metadata schema declaration**
+   - TypeScript/config/schema 중 구현 표현은 core semantics 이후 선택 가능.
+6. **Q030 — prepare target selection**
+   - 초기에는 explicit path 입력으로 시작해 Q015 layout 결정을 blocker로 만들지 않는다.
+7. **Q008 — container mount / credential**
+   - local CLI core에는 blocker가 아니다.
+   - containerized `prepare`는 docs mount가 read-write, `verify`는 원칙적으로 read-only 가능하다.
+   - `publish` integration 전에 Git credential contract를 확정한다.
 
-6. **Q015 — docs layout**
-   - 현재 Site의 “docs 전체 = articles” consumer assumption을 Fumadocs integration에서 실제로 검증한 뒤 결정한다.
-7. **Q017 — authoring editor 역할**
-   - custom component authoring과 source round-trip Evidence 후 결정한다.
-8. **Q019 / Q021 — Site migration와 Turbo retirement**
-   - 기존 delivery Evidence를 보존하며 incremental하게 판단한다.
+### Site/Fumadocs vertical slice 전후로 결정
 
-### 1.0 구현 중 또는 실제 필요 발생 시 결정
+8. **Q024 — projection materialization**
+   - ephemeral staging vs Site working-tree generated projection을 실제 consumer integration으로 비교한다.
+9. **Q015 — docs layout / consumer convention**
+   - projection/discovery boundary를 확인한 뒤 결정한다.
+10. **Q017 — authoring editor 역할**
+    - custom component authoring Evidence 후 결정한다.
+11. **Q019 / Q021 — Site migration / Turbo retirement**
+    - delivery Evidence를 보존하면서 별도 Maintenance 판단으로 둔다.
 
-- Q008 container distribution/mount/credential 세부사항 — D034/D035 기준으로 이제 구체화 가능
-- Q010 asset/large binary policy
-- Q012 shared custom-component profile/package
-- Q014 raw HTML/executable MDX security 세부 정책
-- Q003 final release gate
+### 실제 요구가 생길 때까지 보류 가능
+
+- **Q025** stable document identity / sidecar linkage
+- **Q031** bulk prepare atomicity
+- **Q010** asset / large binary policy
+- **Q012** shared custom-component profile/package
+- **Q014** raw HTML / executable MDX security의 세부 정책 — actual public publish gate 전에는 반드시 닫아야 함
+- **Q003** final 1.0 release gate
 
 ### 현재 migration bootstrap의 blocker가 아닌 운영 질문
 
