@@ -262,8 +262,6 @@ legacy Payload E2E는 새 target Authoring 완료 Evidence가 아니다.
 - projection materialization location
 - docs layout / consumer convention
 - actual editor role
-- docs layout / consumer convention
-- actual editor role
 - Engine container mount/credential contract — D034/D035 기준으로 다음 설계 대상
 - custom component shared profile/package 필요 시점
 - Site Turbo retirement timing
