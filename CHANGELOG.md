@@ -2,6 +2,7 @@
 
 ## 2026-09-21
 
+- D043으로 canonical source의 byte-exact formatting 보존을 1.0 contract에서 제외하고 VP/editor/tooling의 의미 보존 normalization을 허용.
 - D040으로 explicit frontmatter value를 authoritative로 확정하고 Engine은 unset/missing field만 보완하도록 최소 metadata invariant를 축소.
 - D041로 timestamp derivation, file/staged/all selection, prompt UX, formatting fidelity 등 초기 구현 세부사항을 Engine repository에 위임.
 - D042로 Knowledge의 장시간·다문서 작업은 branch + PR + squash merge를 기본 workflow로 확정.
