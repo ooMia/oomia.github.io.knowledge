@@ -22,7 +22,7 @@ JavaScript/TypeScript 구현은 Development Toolchain과 Repository Design 정�
 - canonical content는 Git-backed local filesystem document workspace에 보존한다. publishable 문서는 Markdown/MDX + frontmatter/assets를 사용할 수 있고, docs layout은 free-form부터 strict convention까지 아직 열려 있다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
 - authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
-- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 containerizable runtime을 목표로 한다.
+- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 stateless, invocation-driven CLI-first one-shot runtime을 목표로 한다.
 - storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
 - Fumadocs UI/Core/MDX를 Site에서 우선 재사용하고, Fumadocs Editor는 custom-component authoring 이점이 실제로 필요한지 비교한다. Obsidian-native custom syntax bridge는 1.0 필수 고려사항이 아니다.
 - JavaScript/TypeScript 구현에서는 Development Toolchain (`docs/development-toolchain.md`)의 VP-first 정책과 Repository Design (`docs/repository-design.md`)의 monorepo-ready/package-light 원칙을 적용한다.
@@ -65,6 +65,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 D032에 따라 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
 10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
 11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
+12. Engine 1.0은 one-shot CLI adapter를 사용한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -536,10 +537,11 @@ Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
-Engine의 1.0 목표는 DB-backed CMS가 아니라 **containerizable workspace orchestrator**다.
+Engine의 1.0 목표는 DB-backed CMS가 아니라 **stateless, invocation-driven, CLI-first one-shot workspace orchestrator**다.
 
 ```text
-Engine container
+Engine CLI / one-shot container
+├─ doctor / verify / publish
 ├─ workspace discovery
 ├─ content/frontmatter validation
 ├─ authoring-tool integration hooks
@@ -551,9 +553,10 @@ Engine container
                  local content repository
 ```
 
+- Engine process는 command invocation마다 시작·종료하며 persistent application/job/session state를 소유하지 않는다.
 - Engine image 자체의 ephemeral filesystem을 canonical storage로 사용하지 않는다.
 - content repository는 host bind mount 또는 durable volume로 Engine에 제공한다.
-- application-level user/database/auth model은 1.0의 필수조건이 아니다. 외부 공개가 필요해질 때 별도 access boundary를 추가한다.
+- application-level user/database/auth model, HTTP server, job queue, long-running service lifecycle은 1.0의 필수조건이 아니다. 외부 공개나 remote control이 필요해질 때 같은 operation API 위에 별도 adapter를 추가한다.
 - 검색·인덱싱·복잡한 query가 필요해지면 DB를 **derived index**로 추가할 수 있지만 canonical source를 대체하지 않는다.
 - Payload, PostgreSQL, Lexical 기반 `cms-lab` 구현은 기존 실험/legacy Evidence로 취급하며 새 target architecture의 전제가 아니다.
 
@@ -568,7 +571,9 @@ content / frontmatter / component validation
         ↓
 Site sync / typecheck / build
         ↓
-git commit + push to oomia.github.io.docs
+committed docs revision
+        ↓
+push to oomia.github.io.docs
         ↓
 canonical docs revision
         ↓
@@ -576,7 +581,7 @@ Site revision linkage / delivery
 ```
 
 - source content 자체가 이미 publishable document form이므로 별도 DB → docs projection은 제거한다.
-- publish 과정은 source를 의미 없이 재작성하지 않고 **검증 + revision 확정 + delivery linkage**에 집중한다.
+- publish 과정은 source를 의미 없이 재작성하거나 dirty working tree를 자동 commit하지 않고 **이미 확정된 docs revision의 검증 + remote 반영 + delivery linkage**에 집중한다.
 - `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
 - Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
 - 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
@@ -1329,6 +1334,38 @@ port하지 않는 기본값:
 - DB export
 - legacy CMS task taxonomy
 
+## 14.5 Engine runtime shape
+
+D035에 따라 Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
+
+권장 adapter/application 분리:
+
+```text
+apps/engine/src/
+├─ cli.ts
+├─ commands/
+│  ├─ doctor.ts
+│  ├─ verify.ts
+│  └─ publish.ts
+└─ engine/
+   ├─ doctor.ts
+   ├─ verify.ts
+   └─ publish.ts
+```
+
+`commands/*`는 CLI argument/input/output adapter이고, `engine/*`는 실제 operation을 소유한다. 향후 HTTP/API가 필요해져도 operation API 위에 adapter를 추가할 수 있게 CLI parsing, stdout/stderr, process exit를 core operation 안으로 침투시키지 않는다.
+
+1.0에서 만들지 않는 것:
+
+- HTTP server
+- request router
+- job queue
+- publish job database
+- server-side progress/session store
+- cancellation API
+
+one-shot container는 command invocation 단위로 실행·종료한다. persistent state는 mounted Git workspace, remote Git, Site repository, Evidence artifact에 둔다.
+
 ## 15. Engine scratch initial shape
 
 초기 proposal:
@@ -1936,13 +1973,14 @@ local Git document workspace
                            GitHub Pages
 ```
 
-Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 containerizable tool/runtime이다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
+Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
 - PostgreSQL/Payload를 canonical content store로 유지
 - canonical database backup / restore
 - production-grade multi-user CMS, RBAC, transactional collaborative editing
+- long-running Engine HTTP service, server-side job queue, persistent session/status store
 - advanced agent orchestration
 - complete WYSIWYG preview
 - 모든 Markdown/MDX 표현의 Visual Editing
@@ -2201,6 +2239,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | D031 | implementation repository는 monorepo-ready but package-light 구조를 기본으로 한다. `apps/*`는 실행 단위, `packages/*`는 검증된 재사용/dependency boundary, `tools/*`는 repository-only 개발 도구이며 추측성 `utils/shared/infra` package를 선행 생성하지 않는다 | 사용자 요청 + Vite+/pnpm/Astro repository 조사, 2026-09-21 | 처음부터 많은 layer/package를 만들어 architecture diagram을 filesystem에 그대로 투영 |
 | D032 | Engine의 새 target implementation은 같은 repository history를 보존한 채 greenfield scratch build를 기본 migration 전략으로 한다. legacy tree는 template가 아니라 reference이며 generic verified behavior만 의도적으로 port한다 | 사용자 명시, 2026-09-21 | Payload/PostgreSQL 중심 tree를 계속 깎아내는 in-place refactor를 기본값으로 사용 |
 | D033 | Engine scratch bootstrap baseline은 Node.js `24.20.0`, pnpm `12.3.4`, Vite+ `0.3.3`으로 pin한다. Site와 동일 Node/pnpm baseline을 재사용하고 현재 Engine/최신 Vite+ 0.3.3을 사용하며, 이후 upgrade는 별도 Maintenance change로 다룬다 | 현재 repository state + Fumadocs Node 24+ requirement + Vite+ 0.3.3 latest release 조사, 2026-09-21 | scratch 시작과 동시에 unrelated Node/pnpm/toolchain upgrade를 섞거나 floating latest 사용 |
+| D034 | publish는 **committed-revision publish**를 사용한다. Engine은 dirty docs working tree를 자동 stage/commit하지 않고, 사용자가 확정한 docs commit을 입력으로 검증·push하고 Site가 exact docs SHA를 소비하도록 revision linkage와 delivery를 orchestration한다 | 사용자 명시, 2026-09-21 | Engine이 authoring working tree를 자동 commit하는 one-click publish; 기본 branch/PR 생성 publish |
+| D035 | Engine 1.0은 **stateless, invocation-driven CLI-first one-shot runtime**으로 구현한다. Engine은 명령 실행 시 시작해 filesystem/Git/Site 작업을 수행하고 exit code/log를 남긴 뒤 종료한다. long-running HTTP service, job queue, server-side session/state lifecycle은 1.0 비목표이며 필요 시 동일 operation API 위에 별도 adapter로 추가한다 | 사용자 명시, 2026-09-21 | resident HTTP/service Engine을 1.0부터 운영 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -2209,7 +2249,7 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 Implementation Map (`docs/implementation-map.md`)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D033이 현재 1.0 persistence/authoring/integration 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 Architecture Transition (`docs/architecture-transition.md`)가 소유한다. D021·D023·D026–D035가 현재 1.0 persistence/authoring/integration 및 implementation-bootstrap 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
 
@@ -2234,11 +2274,11 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 | Q012 | custom component shared profile/manifest 필요 여부 | Fumadocs built-in을 우선 사용. 실제 custom component가 생겨 Engine/Site 간 계약 공유가 필요할 때만 schema/package를 활성화 |
 | Q014 | raw HTML 및 executable MDX의 구체적인 publish security policy | Source 저장은 허용 가능. Site/publish 단계에서 허용할 HTML/expression 범위를 구체화해야 함 |
 | Q015 | docs layout / consumer path convention | 현재 Site는 docs repo 전체를 `apps/web/data/articles` submodule로 mount하고 `**/*.{md,mdx}`를 하나의 `articles` collection으로 읽는다. 즉 live consumer는 사실상 docs 전체를 Article source로 가정한다. Fumadocs integration spike에서 이 가정을 유지할지, publishable view/discovery rule을 분리할지, strict layout을 둘지 결정 |
-| Q016 | Git publish ownership / semantics | **사용자 결정 필요.** durable canonical revision은 docs commit으로 확정. (A) Engine은 clean/committed HEAD만 받아 push+verify, (B) Engine이 working tree를 commit+push, (C) branch/PR 생성 중 하나를 선택해야 Q008 credential/mount contract와 public CLI를 확정할 수 있음 |
+| Q016 | Git publish ownership / semantics | **해결됨: D034.** Engine은 dirty docs working tree를 commit하지 않는다. 사용자가 확정한 docs commit을 검증하고 remote에 반영한 뒤 Site의 exact docs SHA linkage와 delivery를 orchestration한다. branch/PR publish는 향후 별도 mode가 필요할 때 검토 |
 | Q017 | 실제 authoring editor 역할 분담 | Evidence-gated. Fumadocs Editor는 local files를 SoT로 유지하고 built-in/custom component specs를 지원한다. 기존 Obsidian corpus를 Fumadocs Site에 연결한 뒤 custom-component authoring 이득을 비교해 Obsidian-only / optional Fumadocs Editor / Fumadocs-heavy 중 결정. Studio vs embedded UI는 채택 이후 하위 결정 |
 | Q019 | Site migration 방식 | Engine은 D032에 따라 greenfield scratch build를 기본값으로 확정. Site는 현재 docs→Astro→Pages Evidence가 있으므로 incremental migration을 우선 후보로 두되 Fumadocs integration spike 결과에 따라 재평가 |
 | Q021 | Site Turbo retirement | 새 task orchestration은 VP-first. 기존 Site Turbo를 언제 제거할지는 `vp run` recursive/filter/cache parity와 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
-| Q022 | Engine 1.0 실행 표면 | **사용자 결정 필요.** (A) CLI-first one-shot runtime/container, (B) long-running HTTP/service shell 포함. scratch directory, public command contract, container ENTRYPOINT가 달라지므로 bootstrap 전에 결정 |
+| Q022 | Engine 1.0 실행 표면 | **해결됨: D035.** stateless, invocation-driven CLI-first one-shot runtime/container를 사용한다. long-running HTTP/service shell은 1.0 비목표이며 향후 필요 시 operation API 위 adapter로 추가 |
 
 ## 분리 원칙
 
@@ -2253,10 +2293,10 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 
 ### 지금 사용자 결정이 필요한 gate
 
-1. **Q022 — Engine execution surface**
-   - 이 결정이 scratch app entrypoint, container lifecycle, command/API contract를 정한다.
-2. **Q016 — Git publish ownership**
-   - Q022와 함께 container credential/mount contract(Q008)를 결정한다.
+1. **Q022 — Engine execution surface — 해결됨(D035)**
+   - scratch app entrypoint는 CLI-first one-shot으로 고정. 다음 설계는 public commands와 container mount/credential contract(Q008) 구체화.
+2. **Q016 — Git publish ownership — 해결됨(D034)**
+   - Q022가 결정되면 D034를 기준으로 container credential/mount contract(Q008)를 구체화한다.
 
 ### Evidence 이후에 닫는 gate
 
@@ -2269,7 +2309,7 @@ D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승�
 
 ### 1.0 구현 중 또는 실제 필요 발생 시 결정
 
-- Q008 container distribution/mount/credential 세부사항 — Q022/Q016 이후
+- Q008 container distribution/mount/credential 세부사항 — D034/D035 기준으로 이제 구체화 가능
 - Q010 asset/large binary policy
 - Q012 shared custom-component profile/package
 - Q014 raw HTML/executable MDX security 세부 정책
