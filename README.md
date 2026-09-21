@@ -29,9 +29,8 @@ Git-backed document workspace를 editor/tooling과 분리해 유지하고, Engin
 | 1.0 제품 경계와 제외 범위 | [Release 1.0](docs/release-1.0.md) |
 | 실제 구현과 1.0 migration gap | [Implementation Map](docs/implementation-map.md) |
 | 기록·발표·LilysAI 활용 | [Operating Rhythm](docs/operating-rhythm.md) |
-| 변경된 결정 | [Decisions](docs/decisions.md) |
+| 현재 유효한 cross-cutting 결정 | [Current Decisions](docs/decisions.md) |
 | 미결·검증 필요 사항 | [Open Questions](docs/open-questions.md) |
-| 과거 대화 출처 및 확정 수준 | [Provenance](provenance/README.md) |
 
 ## Source of Truth
 
@@ -71,3 +70,9 @@ canonical content/publishing Evidence에는 필요에 따라 다음 revision을 
 ## Templates
 
 [Project README](templates/project-readme.md) · [Project Item](templates/project-item.md) · [Repository Issue](templates/repository-issue.md) · [설계 변경](templates/design-change.md) · [Daily Evidence](templates/daily-evidence.md) · [Weekly Review](templates/weekly-review.md) · [Implementation Map 조사 템플릿](templates/implementation-map.md)
+
+
+## Historical archive
+
+현재 `main`은 현재 목표와 계약을 설명하는 living knowledge만 유지한다.
+정리 전 상세 decision/provenance/history는 `archive/main-before-cleanup-20260921` branch에 보존되어 있다.
