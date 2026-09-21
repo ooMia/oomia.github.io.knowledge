@@ -318,6 +318,38 @@ port하지 않는 기본값:
 - DB export
 - legacy CMS task taxonomy
 
+## 14.5 Engine runtime shape
+
+D035에 따라 Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
+
+권장 adapter/application 분리:
+
+```text
+apps/engine/src/
+├─ cli.ts
+├─ commands/
+│  ├─ doctor.ts
+│  ├─ verify.ts
+│  └─ publish.ts
+└─ engine/
+   ├─ doctor.ts
+   ├─ verify.ts
+   └─ publish.ts
+```
+
+`commands/*`는 CLI argument/input/output adapter이고, `engine/*`는 실제 operation을 소유한다. 향후 HTTP/API가 필요해져도 operation API 위에 adapter를 추가할 수 있게 CLI parsing, stdout/stderr, process exit를 core operation 안으로 침투시키지 않는다.
+
+1.0에서 만들지 않는 것:
+
+- HTTP server
+- request router
+- job queue
+- publish job database
+- server-side progress/session store
+- cancellation API
+
+one-shot container는 command invocation 단위로 실행·종료한다. persistent state는 mounted Git workspace, remote Git, Site repository, Evidence artifact에 둔다.
+
 ## 15. Engine scratch initial shape
 
 초기 proposal:
