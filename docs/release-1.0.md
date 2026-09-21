@@ -40,13 +40,14 @@ local Git document workspace
                            GitHub Pages
 ```
 
-Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 containerizable tool/runtime이다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
+Engine은 workspace validation, Git/publish orchestration, authoring-tool integration hooks, Site consumer verification을 담당하는 stateless CLI-first one-shot runtime/container다. command invocation마다 실행·종료하며 persistent HTTP/job/session state를 소유하지 않는다. 1.0은 Obsidian과 Fumadocs Editor를 모두 필수 runtime으로 요구하지 않는다.
 
 ## 명시적 제외 범위
 
 - PostgreSQL/Payload를 canonical content store로 유지
 - canonical database backup / restore
 - production-grade multi-user CMS, RBAC, transactional collaborative editing
+- long-running Engine HTTP service, server-side job queue, persistent session/status store
 - advanced agent orchestration
 - complete WYSIWYG preview
 - 모든 Markdown/MDX 표현의 Visual Editing
