@@ -11,7 +11,7 @@ Turn structured content into customizable, deployable sites through explicit aut
 - [Project Planning Model](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/planning-model.md)
 - [Project Fields](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/fields.md)
 - [Implementation Map](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/implementation-map.md)
-- [Decision Log](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/decisions.md)
+- [Current Decisions](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/decisions.md)
 - [Open Questions](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/open-questions.md)
 
 ## Project usage
