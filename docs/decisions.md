@@ -46,6 +46,7 @@
 | D040 | frontmatter에 **사용자가 명시적으로 설정한 값이 있으면 해당 field는 authoritative**하며 Engine은 그 field를 재계산·덮어쓰지 않는다. Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다 | 사용자 명시, 2026-09-21 | Engine-generated default/derived value가 explicit user metadata를 덮어씀 |
 | D041 | timestamp derivation, prepare 대상 선택(file/staged/all), interactive UX, YAML/source formatting 수준 같은 세부 동작은 초기 Knowledge contract로 고정하지 않고 Engine 구현 레포에 위임한다. 구현·실험을 통해 바꾸기 쉬운 상태를 우선하며 Knowledge는 user-value preservation, frontmatter-first, prepare-before-commit 같은 핵심 경계만 소유한다 | 사용자 명시, 2026-09-21 | 초기 설계에서 모든 CLI/mutation/formatting semantics를 선결 |
 | D042 | Knowledge repository의 **장시간·다문서·다단계 변경은 별도 branch에서 작업하고 PR로 검토 후 기본적으로 squash merge**한다. `main` 직행은 작은 국소 수정에 한정해 main history를 고수준 변화 단위로 유지한다 | 사용자 명시, 2026-09-21 | 긴 작업을 여러 작은 commit으로 main에 직접 누적 |
+| D043 | canonical source의 **byte-exact formatting 보존은 1.0 contract가 아니다**. VP formatter/linter, editor, YAML/Markdown tooling이 의미를 유지하는 범위에서 formatting을 normalize할 수 있으며, 핵심 보장은 explicit user metadata와 semantic content를 임의로 덮어쓰지 않는 것이다 | 사용자 명시, 2026-09-21 | YAML key order/quoting/whitespace/body bytes까지 exact preservation을 필수 계약으로 고정 |
 
 
 D005의 다중 선택 설정, Delivery 옵션 등록은 실제 Project에서 확인되지 않았다. D007 등 초기 assistant 제안을 사용자의 명시적 승인 발언으로 인용하지 않는다. engine container 배포 및 Validation 옵션은 결정이 아니라 미결 제안이다.
@@ -54,6 +55,6 @@ D010은 **설계 정의가 Outcome인 경우에만** 적용한다. 기능 구현
 
 D011의 현재 기준 revision과 capability 판정은 [Implementation Map](implementation-map.md)에 기록한다. Product Boundary가 변경되면 동일한 구현 revision도 다시 판정할 수 있으며, contract 강화에 따른 상태 하향을 regression과 구분한다.
 
-D012–D016의 세부 정책과 예제별 지원 수준은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 [Architecture Transition](architecture-transition.md)가 소유한다. D021·D023·D026–D042가 현재 1.0 persistence/authoring/integration, enrichment/projection, implementation-bootstrap 및 Knowledge 운영 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
+D012–D016의 세부 정책과 예제별 지원 수준은 [Content Authoring & Publishing Contract](content-authoring-contract.md)가 소유한다. D025의 migration 절차와 legacy reconciliation 기준은 [Architecture Transition](architecture-transition.md)가 소유한다. D021·D023·D026–D043이 현재 1.0 persistence/authoring/integration, enrichment/projection, implementation-bootstrap 및 Knowledge 운영 기준이다. D024는 Fumadocs built-in 재사용 원칙을 유지하지만 D027에 따라 Fumadocs Editor 자체를 필수 authoring client로 확정하지 않는다. 별도 content-component package와 manifest는 실제 custom component의 공유 계약이 필요해질 때만 다시 활성화한다.
 
 D017에 따라 세션의 장기 의미는 canonical 문서·Decision Log로 승격하고, 일시적인 실행 상태만 `handoff/current.md`에 유지한다. 원문 대화가 필요하면 원래 대화 시스템을 참조하며 Knowledge repository는 transcript archive 역할을 맡지 않는다.
