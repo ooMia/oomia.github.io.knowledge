@@ -9,6 +9,19 @@
 
 규칙의 중복 복사는 피한다. GitHub Project README와 필드 description은 이 레포의 canonical 정의를 가리키는 탐색 계층으로 유지한다. 별도 레포의 코드와 계약을 함께 바꾸는 경우 관련 PR/commit을 서로 연결한다.
 
+## Branch / PR workflow
+
+`main`은 **고수준 knowledge change history**를 유지한다.
+
+- typo, 링크 수정, 작은 문구 정정처럼 국소적이고 한 번에 검토 가능한 변경은 `main`에 직접 반영할 수 있다.
+- 다문서 변경, architecture 재정렬, context bundle까지 연쇄적으로 바뀌는 작업, 여러 번의 중간 commit이 예상되는 장시간 작업은 **반드시 별도 branch에서 수행한다**.
+- 장시간 작업 branch는 작업 중 자유롭게 여러 commit을 사용할 수 있다.
+- 완료 시 PR에서 전체 diff와 canonical consistency를 검토하고, 기본적으로 **squash merge**하여 `main`에는 하나의 의미 단위 commit만 남긴다.
+- merge 후 불필요한 head branch는 삭제한다.
+- history rewrite나 force update가 필요한 maintenance는 먼저 기존 `main`을 archive branch/tag 등으로 보존한 뒤 수행한다.
+
+작업이 길어질지 불확실하면 branch를 선택하는 쪽을 기본으로 한다.
+
 ## Evidence
 
 설계·계획 정의 자체가 Outcome이면 관련 canonical 문서의 immutable commit/permalink를 완료 Evidence로 사용할 수 있다. `main` 링크는 최신 정의를 찾는 reference로 사용한다.
