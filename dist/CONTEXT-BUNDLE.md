@@ -2626,12 +2626,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## Historical reference
 
-정리 전의 세부 decision history, 대화 provenance, 변경 순서가 필요한 경우:
-
-- branch: `archive/main-before-cleanup-20260921`
-- cleanup 전 `main` HEAD: `3b7d16273ff4cce90bbbdae19b796bd89b452a9b`
-
-현재 방향을 판단할 때는 archive보다 현재 `main`의 canonical documents를 우선한다.
+과거 상세 설계·provenance·변경 순서가 실제로 필요할 때만 `archive/main-before-cleanup-20260921` branch를 참고한다. 현재 방향은 항상 현재 `main`의 canonical documents를 우선한다.
 
 <!-- END SOURCE: docs/decisions.md -->
 
