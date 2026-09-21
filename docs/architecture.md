@@ -22,7 +22,7 @@
 |---|---|
 | `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
 | `oomia.github.io.docs` | document directory/tree와 assets의 durable Git remote 및 shared revision history. layout은 자유 tree부터 strict path/schema까지 구현 목적에 맞게 선택 가능하며 현재 Knowledge가 한 형태를 선결하지 않음 |
-| `oomia.github.io` | docs repository의 canonical content revision을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io` | canonical authoring revision에서 materialize된 publishable projection을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
 
 `mono`는 사용자가 Site repository에 붙인 로컬 별칭이며 실제 원격 repository 이름의 일부가 아니다.
@@ -114,26 +114,26 @@ Engine CLI / one-shot container
 
 ## Publishing boundary
 
-Publishing은 더 이상 DB state를 generated Markdown으로 변환하는 작업이 아니다.
+Publishing은 DB state를 Markdown으로 export하는 작업이 아니지만, **canonical authoring source를 Site-ready projection으로 enrich/transform하는 작업은 핵심 책임**이다.
 
 ```text
-local content workspace
+committed docs source revision
         ↓
-content / frontmatter / component validation
+metadata discovery / resolution
         ↓
-Site sync / typecheck / build
+publishable projection materialization
         ↓
-committed docs revision
+projection validation
         ↓
-push to oomia.github.io.docs
+actual Site sync / typecheck / build
         ↓
-canonical docs revision
+docs remote / exact source SHA
         ↓
 Site revision linkage / delivery
 ```
 
-- source content 자체가 이미 publishable document form이므로 별도 DB → docs projection은 제거한다.
-- publish 과정은 source를 의미 없이 재작성하거나 dirty working tree를 자동 commit하지 않고 **이미 확정된 docs revision의 검증 + remote 반영 + delivery linkage**에 집중한다.
+- canonical authoring source와 Site-consumed projection은 다를 수 있다. DB snapshot export는 제거하지만 metadata enrichment와 deterministic projection은 유지한다.
+- publish 과정은 dirty source working tree를 자동 commit하지 않는다. committed docs revision과 선언된 metadata inputs를 입력으로 **projection 생성 + 검증 + remote/revision linkage + delivery**를 수행한다.
 - `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
 - Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
 - 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
@@ -166,6 +166,7 @@ official/custom component 지원은 다음 순서로 판단한다.
 | Surface | 소유 위치 |
 |---|---|
 | Content workspace / authoring / storage / publish 정책 | knowledge repository |
+| Metadata enrichment / publishable projection contract | [Publishable Projection](publishable-projection.md) |
 | Canonical content revision | `oomia.github.io.docs` Git history |
 | Workspace validation / Git / publish orchestration | engine |
 | Authoring UX | editor selection 미확정: Obsidian primary candidate, Fumadocs Editor component-aware candidate, IDE/Agent source client |
