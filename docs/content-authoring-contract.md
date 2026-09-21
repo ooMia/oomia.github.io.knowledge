@@ -8,7 +8,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 공식 정책:
 
-> Canonical content는 Git-backed filesystem document workspace에 보존한다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
+> Canonical content는 Git-backed filesystem document workspace에 보존한다. working-tree draft는 Engine `prepare`에 의해 frontmatter-first persistent metadata가 보완될 수 있고, 사용자가 검토·commit한 상태가 durable canonical revision이 된다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
 이 문서는 **Editing, Storage, Canonical Revision, Projection, Publishing**을 분리해 정의한다.
 
@@ -43,7 +43,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 ## Canonical revision
 
-canonical content의 물리적 표현은 local Git working tree의 files다.
+canonical content의 물리적 표현은 local Git working tree의 files다. 다만 working tree의 모든 draft가 곧 durable canonical revision인 것은 아니며, `prepare`와 user review를 거쳐 commit된 상태가 공유 가능한 canonical revision이 된다.
 
 - Markdown/MDX-like document source는 파일 내용 자체다.
 - frontmatter는 publishable Article-like documents의 유력 metadata representation이다. repository 또는 consumer가 strict schema를 선택할 수 있고, 반대로 일부 path는 schema 밖에 둘 수도 있다. 어느 형태를 택할지는 layout decision에 따른다.
@@ -53,6 +53,20 @@ canonical content의 물리적 표현은 local Git working tree의 files다.
 - Git commit/history가 기본 revision, diff, rollback, provenance mechanism이다.
 
 따라서 `oomia.github.io.docs`는 generated projection이 아니라 **canonical content remote**다.
+
+## Prepare
+
+`prepare`는 **commit 전 source-mutating operation**이다.
+
+- document-local persistent metadata의 기본 저장소는 frontmatter다.
+- Engine이 자동 생성 가능한 값은 정책에 따라 frontmatter에 materialize할 수 있다.
+- 사용자의 판단이 필요한 required 값은 명확히 unresolved로 보고한다.
+- 기존 valid user-owned value를 임의로 덮어쓰지 않는다.
+- unknown frontmatter key를 보존한다.
+- body rewrite는 metadata update의 부수 효과로 발생해서는 안 된다.
+- Git stage/commit/push는 하지 않는다.
+
+`prepare` 이후 사용자가 diff를 검토하고 필요한 값을 조정한 뒤 commit한다.
 
 ## Projection
 
