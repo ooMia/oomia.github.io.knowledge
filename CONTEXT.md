@@ -6,7 +6,7 @@
 
 콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
 
-- canonical content는 Git-backed local filesystem document workspace에 보존한다. publishable 문서는 Markdown/MDX + frontmatter/assets를 사용할 수 있고, docs layout은 free-form부터 strict convention까지 아직 열려 있다.
+- canonical authoring content는 Git-backed local filesystem document workspace에 보존한다. Site가 소비하는 publishable document는 metadata enrichment를 거친 deterministic projection일 수 있으며 source와 byte-for-byte 동일할 필요가 없다. docs layout은 free-form부터 strict convention까지 아직 열려 있다.
 - local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
 - authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
 - Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 stateless, invocation-driven CLI-first one-shot runtime을 목표로 한다.
