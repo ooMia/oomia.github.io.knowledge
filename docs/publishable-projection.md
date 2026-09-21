@@ -117,15 +117,14 @@ source에서 언제든 재현 가능하고 사람이 보존·수정할 이유가
 
 필수 원칙:
 
-1. 이미 유효한 user-owned frontmatter를 임의로 덮어쓰지 않는다.
-2. Engine이 자동 결정 가능한 값과 사용자의 판단이 필요한 값을 구분한다.
-3. 자동 생성 값은 가능한 한 idempotent해야 한다.
-4. missing/invalid field는 document-level diagnostic으로 식별한다.
-5. unknown frontmatter key를 삭제하지 않는다.
-6. body를 metadata update의 부수 효과로 재작성하지 않는다.
-7. `prepare`는 Git stage/commit/push를 하지 않는다.
+1. **explicit frontmatter value가 있으면 authoritative**하며 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
+2. Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다.
+3. unknown frontmatter key와 사용자가 명시한 metadata 의미를 보존한다.
+4. `prepare`는 Git stage/commit/push를 하지 않는다.
+5. formatting/serialization normalization 자체는 금지하지 않는다. VP formatter/linter나 선택한 YAML/Markdown tooling이 일관된 형식으로 정리할 수 있다.
+6. metadata enrichment/formatting이 unrelated semantic content를 임의로 변경해서는 안 된다.
 
-정확한 field ownership, timestamp 의미, interactive/non-interactive behavior는 구현 전 결정이 필요하다.
+field generator, timestamp derivation, file/staged/all selection, prompt/diagnostic UX, normalization 수준은 초기 Knowledge contract로 고정하지 않고 Engine 구현 레포에 위임한다.
 
 ## 4. Publishable Projection
 
@@ -272,10 +271,8 @@ environment/workspace prerequisites를 진단한다.
 
 Engine scratch의 `prepare` 구현 전에:
 
-- persistent field ownership/generation policy
-- `createdAt` / `updatedAt` / `publishedAt` 등의 정확한 의미
-- interactive vs non-interactive missing-value resolution
-- frontmatter mutation safety / normalization 허용 범위
+- actual Site/Fumadocs integration에서 projection materialization 위치
+- public publish 전에 필요한 security/credential contract
 
 Vertical slice의 Site integration 전에:
 
