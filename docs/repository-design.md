@@ -1,6 +1,6 @@
 # Repository Design & Maintenance
 
-상태: 공통 repository scheme과 문서 소유권의 원본. 하단의 기존 Engine/Site 설계 절은 이관 검토 중이며 공통 scheme을 재정의하지 않는다.
+상태: 공통 repository scheme과 문서 소유권의 원본. Engine/Site 고유 설계 절은 책임 레포의 원본을 참조한다.
 
 이 문서는 모든 repository가 공유하는 디렉토리 역할과 scaffolding 기준을 소유한다. repository의 성격은 안에 들어가는 내용으로 표현하며, 같은 이름의 디렉토리를 repository마다 다른 역할로 정의하지 않는다.
 
@@ -241,7 +241,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 
 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
-기존 기술 문서는 목적지 원본과 참조 전환이 준비되기 전까지 제거하지 않는다. 하단 Engine/Site 설계 절과 다른 기술 문서의 이관 판단은 [Open Questions](open-questions.md)에 기록한다.
+기존 기술 문서는 목적지 원본과 참조 전환이 준비되기 전까지 제거하지 않는다. 다른 기술 문서의 이관 판단은 [Open Questions](open-questions.md)에 기록한다.
 
 ## 12. Agent context
 
@@ -284,109 +284,19 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 ## 14. Scratch-build policy for Engine
 
-현재 Engine은 legacy CMS architecture coupling이 강하므로 **greenfield scratch target을 기본 migration 전략으로 채택한다.**
-
-의미:
-
-- Git history와 legacy revision은 보존한다.
-- 기존 source tree를 새 architecture의 directory template로 사용하지 않는다.
-- 새 branch에서 target architecture 기준 skeleton을 만든다.
-- legacy code는 검토 후 필요한 부분만 의도적으로 port한다.
-- “삭제하고 다시 쓰기”와 “history를 지우기”를 동일시하지 않는다.
-
-우선 port 후보:
-
-- process execution abstraction이 실제로 유용하면 해당 부분
-- concurrency/idempotency behavior
-- evidence/revision linkage
-- Site verification logic
-
-port하지 않는 기본값:
-
-- Payload UI
-- PostgreSQL lifecycle
-- Lexical codec
-- DB export
-- legacy CMS task taxonomy
+Engine의 실제 전환 결정과 보존 경계는 [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)가 소유한다. 과거 Knowledge의 새 skeleton 제안은 현재 구현 상태를 뜻하지 않는다.
 
 ## 14.5 Engine runtime shape
 
-Engine 1.0은 long-running service가 아니라 one-shot CLI runtime이다.
-
-권장 adapter/application 분리:
-
-```text
-apps/engine/src/
-├─ cli.ts
-├─ commands/
-│  ├─ doctor.ts
-│  ├─ prepare.ts
-│  ├─ verify.ts
-│  └─ publish.ts
-└─ engine/
-   ├─ doctor.ts
-   ├─ prepare.ts
-   ├─ verify.ts
-   └─ publish.ts
-```
-
-`commands/*`는 CLI argument/input/output adapter이고, `engine/*`는 실제 operation을 소유한다. 향후 HTTP/API가 필요해져도 operation API 위에 adapter를 추가할 수 있게 CLI parsing, stdout/stderr, process exit를 core operation 안으로 침투시키지 않는다.
-
-1.0에서 만들지 않는 것:
-
-- HTTP server
-- request router
-- job queue
-- publish job database
-- server-side progress/session store
-- cancellation API
-
-`prepare`는 mounted docs workspace에 write access가 필요하고, `verify`는 원칙적으로 source read-only로 동작할 수 있다. `publish`는 committed source를 수정하지 않지만 remote Git/Site linkage를 변경할 수 있다.
-
-one-shot container는 command invocation 단위로 실행·종료한다. persistent state는 mounted Git workspace, remote Git, Site repository, Evidence artifact에 둔다.
+[Engine runtime adapter 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#runtime-adapter-설계)를 참조한다.
 
 ## 15. Engine scratch initial shape
 
-초기 proposal:
-
-```text
-/
-├─ apps/
-│  └─ engine/
-│     ├─ src/
-│     └─ tests/
-├─ .github/
-├─ .vite-hooks/
-├─ package.json
-├─ pnpm-workspace.yaml
-├─ tsconfig.json
-└─ vite.config.ts
-```
-
-`packages/*`와 `tools/*`는 실제 extraction point가 확인될 때 추가한다.
-
-첫 구현부터 다음처럼 나누지 않는다.
-
-```text
-packages/
-├─ core
-├─ git
-├─ workspace
-├─ process
-├─ validation
-└─ utils
-```
-
-이들은 architecture diagram의 개념이지 반드시 npm/workspace package여야 하는 것은 아니다.
+현재 구성은 [Engine contributor map](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/README.md#contributor-map), 새 경로의 역할은 이 문서의 공통 scheme을 따른다. 과거 bootstrap tree를 매번 다시 만들거나 현재 구현에 복제하지 않는다.
 
 ## 16. Site migration implication
 
-Site는 이미 docs consumption → Astro build → GitHub Pages delivery Evidence가 있으므로 Engine과 달리 greenfield를 기본값으로 하지 않는다.
-
-- Astro structure는 유지 가능
-- Fumadocs integration은 incremental spike
-- Turbo는 Vite+ task parity가 확인될 때 단계적으로 제거 가능
-- generic `packages/ui`, `packages/md`는 실제 새 responsibility와 맞는지 integration 과정에서 재검토
+[Site consumer integration 전환](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다.
 
 ## 17. Maintenance checklist
 

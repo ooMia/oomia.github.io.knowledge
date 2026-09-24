@@ -59,10 +59,10 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 | `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor·projection 설명은 별도 검토. |
 | `publishable-projection.md` | Engine/Site 중 원본 소유자 미정. 별도 projection의 필요성과 위치는 in-place 후처리 설명만으로 확정하지 않는다. |
 | `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
-| `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme과 개발 원칙은 유지. 런타임·migration 상세는 각 구현 레포의 기존 문서와 대조 후 이관한다. |
-| `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준은 유지. 현재 버전과 레포별 실행 상세는 해당 설정·문서 원본을 참조하도록 검토한다. |
-| `release-1.0.md` | 통합 제품 목표·AC를 Knowledge에 유지할지 사용자의 명시적 판단 필요. 기술 설계의 owner와 분리한다. |
-| `implementation-map.md` | 통합 검수 링크와 revision snapshot만 유지할지 검토. 레포별 구현 상태 원장 복제는 줄인다. |
+| `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme 유지. Engine runtime 설계와 Site integration 전환은 소유 레포의 이관 branch로 이동했고, Engine bootstrap은 기존 migration record를 참조한다. |
+| `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준 유지. 레포별 적용 상세는 Engine README/migration 및 Site toolchain 전환 원본 참조로 변경했다. |
+| `release-1.0.md` | 사용자 결정: Knowledge에 통합 목표·수용 기준 유지. 기술 상세는 원본 참조로 정리했다. |
+| `implementation-map.md` | 사용자 결정: Knowledge에 통합 검수 연결 유지. 기준 Evidence와 당시 판정은 보존하고 기술 구현 목록은 원본 참조로 정리했다. |
 | `decisions.md` | 원본 링크 인덱스로 전환했다. 이관이 확정되면 해당 링크만 변경한다. |
 | 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 공통 콘텐츠·projection 질문은 owner를 먼저 확정한다. |
 | `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지하고 기능별 Engine Issue 참조로 전환했다. |

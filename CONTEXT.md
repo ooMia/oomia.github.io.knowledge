@@ -11,7 +11,7 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 | Issue 생성·수정·활성화 | [Issue 형식](templates/repository-issue.md) → [lifecycle·DoD](docs/planning-model.md) → 필요한 [Fields](docs/fields.md) / [Labels](docs/labels.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Issue-linked branch](docs/project-orchestration.md#development-branch-naming) → 해당 Issue |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
-| major/minor release | [Git Workflow](docs/git-workflow.md) → 해당 release의 AC·Evidence |
+| major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
 | 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → JS/TS이면 [Development Toolchain](docs/development-toolchain.md) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 Issue·코드·테스트 |
 | Knowledge 문서 수정 | [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 → [CONTRIBUTING](CONTRIBUTING.md) |
@@ -41,7 +41,6 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 | 편집·파일 수정·발행 계약 | [Content Authoring Contract](docs/content-authoring-contract.md) |
 | metadata·projection | [Publishable Projection](docs/publishable-projection.md) |
 | 보류된 component 계약 | [Component Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
-| 통합 목표·검수 | [Release 1.0](docs/release-1.0.md), [Implementation Map](docs/implementation-map.md) |
 | 결정 탐색 | [Current Decisions](docs/decisions.md) |
 
 설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며, 현재 구현은 책임 레포에서 확인한다. 과거 상세 history는 `archive/main-before-cleanup-20260921`에서 필요할 때만 조사한다.

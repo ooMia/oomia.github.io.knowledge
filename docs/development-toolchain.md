@@ -333,30 +333,10 @@ vp config --no-agent
 
 ## 16. Current repository implications
 
-### Engine
+공통 기준을 적용한 실제 구성은 각 레포의 문서와 설정이 소유한다. 현행 버전·명령·전환 상태를 이 공통 지침에 복제하지 않는다.
 
-현재 Engine은 Vite+를 이미 사용하지만 task taxonomy가 legacy architecture에 결합되어 있다.
-
-예:
-- `db:*`
-- `cms:*`
-- DB-based `docs:publish`
-
-scratch build에서는 이 task set을 이어받지 않는다.
-
-VP 자체와 다음 종류의 정책만 재사용한다.
-
-- root lint/fmt/check
-- catalog/pinning model
-- workspace task execution
-- evidence `NO_COLOR`
-- generic verification
-
-### Site
-
-현재 Site는 Vite+와 Turbo를 함께 사용한다.
-
-새 policy에서는 VP가 default task runner다. Turbo는 즉시 삭제하지 않지만 **새 workflow가 Turbo dependency를 확대하지 않는다**. VP recursive/filter/cache가 현재 Turbo usage를 대체할 수 있는지 별도 parity migration으로 검증한 뒤 정리한다.
+- Engine: [개발 명령과 버전](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/README.md#development), [독립 이력 전환](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md). legacy의 `db:*` / `cms:*` task 설명을 현재 Engine 상태로 사용하지 않는다.
+- Site: [consumer integration / Turbo 전환](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#toolchain-전환).
 
 ## External references reviewed
 
