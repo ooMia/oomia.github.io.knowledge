@@ -195,7 +195,7 @@ ports/
 
 Astro repository의 구조에서 참고할 수 있는 좋은 원칙은 **같은 제품이라도 실행되는 context가 다르면 코드 경계를 분명히 하는 것**이다.
 
-Engine에서도 다음 차이가 실제로 생기면 directory/package boundary 후보가 된다.
+구현 repository에서도 다음 차이가 실제로 생기면 directory/package boundary 후보가 된다.
 
 - host filesystem / Git access
 - container runtime
@@ -241,7 +241,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 
 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
-기존 기술 문서는 목적지 원본과 참조 전환이 준비되기 전까지 제거하지 않는다. 다른 기술 문서의 이관 판단은 [Open Questions](open-questions.md)에 기록한다.
+구현 상세가 책임 repository의 code/docs로 충분히 표현되면 Knowledge에 compatibility 문서를 중복 유지하지 않는다. 삭제된 과거 설계는 Git history에서 조사한다.
 
 ## 12. Agent context
 
@@ -282,21 +282,6 @@ generated/local state를 source tree와 섞지 않는다.
 
 canonical content 자체는 Engine repository 내부 generated directory가 아니라 external/mounted docs workspace로 취급한다.
 
-## 14. Scratch-build policy for Engine
-
-Engine의 실제 전환 결정과 보존 경계는 [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)가 소유한다. 과거 Knowledge의 새 skeleton 제안은 현재 구현 상태를 뜻하지 않는다.
-
-## 14.5 Engine runtime shape
-
-[Engine runtime adapter 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#runtime-adapter-설계)를 참조한다.
-
-## 15. Engine scratch initial shape
-
-현재 구성은 [Engine contributor map](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/README.md#contributor-map), 새 경로의 역할은 이 문서의 공통 scheme을 따른다. 과거 bootstrap tree를 매번 다시 만들거나 현재 구현에 복제하지 않는다.
-
-## 16. Site migration implication
-
-[Site consumer integration 전환](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다.
 
 ## 17. Maintenance checklist
 

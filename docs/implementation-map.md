@@ -2,7 +2,7 @@
 
 검증 기준일: 2026-09-21. Knowledge가 소유하는 통합 검수 연결이다. 아래 상태 판정과 immutable Evidence는 당시 snapshot이며, 이번 문서 소유권 정리에서 구현·배포를 재검증하거나 최신 상태로 갱신하지 않았다.
 
-2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + editor/integration 재검토**로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
+2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + repository-owned consumer/mutation implementation**으로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
 
 ## 기준 revision
 
@@ -24,9 +24,9 @@
 
 | Capability | 당시 판정 | 기준 revision의 Evidence | 다음 통합 검수 연결 |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 기존 corpus를 사용한 authoring/consumer 통합 Evidence. [Authoring 검토](content-authoring-contract.md#authoring-clients). |
+| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 실제 md-like source를 호환 authoring tool로 수정·보존하고 Site가 소비하는 Evidence. editor 종류 자체는 판정 대상이 아니다. |
 | Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md). |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | 추가 콘텐츠 표현의 실제 소비 Evidence. [Site component 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract). |
+| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | 동일 component implementation/package를 사용하는 실제 Site consumer와 필요한 authoring integration Evidence. 지원 catalog는 Knowledge가 별도로 판정하지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 실제 후처리·발행 workflow에 automation이 참여한다는 Evidence. [기능별 이슈](operating-rhythm.md#기능-실험-참조). |
 | Publishing | **부분 충족** | legacy workflow는 DB snapshot을 docs repo에 materialize하고 실제 Site sync/lint/test/typecheck/build를 통과시켰다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | 현재 콘텐츠 revision의 소비 검증과 결과 재현성. [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publishing). |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | 현재 콘텐츠 revision에 대한 실제 렌더링 Evidence를 확보해 재평가. |
