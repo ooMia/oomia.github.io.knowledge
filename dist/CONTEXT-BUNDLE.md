@@ -82,11 +82,13 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 상태: **Active migration directive**  
 기준일: 2026-09-21
 
-이 문서는 2026-09-21에 확정된 급진적인 architecture 변경을 구현자가 안전하게 이어받기 위한 **전환 전용 canonical guide**다.
+이 문서는 2026-09-21에 확정된 architecture 변경을 여러 repository에서 일관되게 이어가기 위한 **cross-repository 전환 guide**다.
 
-장기 제품 계약 자체는 Architecture (`docs/architecture.md`), Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`), Release 1.0 (`docs/release-1.0.md`)이 소유한다. 이 문서는 **기존 구현에서 새 target으로 이동하는 동안 무엇을 중단·보존·재구성해야 하는가**를 소유한다.
+장기 제품·통합 경계는 Architecture (`docs/architecture.md`)와 Release 1.0 (`docs/release-1.0.md`)이 소유한다. Engine의 문서 수정·legacy 전환 기술 설계는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)과 [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)가 소유하고, Site의 입력·렌더링·integration 전환은 [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md)이 소유한다.
 
-전환이 완료되면 이 문서의 상태를 종료하고 필요한 규칙만 장기 canonical 문서에 남긴다.
+이 문서는 **레포 간 전환 목적·순서·안전 규칙·완료 조건과 Evidence 연결**만 소유한다. 구현 repository 내부의 코드 분류, runtime 구조, toolchain migration 같은 기술 상세를 중복 정의하지 않는다.
+
+전환이 완료되면 이 문서의 상태를 종료하고 필요한 장기 규칙만 owning canonical 문서에 남긴다.
 
 ## 1. 왜 전환하는가
 
@@ -104,283 +106,154 @@ oomia.github.io.docs
 Astro Site
 ```
 
-이 구조는 raw Markdown/MDX를 최종 콘텐츠 형태로 사용하는 제품에 비해 다음 책임을 추가했다.
+이 구조는 raw Markdown/MDX를 최종 콘텐츠 형태로 사용하는 제품에 비해 DB schema/lifecycle, editor-state conversion, snapshot projection, 별도 persistence 운영 같은 책임을 추가했다.
 
-- DB schema와 lifecycle
-- Payload user/auth 및 CRUD
-- Lexical ↔ Markdown conversion
-- visual editor representability와 source preservation 사이의 codec
-- DB snapshot → Markdown projection
-- 별도 DB backup/restore와 dev/prod persistence 운영
+현재 목표는 기능을 포기하는 것이 아니라 **canonical source와 authoring 도구 사이의 불필요한 persistence/conversion layer를 제거하고 repository별 책임을 분리하는 것**이다.
 
-현재 레포 역할과 독립적인 콘텐츠 흐름은 Architecture (`docs/architecture.md`)를 따른다. Engine 사용 여부는 Docs commit·Site 소비의 전제 조건이 아니다.
+현재 레포 역할과 콘텐츠 흐름은 Architecture (`docs/architecture.md`)를 따른다. Engine 사용 여부는 Docs commit이나 Site 소비의 전제 조건이 아니다.
 
-변경의 목적은 기능을 포기하는 것이 아니라 **canonical source와 authoring 도구 사이의 불필요한 persistence/conversion layer를 제거하는 것**이다.
+## 2. 현재 요구사항으로 사용하지 않는 전제
 
-## 2. 구현자가 가장 먼저 버려야 하는 전제
-
-다음 전제를 현재 요구사항으로 사용하지 않는다.
+다음 전제를 현재 architecture requirement로 사용하지 않는다.
 
 1. PostgreSQL이 canonical content source다.
 2. Payload collection이 Article lifecycle의 owner다.
 3. Visual editor state를 Markdown으로 변환해야만 content를 저장할 수 있다.
 4. `oomia.github.io.docs`는 DB snapshot에서 생성되는 read-only projection이다.
 5. publish는 DB를 Markdown으로 export하는 작업이다.
-6. 모든 공식 content component를 Oomia가 직접 React package로 구현해야 한다.
-7. Engine Issue #13의 기존 Payload-oriented 구현 계획이 여전히 현재 next step이다.
-8. 기존 코드에 많은 투자가 들어갔다는 이유만으로 새 architecture가 legacy abstraction을 보존해야 한다.
+6. 특정 editor 또는 Engine 후처리를 거쳐야만 Site가 콘텐츠를 소비할 수 있다.
+7. 과거 Issue·branch의 구현 계획이 현재 owner 문서보다 우선한다.
+8. 기존 코드 투자량이 새 architecture의 책임 경계를 결정한다.
 
-위 전제에 의존하는 구현은 **현재 target과의 compatibility를 먼저 증명하기 전에는 확장하지 않는다.**
+과거 구현과 branch는 migration input과 Evidence로 보존하되, 현재 목표는 owning 문서와 live repository state를 기준으로 판단한다.
 
-## 3. 현재 non-negotiable target
+## 3. Cross-repository target
 
 ### Canonical content
 
 - content는 Markdown/MDX + YAML frontmatter + assets의 filesystem representation을 사용한다.
 - local Git working tree는 authoring/draft state를 포함할 수 있다.
 - durable shared canonical revision은 [`ooMia/oomia.github.io.docs`](https://github.com/ooMia/oomia.github.io.docs)의 Git commit SHA로 식별한다.
+- 사용자가 작성한 파일은 Engine 후처리 없이도 commit할 수 있다.
 - Git history가 기본 revision/diff/rollback mechanism이다.
 - DB를 추가하더라도 derived index/cache여야 하며 canonical content를 대체하지 않는다.
 
-### Authoring
+### Repository boundaries
 
-- editor는 아직 확정하지 않는다. 기존 content corpus가 이미 Obsidian 기반이므로 Obsidian의 기본 file/Markdown authoring 가능성은 검증 대상이 아니다.
-- 핵심 검증 대상은 Fumadocs Site integration과, custom component 주입·structured editing 관점에서 Fumadocs Editor가 Obsidian보다 실질적으로 유리한지 여부다.
-- 동일 docs workspace를 editor와 Site가 불필요한 conversion 없이 공유해야 한다.
-- Source-level editing은 Obsidian/IDE/Agent로 항상 가능해야 한다.
-- Obsidian-native custom syntax/style bridge는 1.0 핵심 과제로 만들지 않는다.
-- full CMS나 자체 editor framework를 직접 재구현하지 않는다.
+| Repository | 전환 후 책임 |
+|---|---|
+| `oomia.github.io.engine` | 선택적 문서 수정·보존 기능과 그 구현·migration Evidence |
+| `oomia.github.io.docs` | canonical content remote, shared revision history, content/assets |
+| `oomia.github.io` | Docs 입력 계약에 따른 렌더링·publishability·delivery |
+| `oomia.github.io.knowledge` | 공통 workflow·coordination·통합 목표·cross-repository 검수 연결 |
+
+Engine과 Site 문서가 서로를 참조해도 상대 runtime 실행을 요구하는 의존성을 뜻하지 않는다. Site는 Engine 처리 이력을 몰라도 자신의 입력 계약으로 Docs revision을 판정한다.
+
+### 아직 결정하지 않는 경계
+
+- authoring editor 역할은 Q017 (`docs/open-questions.md`)을 따른다.
+- docs layout / consumer discovery convention은 Q015 (`docs/open-questions.md`)을 따른다.
+- custom component shared profile/manifest 필요성과 owner는 Q012 (`docs/open-questions.md`)을 따른다.
+
+이 항목은 실제 Evidence가 생기기 전 임의로 확정하지 않는다.
+
+## 4. Repository별 migration source
 
 ### Engine
 
-문서 후처리와 legacy 전환의 기술 상세는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)를 참조한다. Engine의 선택 기능을 Site·Docs의 필수 실행 단계로 만들지 않는다.
+Engine 내부의 greenfield/bootstrap, legacy preservation, runtime 범위, 코드 재사용·폐기 판단은 Engine이 소유한다.
+
+- [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)
+- [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)
+- [Engine Issue #13](https://github.com/ooMia/oomia.github.io.engine/issues/13)
+- [Engine Issue #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)
+
+Knowledge는 해당 구현 전략을 복제하지 않고 cross-repository 결과와 Evidence 연결만 추적한다.
 
 ### Site
 
-Site는 단순 migration 대상이 아니다. 새 target의 핵심 consumer이므로 함께 변경된다.
+Site 내부의 Astro/Fumadocs integration, component 지원, toolchain 전환, build/deployment 검증은 Site가 소유한다.
 
-- canonical docs revision을 직접 소비하는 boundary는 유지한다.
-- 현재 Astro 기반은 별도 이유가 없는 한 유지할 수 있다.
-- Fumadocs UI/content tooling을 우선 검토한다.
-- 기존 custom Callout 같은 예시 구현을 보존하기 위해 Fumadocs built-in을 재구현하지 않는다.
-- actual Site typecheck/test/build는 Publishability의 최종 gate 중 하나로 계속 유지한다.
+- [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md)
+- [Site Issue #10](https://github.com/ooMia/oomia.github.io/issues/10)
+
+Knowledge는 Site의 기술 migration 방식을 재정의하지 않고 통합 수용 기준과 revision linkage를 연결한다.
 
 ### Docs
 
-Docs repository는 ownership이 가장 크게 바뀐다.
+Docs는 canonical content remote와 revision history를 제공한다. 일반 content edit은 repository implementation migration 자체가 아니다. layout·shared convention·tooling처럼 여러 소비자 또는 workflow에 영향을 주는 변경만 별도 설계 대상으로 올린다.
 
-기존:
-> generated document projection
+## 5. Cross-repository migration order
 
-현재:
-> 구현 목적에 따라 layout을 자유롭게 선택할 수 있는 document repository + durable Git revision history
+### Phase A — Observe and preserve
 
-Docs는 완전 자유 tree, consumer별 discovery convention, strict repository-wide layout을 모두 허용한다. 어떤 형태를 채택할지는 Site/Fumadocs integration과 유지보수 비용을 보고 결정한다. 일반 document edit 자체를 repository implementation Issue로 다룰 필요는 없고, shared tooling/policy/convention 변경만 구현 작업으로 추적할 수 있다.
+- legacy history와 미병합 작업을 임의로 덮어쓰거나 삭제하지 않는다.
+- Engine/Site/Docs의 실제 live state와 owner 문서를 확인한다.
+- 기존 Evidence가 어느 revision과 architecture를 검증했는지 구분한다.
 
-## 4. Repository별 migration impact
+### Phase B — Prove canonical Docs consumption
 
-| Repository | 기존 중심 책임 | 새 책임 / 변화 |
-|---|---|---|
-| `oomia.github.io.engine` | Payload CMS, PostgreSQL persistence, export/publish | 문서의 선택적 in-place 후처리; 기능 상세는 Engine 소유 |
-| `oomia.github.io.docs` | generated projection | canonical content remote, history, assets/frontmatter |
-| `oomia.github.io` | generated docs renderer | canonical docs consumer + Fumadocs-oriented presentation |
-| `oomia.github.io.knowledge` | architecture/planning SoT | transition policy와 migration Evidence mapping |
+실제 기존 content corpus를 우선 사용해 다음을 검증한다.
 
-## 5. 기존 코드의 분류 규칙
+- Docs에 직접 작성·commit한 source를 Site가 자신의 입력 계약으로 소비할 수 있는가.
+- source 보존과 Site rendering 사이에 불필요한 conversion이 없는가.
+- editor·layout·component 관련 미결 사항을 결정할 만큼의 Evidence가 확보되는가.
 
-기존 코드를 `keep`, `adapt`, `retire`로 분류한다.
+synthetic fixture는 실제 corpus로 재현하기 어려운 regression 검증에 보조적으로 사용한다.
 
-### Keep 가능성이 높은 코드
+### Phase C — Rewire publishing evidence
 
-- command/process execution
-- concurrency/idempotency guard
-- exit-code/failure propagation
-- Evidence capture
-- Git revision linkage
-- Site checkout/sync/test/typecheck/build verification
-- repository/main-only policy checks
+- DB snapshot export를 공통 publish 선행 조건에서 제거한다.
+- Docs canonical revision과 Site revision·delivery result를 연결한다.
+- Engine을 사용한 경우 그 실행 Evidence는 Engine 기능 검수에 별도로 연결한다.
+- 문서 검증과 runtime/build/deployment 검증을 서로 대체하지 않는다.
 
-### Adapt가 필요한 코드
+### Phase D — Retire legacy after replacement evidence
 
-- publish orchestration
-- docs revision handling
-- content validation
-- explicit publish trigger
-- integration/E2E fixture
+새 경로가 필요한 acceptance를 충족한 뒤에만 legacy runtime·scripts·tests·config를 각 owning repository의 판단과 Evidence에 따라 제거하거나 archive한다.
 
-### Retire 가능성이 높은 코드
+Knowledge는 제거 대상의 파일 목록이나 내부 순서를 소유하지 않는다.
 
-- Payload collection CRUD
-- Payload-specific Admin UI
-- PostgreSQL adapter/schema/init
-- Lexical ↔ Markdown codec을 canonical save gate로 쓰는 코드
-- DB snapshot exporter
-- DB-only integration tests
-- CMS user/auth가 local authoring에 필수라는 전제
+## 6. Migration safety rules
 
-분류는 파일 이름이나 과거 투자량이 아니라 **새 target에서 실제 책임을 수행하는가**로 결정한다.
-
-## 6. Issue #13 / #14 처리 원칙
-
-### Engine Issue #13
-
-[Issue #13](https://github.com/ooMia/oomia.github.io.engine/issues/13)의 기존 방향은 Payload 내부에서 canonical source를 visual editor constraint에서 분리하는 것이었다.
-
-새 architecture에서는 목표 대부분이 filesystem boundary로 이동한다.
-
-따라서:
-
-- 기존 branch의 미push/local work를 먼저 보존·검토한다.
-- branch를 자동으로 merge하거나 버리지 않는다.
-- generic test/contract/evidence 중 재사용 가능한 부분을 추출한다.
-- 기존 AC를 그대로 완료하려고 하지 않는다.
-- live Issue는 새 architecture를 기준으로 supersede/re-scope한 뒤 진행한다.
-
-### Engine Issue #14
-
-[Issue #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 핵심 의도인 **Visual codec을 global publish gate로 사용하지 않는다**는 원칙은 유지한다.
-
-단 구현은:
-
-```text
-DB body → codec round-trip → export
-```
-
-가 아니라:
-
-```text
-workspace files
-      ↓
-content / frontmatter / component / asset validation
-      ↓
-actual Site consumer verification
-```
-
-로 바꾼다.
-
-## 7. Site migration 원칙
-
-Site 구현자가 과거 component-package 계획을 보고 별도 library부터 만들지 않도록 한다.
-
-우선순위:
-
-1. 현재 docs consumption contract를 확인한다.
-2. canonical docs repository가 직접 authored source가 되어도 현재 Site pipeline이 유지되는지 검증한다.
-3. Fumadocs UI/content tooling 도입 범위를 spike한다.
-4. Fumadocs built-in component를 우선 활용한다.
-5. 실제 Oomia-specific custom component가 생긴 경우에만 adapter/profile/shared package를 도입한다.
-6. 기존 Astro/Fumadocs integration이 충분하면 framework migration을 별도 목표로 만들지 않는다.
-
-## 8. Migration order
-
-코드를 대량 삭제하기 전에 아래 순서를 따른다.
-
-### Phase A — Observe
-
-- Engine #13 branch/local Codex work 보존 상태 확인
-- Engine main/develop과 relevant Issue live state 확인
-- Docs repository tree/layout/history 조사
-- Site의 docs consumption 방식 조사
-- 현재 publish workflow에서 generic 부분과 Payload coupling 분리
-
-### Phase B — Prove the Fumadocs/Site integration
-
-synthetic 최소 fixture보다 기존에 Obsidian으로 작성한 실제 content corpus를 우선 사용한다. Obsidian authoring 자체는 이미 검증된 전제이므로, spike는 다음 불확실성에 집중한다.
-
-- 기존 corpus를 Fumadocs UI/Core/MDX 기반 Site에서 얼마나 자연스럽게 소비할 수 있는가
-- custom component가 필요할 때 Site와 authoring 측에서 주입/편집 경험이 어떤가
-- Fumadocs Editor가 custom component authoring을 충분히 단순화해 별도 editor로 채택할 가치가 있는가
-- Obsidian을 primary editor로 유지해도 source와 Site rendering contract가 충분히 단순한가
-- docs layout을 free-form/discovery-based로 유지하는 편과 strict convention을 도입하는 편 중 어느 쪽이 실제 integration을 단순화하는가
-- external edits/source round-trip에서 의미 없는 normalization이나 data loss가 발생하지 않는가
-
-Obsidian-native custom callout/plugin/CSS bridge는 1.0 spike의 필수 항목이 아니다.
-
-synthetic fixture는 broken source, encoding/path edge case, custom component validation처럼 실제 corpus로 재현하기 어려운 regression에만 추가한다.
-
-### Phase C — Rewire publishing
-
-- DB snapshot export를 필수 publish input에서 제거
-- Engine 처리 없이 작성·commit한 Docs 파일을 Site가 소비하는 경로 확인
-- Site 입력 계약에 따른 소비 검증과 Docs/Site revision·delivery 결과 연결
-- Engine의 선택 기능 검증은 해당 레포에서 별도로 수행
-
-### Phase D — Remove legacy
-
-새 path가 동등하거나 더 나은 Evidence를 확보한 이후에만:
-
-- Payload/PostgreSQL runtime 제거
-- obsolete scripts/tests/config 제거
-- container image에서 DB dependency 제거
-- legacy Issue/branch 정리
-
-## 9. Migration safety rules
-
-- **Big-bang delete 금지**: 새 path가 최소 vertical slice를 통과하기 전에 legacy code를 대량 삭제하지 않는다.
+- **Big-bang delete 금지**: 대체 경로가 최소 vertical slice Evidence를 확보하기 전에 legacy 구현을 대량 삭제하지 않는다.
 - **Dual-SoT 장기 운영 금지**: migration 중 일시적 coexistence는 가능하지만 DB와 files를 동시에 authoritative하게 두지 않는다.
-- **Silent normalization 금지**: Fumadocs/Obsidian 간 이동에서 unsupported source가 조용히 손실되면 migration 실패다.
-- **Site verification 생략 금지**: file parse 성공만으로 Publishable 판정을 내리지 않는다.
-- **Framework rewrite 금지**: Fumadocs 도입을 이유로 Astro 등 이미 동작하는 Site 기반을 불필요하게 전면 교체하지 않는다.
-- **Editor lock-in 금지**: Obsidian/Fumadocs Editor 중 하나를 integration evidence 없이 canonical editor로 고정하지 않는다.
-- **Premature layout lock-in 금지**: strict layout 자체를 금지하지 않는다. 다만 integration evidence 없이 free-form 또는 strict layout을 architecture 원칙으로 선결하지 않는다.
-- **Legacy sunk-cost bias 금지**: 과거 구현 유지가 새 모델을 더 복잡하게 만들면 제거를 우선 검토한다.
-- **Unverified convenience assumption 금지**: Obsidian plugin/Fumadocs 기능을 문서나 실제 spike 없이 canonical capability로 가정하지 않는다.
+- **Silent normalization 금지**: editor/tool 간 이동에서 unsupported source가 조용히 손실되면 migration 실패다.
+- **Site verification 생략 금지**: file parse나 문서 링크 검사만으로 Publishable 또는 배포 성공을 판정하지 않는다.
+- **Editor/layout 선결 금지**: Q015/Q017의 Evidence 없이 특정 editor 또는 strict/free-form layout을 architecture 원칙으로 고정하지 않는다.
+- **Owner 우회 금지**: Engine/Site 기술 상세를 Knowledge에서 새로 확정하지 않는다.
+- **Evidence 범위 확대 금지**: 과거 Evidence는 기록된 revision·검증 종류에만 적용한다.
 
-## 10. Implementation session bootstrap
+## 7. Implementation session bootstrap
 
-Engine/Site/Docs의 architecture migration을 수행하는 Agent는 다음 순서로 읽는다.
+migration 관련 작업을 수행할 때는 다음 순서로 현재 원본을 확인한다.
 
-1. 이 문서
-2. Architecture (`docs/architecture.md`)
-3. Development Toolchain (`docs/development-toolchain.md`)
-4. Repository Design & Maintenance (`docs/repository-design.md`)
-5. Open Questions (`docs/open-questions.md`)에서 editor / layout / Site migration decision gate 확인
-6. Content Authoring & Publishing Contract (`docs/content-authoring-contract.md`)
+1. Context entry point (`CONTEXT.md`)
+2. Repository Design (`docs/repository-design.md`)
+3. Architecture (`docs/architecture.md`)
+4. 이 문서
+5. 변경 대상 repository의 owning docs·Issue·code·tests
+6. Open Questions (`docs/open-questions.md`)
 7. Release 1.0 (`docs/release-1.0.md`)
 8. Implementation Map (`docs/implementation-map.md`)
 9. Current Handoff (`handoff/current.md`)
-10. 변경 대상 repository의 최신 Issue/branch/code/test
 
-과거 Issue body나 branch code가 위 문서와 충돌하면 **현재 canonical Knowledge가 목표를 소유하고, 과거 구현은 migration input**으로 취급한다.
+과거 Issue body나 branch code가 현재 owning 문서와 충돌하면 과거 구현은 migration input으로 취급한다. 실제 live repository state와 미push local work는 임의로 덮어쓰지 않는다.
 
-단, 실제 live repository state와 미push local work는 임의로 덮어쓰지 않는다.
-
-## 10.5 Engine greenfield scratch build
-
-Engine은 **greenfield scratch build를 기본 migration 전략으로 사용한다**.
-
-목표는 Git history를 지우는 것이 아니라 legacy source tree를 새 architecture의 template로 사용하지 않는 것이다.
-
-원칙:
-
-- same repository history를 보존한다.
-- scratch implementation은 새 Issue-linked branch에서 시작한다.
-- legacy branch/worktree의 미병합 작업은 먼저 보존한다.
-- Vite+ toolchain과 repository orchestration은 새 global policy를 적용한다.
-- Payload/PostgreSQL/Lexical/DB export task taxonomy를 새 skeleton에 복제하지 않는다.
-- legacy에서 generic behavior를 가져올 때는 이유와 verification evidence를 남긴다.
-
-우선 port 후보:
-
-- process execution behavior
-- concurrency/idempotency semantics
-- evidence/revision linkage
-- Site verification logic
-
-Site는 현재 docs→Astro→Pages Evidence가 있으므로 같은 결정을 자동 적용하지 않는다. Site는 incremental Fumadocs integration을 우선 후보로 유지하고 별도 evidence로 판단한다.
-
-## 11. Transition completion criteria
+## 8. Transition completion criteria
 
 다음이 모두 충족되면 이 transition guide를 Active에서 Completed/Archived 상태로 바꿀 수 있다.
 
 - Docs repository가 canonical content remote로 실제 운영된다.
-- 실제 기존 content corpus가 Fumadocs/Site integration에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
-- Engine 전환 범위는 해당 레포의 수용 기준과 Evidence로 별도 판정한다.
-- Site가 새 canonical content revision을 실제 build/deploy한다.
-- publish Evidence가 docs SHA + Site revision + delivery result로 연결된다. 선택적으로 사용한 Engine 기능의 Evidence는 해당 기능에 연결한다.
-- #13/#14와 관련 active backlog가 새 architecture로 re-scope되었다.
-- legacy Payload/PostgreSQL runtime이 제거되거나 명시적으로 archive 상태로 격리되었다.
-- Implementation Map이 새 main revisions 기준으로 다시 검증되었다.
+- Site가 canonical Docs revision을 실제 입력 계약에 따라 build/deploy한다.
+- publish Evidence가 Docs SHA + Site revision + delivery result를 연결한다.
+- 선택적으로 사용한 Engine 기능의 Evidence는 Engine 기능 검수에 별도로 연결된다.
+- Engine 전환 완료 여부는 Engine의 현재 수용 기준과 Evidence로 판정된다.
+- editor/layout/component 관련 미결 사항은 실제 integration에 필요한 범위에서 결정되거나 명시적으로 이후 gate로 남는다.
+- legacy Payload/PostgreSQL runtime은 owning repository에서 제거되거나 명시적으로 archive 상태로 격리된다.
+- Implementation Map (`docs/implementation-map.md`)이 새 기준 revisions와 검증 종류를 구분해 갱신된다.
+
+이 완료 조건은 문서 정리만으로 충족되지 않는다. 코드·build·deployment Evidence와 문서 검증은 별도로 기록한다.
 
 <!-- END SOURCE: docs/architecture-transition.md -->
 
@@ -792,16 +665,13 @@ GitHub Actions에서는 Vite+ official `voidzero-dev/setup-vp`를 사용한다.
 
 Vite Task result cache의 cross-run restore는 experimental이므로 correctness보다 먼저 최적화하지 않는다.
 
-## 12. Docker
+## 12. Container builds
 
 Vite+ official image는 build/CI/devcontainer에 사용할 수 있지만 production runtime image로 사용하지 않는다.
 
-Engine container는 multi-stage를 기본으로 한다.
+runtime image를 제공하는 repository는 build toolchain과 production runtime surface를 분리한다. multi-stage build는 기본 후보이며, 실제 stage 구성·artifact·runtime dependency·mount/credential 계약은 해당 구현 repository가 소유한다.
 
-1. Vite+ build stage에서 install/check/test/build/pack
-2. runtime stage에는 실제 runtime과 artifact/production dependency만 포함
-
-이렇게 하면 project toolchain이 production image surface에 불필요하게 남지 않는다.
+Engine의 현재 container/runtime 설계는 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)과 [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)를 참조한다.
 
 ## 13. IDE
 
@@ -1944,7 +1814,7 @@ Implementation Map (`docs/implementation-map.md`)은 기준 revision과 capabili
 
 ## Issue #13 / #14 영향
 
-[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. 기존 전환 검토 (`docs/architecture-transition.md`)와 책임 레포의 현재 Issue를 확인한다.
+[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
 
 ## 갱신 규칙
 
@@ -2030,16 +1900,16 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 - [현재 구현·명령·제약](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
 - [Prepare 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)
 - Engine 기능 원본 참조 (`docs/publishable-projection.md`)
-- [Migration 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
+- [Migration 기록 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)
 
 ## Publishable projection
 
 - 콘텐츠 흐름과 계약 참조 (`docs/publishable-projection.md`)
-- 필요성·위치·소유권의 남은 검토 (`docs/open-questions.md`)
+- 현재 publishing boundary (`docs/architecture.md`)
 
 ## Site / components
 
-- Site 전환 설계 (`docs/architecture-transition.md`)
+- [Site 전환 설계 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#consumer-integration-전환)
 - [Component contract](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract)
 - 보류된 manifest 계획 (`docs/content-component-schema.md`)
 
@@ -2114,22 +1984,26 @@ Site 입력/layout·editor 역할은 Q015/Q017의 실제 corpus 검증으로 좁
 
 ## 문서 소유권 검토
 
-공통 scheme과 소유권 판단 기준은 Repository Design (`docs/repository-design.md`)이 소유한다. 아래는 이동 지시가 아닌 후속 검토 목록이다. 불확실한 owner는 사용자와 확인한 뒤 변경한다.
+공통 scheme과 소유권 판단 기준은 Repository Design (`docs/repository-design.md`)이 소유한다.
 
-| 기존 문서 / 절 | 후보와 남은 질문 |
+이번 검토에서 다음 경계는 정리 완료했다.
+
+- `architecture.md`: Knowledge는 레포 역할·cross-repository 경계와 원본 탐색을 유지하고 Engine/Site 기술 설계는 각 소유 레포를 참조한다.
+- `architecture-transition.md`: Knowledge는 전환 목적·순서·안전 규칙·완료 조건·Evidence 연결만 소유한다. Engine/Site 내부 migration 전략은 각 레포 원본으로 이동했다.
+- `publishable-projection.md`: 과거 필수 projection pipeline을 종료하고 현재 owner를 찾는 compatibility reference로 유지한다.
+- `repository-design.md`: 공통 directory scheme·documentation ownership만 유지하며 Engine/Site 상세는 원본 참조로 정리했다.
+- `development-toolchain.md`: 공통 개발·scaffolding 기준만 유지하며 repository-specific runtime/container/toolchain 적용은 owning repository가 소유한다.
+- `release-1.0.md`: Knowledge가 통합 목표·수용 기준을 유지하고 기술 상세는 원본 참조로 정리했다.
+- `implementation-map.md`: Knowledge가 기준 revision·immutable Evidence·통합 검수 연결을 유지한다. 당시 판정과 현재 구현 상태를 구분한다.
+- `decisions.md`: 원본 링크 인덱스로 유지한다.
+- `operating-rhythm.md`: 기록·발표 workflow만 유지하고 기능 구현은 책임 레포 Issue를 참조한다.
+
+실제 소유권 판단이 남은 문서는 다음 두 범위다. 답변에 의존하는 이동·축소만 보류한다.
+
+| 기존 문서 / artifact | 남은 질문 |
 |---|---|
-| `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. Engine 수정 / Site 소비 계약의 원본을 참조한다. |
-| `architecture-transition.md` | 레포 간 의존성은 coordination; Engine/Site 이행 상세는 각 레포. 현재 유효한 전환 범위를 먼저 확인한다. |
-| `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor 설명은 별도 검토. |
-| `publishable-projection.md` | 기존 필수 파이프라인 설계를 종료하고 소유 레포 원본을 찾는 참조 문서로 정리했다. |
-| `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
-| `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme 유지. Engine runtime 설계와 Site integration 전환은 소유 레포의 이관 branch로 이동했고, Engine bootstrap은 기존 migration record를 참조한다. |
-| `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준 유지. 레포별 적용 상세는 Engine README/migration 및 Site toolchain 전환 원본 참조로 변경했다. |
-| `release-1.0.md` | 사용자 결정: Knowledge에 통합 목표·수용 기준 유지. 기술 상세는 원본 참조로 정리했다. |
-| `implementation-map.md` | 사용자 결정: Knowledge에 통합 검수 연결 유지. 기준 Evidence와 당시 판정은 보존하고 기술 구현 목록은 원본 참조로 정리했다. |
-| `decisions.md` | 원본 링크 인덱스로 전환했다. 이관이 확정되면 해당 링크만 변경한다. |
-| 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 실제로 여러 레포가 공유할 새 계약이 생기면 owner를 먼저 확정한다. |
-| `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지하고 기능별 Engine Issue 참조로 전환했다. |
+| `content-authoring-contract.md`의 editor 관련 절 | Q017의 editor 역할이 확정된 뒤 authoring 정책의 durable owner와 문서 위치를 결정한다. Engine 수정 / Site 소비 계약은 이미 분리했다. |
+| `content-component-schema.md` 및 JSON Schema | Q012의 manifest 필요성 및 owner를 결정하기 전까지 deferred planning draft로 유지한다. Site 또는 미래 shared package로 임의 이전하지 않는다. |
 
 Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방식은 미정이다. 해당 작업이 필요해질 때 확인하며 일반 Issue branch → develop PR 작업을 막지 않는다.
 
