@@ -1,6 +1,6 @@
 # Content Authoring & Publishing Contract
 
-상태: 2026-09-21 Git-backed document workspace와 editor-selection/integration 재검토 방향을 canonical policy로 반영.
+상태: 파일 수정 계약은 Engine, 소비 계약은 Site의 문서 이관 branch로 분리했다. 링크 대상은 검토 중이며 develop/main 통합 완료를 뜻하지 않는다. 남은 editor·projection 절은 기존 위치에서 후속 검토한다.
 
 ## 목적
 
@@ -28,18 +28,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 ## Storage
 
-| 수준 | 보장 |
-|---|---|
-| Preserved | 사용자가 명시한 content와 metadata의 의미를 보존한다. byte-for-byte 동일성은 contract가 아니다. |
-| Normalized | Editor, VP formatter/linter 또는 선택한 tooling이 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
-| Reject | workspace/file contract 자체를 만족하지 못하거나 안전하게 파일로 보존할 수 없는 경우에만 저장을 거부한다. |
-
-기본 원칙:
-
-- source-oriented editing도 byte-exact 보존을 요구하지 않는다. 사용자가 명시한 의미와 explicit frontmatter value를 보존하는 것이 우선이다.
-- visual/editor/formatter-specific tooling의 **Normalized** output을 허용하며, format/lint에 따른 일관된 source 변화 자체는 실패가 아니다.
-- Markdown/MDX 문법 오류나 현재 Site가 지원하지 않는 expression은 draft file로 저장할 수 있고 publish 단계에서 Blocked될 수 있다.
-- storage contract는 DB schema나 rich-text serialization compatibility를 요구하지 않는다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#storage)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Canonical revision
 
@@ -52,20 +41,11 @@ canonical content의 물리적 표현은 local Git working tree의 files다. 다
 - 다른 환경과 공유·재현하는 durable canonical state는 `ooMia/oomia.github.io.docs`의 commit SHA다.
 - Git commit/history가 기본 revision, diff, rollback, provenance mechanism이다.
 
-따라서 `oomia.github.io.docs`는 generated projection이 아니라 **canonical content remote**다.
+`oomia.github.io.docs`는 작성 폴더를 Git으로 관리할 때 사용하는 remote다. 같은 문서는 editor가 작성한 콘텐츠이면서 Engine이 in-place 후처리한 generated content일 수 있다. 이 표현은 별도 output 전용 레포나 post-commit projection을 의미하지 않는다.
 
 ## Prepare
 
-`prepare`는 **commit 전 source-mutating operation**이다.
-
-- document-local persistent metadata의 기본 저장소는 frontmatter다.
-- Engine이 자동 생성 가능한 값은 정책에 따라 frontmatter에 materialize할 수 있다.
-- existing explicit frontmatter value가 있으면 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
-- unset/missing field를 어떻게 채울지와 unresolved UX는 Engine 구현이 선택한다.
-- formatting/serialization normalization은 허용하지만 사용자가 명시한 content/metadata 의미를 임의로 바꾸지 않는다.
-- Git stage/commit/push는 하지 않는다.
-
-`prepare` 이후 사용자가 diff를 검토하고 필요한 값을 조정한 뒤 commit한다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Projection
 
@@ -86,52 +66,11 @@ Engine은 source를 불필요하게 mutation하지 않고 publishable projection
 
 ## Publishing
 
-| 수준 | 보장 |
-|---|---|
-| Publishable | 현재 workspace content가 validation과 실제 Site consumer 검증을 통과하고 canonical docs revision으로 확정될 수 있다. |
-| Blocked | source는 workspace에 보존되지만 현재 publishing contract를 만족하지 않는다. 실패 이유를 관찰 가능하게 제공한다. |
-
-Visual editing compatibility는 Publishability의 필수조건이 아니다.
-
-목표 흐름:
-
-```text
-committed docs source revision
-        ↓
-metadata resolve / enrichment
-        ↓
-publishable projection materialization
-        ↓
-projection validation
-        ↓
-actual Site consumer build
-        ↓
-revision linkage / delivery
-```
-
-Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment와 deterministic projection materialization은 핵심 product behavior**다. source revision과 projection을 구분하며, Site는 projection contract를 만족하는 입력을 소비한다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publishing)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## 1.0 목표 정책 테이블
 
-| 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
-|---|---|---|---|---|
-| 기본 Markdown | Source + 필요 시 Visual | Preserved / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
-| 일반 GFM table | Visual 또는 Source | Preserved / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
-| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Preserved | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
-| 임의 code fence language | Visual 또는 Source | Preserved | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
-| 일반 Markdown image | Visual 또는 Source | Preserved | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
-| workspace-relative asset | Visual 또는 Source | Preserved | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
-| durable external asset URL | Visual 또는 Source | Preserved | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
-| raw HTML | Source | Preserved | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
-| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Preserved / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
-| Fumadocs built-in MDX component | Visual 또는 Source | Preserved / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
-| custom MDX component + visual spec | Visual | Normalized | Publishable | 명시된 component contract와 Site consumer 검증을 통과해야 한다. |
-| custom MDX component + visual spec 없음 | Source | Preserved | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
-| contract에 없는 MDX component | Source | Preserved | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
-| 잘못된 component props | Source | Preserved | Blocked | file 저장과 publish validation을 분리한다. |
-| arbitrary JavaScript expression | Source | Preserved | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
-| 문서 내부 임의 import/export | Source | Preserved | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
-| 문법 오류가 있는 draft | Source | Preserved | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#10-소비-목표)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Authoring clients
 
@@ -177,7 +116,7 @@ Site presentation은 Fumadocs UI/Core/MDX를 적극 재사용할 수 있다. aut
 
 ### Engine
 
-Engine은 1.0에서 full CMS나 editor framework가 아니다.
+Engine의 목적은 Obsidian이 지원하는 frontmatter 포함 md-like 문서 각각의 in-place 후처리다. CLI는 현재 실행 형태이며 이 목적과 구분한다. 아래는 기존 기술 설계의 확장 책임으로, 소유 레포 이관 시 현재 구현과 대조할 대상이다.
 
 - workspace discovery / validation
 - selected layout/convention validation
@@ -192,49 +131,15 @@ Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존
 
 ## Metadata contract
 
-publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. docs layout 결정에 따라 repository-wide 또는 subtree-specific schema를 강제할 수 있다.
-
-최소 공통 예:
-
-```yaml
----
-title: Example
-description: Optional summary
-author: mia
-draft: true
----
-```
-
-정확한 required/optional field schema와 적용 범위는 선택된 docs layout/consumer contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
-
-외부 source에서 import할 경우 canonical frontmatter로 normalize할 수 있지만 import adapter의 source-specific metadata를 장기 SoT로 유지하지 않는다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#metadata-contract)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Component contract
 
-Fumadocs built-in component를 우선 활용한다.
-
-- built-in component의 이름/props를 그대로 canonical syntax로 사용할 수 있는 경우 불필요한 wrapper를 만들지 않는다.
-- 플랫폼에서 허용할 component subset이 필요하면 supported profile을 명시한다.
-- custom component가 필요하면 name / props / children / source semantics를 먼저 정의한다.
-- Engine authoring spec과 Site renderer가 shared runtime contract를 필요로 할 때만 manifest 또는 shared package를 도입한다.
-- 별도 `@oomia/content-components` renderer library는 1.0 필수조건이 아니다.
-
-[Content Component Manifest Schema](../schemas/content-component-manifest.schema.json)는 custom component contract가 실제로 필요해질 때 사용할 수 있는 planning schema다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Publish validation 원칙
 
-Publish validation은 editor round-trip 여부가 아니라 **현재 canonical files가 Site에서 안전하고 재현 가능하게 소비되는가**를 판정한다.
-
-최소 검증:
-
-1. workspace/file layout와 frontmatter schema
-2. Markdown/MDX parse
-3. component contract / dangerous expression policy
-4. asset resolution
-5. Site sync/typecheck/test/build
-6. canonical docs commit과 Site revision linkage
-
-Source를 publish 전에 visual editor codec으로 decode/encode하는 절차는 요구하지 않는다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publish-validation-원칙)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## 1.0 비목표
 

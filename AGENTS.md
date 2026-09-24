@@ -5,7 +5,7 @@
 3. Keep product direction separate from repository implementation and live Project state.
 4. Treat current canonical documents as authoritative. Historical decision/provenance context belongs to `archive/main-before-cleanup-20260921`, not current `main`.
 5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. New unresolved product-level questions belong in docs/open-questions.md.
-6. Edit only the owning document for a rule; update Current Decisions only when a cross-cutting current rule changes.
+6. Edit only the owning document for a rule; update Current Decisions links when ownership or navigation changes, without duplicating policy prose.
 7. Do not mark work Done or invent GitHub field IDs, issue links, implementation evidence, or release dates.
 8. Use Korean prose and retain exact English field/option names. If returning copy-paste replacements, return complete changed sections or files including unchanged intervening text.
 9. Run python3 scripts/bundle.py after edits. Report changed files and unresolved questions.

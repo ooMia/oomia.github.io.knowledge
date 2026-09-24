@@ -18,8 +18,17 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그를 중심으로 하고 LinkedIn을 초기 후보로 둔다. 자체 블로그가 준비되기 전 발행 채널은 미결이다.
 
-## LilysAI 활용 후보
+## 기능 실험 참조
 
-글 전체 기반 description/metadata, 내용 기반 외부 링크 preview, 태그 후보, 3줄 요약을 실험할 수 있다. 이는 사용자가 제시한 관심 기능이며 네 기능 모두가 1.0 필수라는 의미는 아니다. 1.0은 최소 하나의 실제 automation 경로를 요구한다.
+발표·글 정리에 활용할 기능의 범위와 AC는 책임 구현 레포의 Issue에서 관리한다. 이 문서에는 기능 정책이나 실행 상태를 복제하지 않는다.
 
-자동화는 자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 순서로 필요에 맞게 확장한다. 현재 연결된 서비스나 구현 완료된 자동화를 의미하지 않는다.
+| 관심 작업 | 책임 레포의 원본 |
+|---|---|
+| 본문 기반 metadata·태그 보완 | [Engine #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) |
+| 요약·description 제안 | [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15) |
+| 외부 링크 preview | [Engine #16](https://github.com/ooMia/oomia.github.io.engine/issues/16) |
+| LilysAI MCP 활용 비교 | [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24) |
+
+링크가 존재한다는 사실은 기능 구현이나 외부 서비스 연결 완료를 뜻하지 않는다. 릴리스 포함 여부는 해당 Issue와 release 요구사항에서 확인한다.
+
+자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 흐름에서 실제 정리 부담이 큰 단계를 선택해 활용한다.

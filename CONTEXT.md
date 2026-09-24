@@ -24,11 +24,11 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
-| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [docs](https://github.com/ooMia/oomia.github.io.engine/tree/main/docs), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
-| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md), [docs](https://github.com/ooMia/oomia.github.io.engine/tree/main/docs), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs); 현재 Issue 작업 대상은 [Orchestration 적용 범위](docs/project-orchestration.md#적용-범위) 참고 |
 
-Site의 기술 문서 목적지와 개별 기술 계약의 이관은 아직 완료되지 않았다. 없는 파일을 참조하거나 이동 완료로 간주하지 않는다.
+수정·소비 계약 링크는 각각 문서 이관 branch의 원본이다. PR 통합 전이며, 아직 main에서 사용할 수 있는 것으로 보고하지 않는다. 남은 editor·projection 설계는 아래 기존 문서에서 검토한다.
 
 ## 이관 전 기존 문서
 
@@ -51,7 +51,7 @@ Site의 기술 문서 목적지와 개별 기술 계약의 이관은 아직 완�
 이 프로젝트의 Chat/Agent 세션은 아래 협업 규칙을 공통으로 적용한다. 사용자가 특정 지침을 **프로젝트 전체 세션에 적용**한다고 명시하면 현재 대화에만 묶어두지 않고 이 문서 또는 해당 규칙의 owning canonical 문서에 반영한다.
 
 1. 작업은 검증 가능한 작은 단계로 나눈다. 한 번에 지나치게 많은 live 변경을 묶지 않고, 의미 있는 단계가 끝날 때 상태를 검증해 보고한 뒤 다음 단계로 진행한다.
-2. 실제 사용자 선택이 필요한 분기점에서는 그 선택에 의존하는 변경을 진행하지 않고 멈춘다. 판단에 필요한 사실과 선택지를 제시하고 사용자 결정을 기다린다. 이미 확정된 규칙으로 결정할 수 있는 사안은 불필요하게 다시 묻지 않는다.
+2. 실제 사용자 선택이 필요한 분기점에서는 그 선택에 의존하는 변경을 진행하지 않고 멈춘다. 판단에 필요한 사실과 선택지를 제시하고 사용자 결정을 기다린다. 이미 확정된 정책을 문서에 반영하는 편집·참조 정리·검증은 주도적으로 수행한다. 새로운 정책 선택이나 불확실한 소유권 판단만 질문하며, 그 답변과 독립적인 작업은 계속한다.
 3. GitHub 관련 핵심 객체의 주소를 알고 있다면 답변에서 **처음 소개할 때 plain text 식별자만 쓰지 말고 클릭 가능한 링크로 제시한다.** 대상에는 repository, GitHub Project, Issue, Pull Request, branch, commit, workflow run/artifact 등 작업 이해에 직접 필요한 객체가 포함된다. 이후 같은 답변에서 문맥이 명확하면 짧은 이름이나 번호로 다시 언급할 수 있다.
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 본 작업의 blocker로 만들지 않는다. 필요하면 deferred verification으로 기록하고 핵심 작업을 계속한다.
 5. 세션별 임시 상태는 `handoff/current.md`에 두되, 여러 세션에 지속 적용할 사용자 작업 방식·응답 방식은 volatile handoff가 아니라 durable context에 둔다.

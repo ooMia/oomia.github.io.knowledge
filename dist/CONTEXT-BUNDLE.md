@@ -35,11 +35,11 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
-| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [docs](https://github.com/ooMia/oomia.github.io.engine/tree/main/docs), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
-| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md), [docs](https://github.com/ooMia/oomia.github.io.engine/tree/main/docs), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs); 현재 Issue 작업 대상은 Orchestration 적용 범위 (`docs/project-orchestration.md`) 참고 |
 
-Site의 기술 문서 목적지와 개별 기술 계약의 이관은 아직 완료되지 않았다. 없는 파일을 참조하거나 이동 완료로 간주하지 않는다.
+수정·소비 계약 링크는 각각 문서 이관 branch의 원본이다. PR 통합 전이며, 아직 main에서 사용할 수 있는 것으로 보고하지 않는다. 남은 editor·projection 설계는 아래 기존 문서에서 검토한다.
 
 ## 이관 전 기존 문서
 
@@ -62,7 +62,7 @@ Site의 기술 문서 목적지와 개별 기술 계약의 이관은 아직 완�
 이 프로젝트의 Chat/Agent 세션은 아래 협업 규칙을 공통으로 적용한다. 사용자가 특정 지침을 **프로젝트 전체 세션에 적용**한다고 명시하면 현재 대화에만 묶어두지 않고 이 문서 또는 해당 규칙의 owning canonical 문서에 반영한다.
 
 1. 작업은 검증 가능한 작은 단계로 나눈다. 한 번에 지나치게 많은 live 변경을 묶지 않고, 의미 있는 단계가 끝날 때 상태를 검증해 보고한 뒤 다음 단계로 진행한다.
-2. 실제 사용자 선택이 필요한 분기점에서는 그 선택에 의존하는 변경을 진행하지 않고 멈춘다. 판단에 필요한 사실과 선택지를 제시하고 사용자 결정을 기다린다. 이미 확정된 규칙으로 결정할 수 있는 사안은 불필요하게 다시 묻지 않는다.
+2. 실제 사용자 선택이 필요한 분기점에서는 그 선택에 의존하는 변경을 진행하지 않고 멈춘다. 판단에 필요한 사실과 선택지를 제시하고 사용자 결정을 기다린다. 이미 확정된 정책을 문서에 반영하는 편집·참조 정리·검증은 주도적으로 수행한다. 새로운 정책 선택이나 불확실한 소유권 판단만 질문하며, 그 답변과 독립적인 작업은 계속한다.
 3. GitHub 관련 핵심 객체의 주소를 알고 있다면 답변에서 **처음 소개할 때 plain text 식별자만 쓰지 말고 클릭 가능한 링크로 제시한다.** 대상에는 repository, GitHub Project, Issue, Pull Request, branch, commit, workflow run/artifact 등 작업 이해에 직접 필요한 객체가 포함된다. 이후 같은 답변에서 문맥이 명확하면 짧은 이름이나 번호로 다시 언급할 수 있다.
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 본 작업의 blocker로 만들지 않는다. 필요하면 deferred verification으로 기록하고 핵심 작업을 계속한다.
 5. 세션별 임시 상태는 `handoff/current.md`에 두되, 여러 세션에 지속 적용할 사용자 작업 방식·응답 방식은 volatile handoff가 아니라 durable context에 둔다.
@@ -1249,7 +1249,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
 | 작업별 읽기 경로 | CONTEXT (`CONTEXT.md`) |
 
-기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. producer/consumer 사이의 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
+기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. Engine의 파일 수정 계약과 Site의 소비 계약은 각 레포가 소유하고 서로의 원본을 참조한다. 그 밖의 producer/consumer 계약에서 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
 
 공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 Git flow나 디렉토리 역할을 반복 복사할 필요는 없다.
 
@@ -1443,7 +1443,7 @@ Site는 이미 docs consumption → Astro build → GitHub Pages delivery Eviden
 
 # Content Authoring & Publishing Contract
 
-상태: 2026-09-21 Git-backed document workspace와 editor-selection/integration 재검토 방향을 canonical policy로 반영.
+상태: 파일 수정 계약은 Engine, 소비 계약은 Site의 문서 이관 branch로 분리했다. 링크 대상은 검토 중이며 develop/main 통합 완료를 뜻하지 않는다. 남은 editor·projection 절은 기존 위치에서 후속 검토한다.
 
 ## 목적
 
@@ -1471,18 +1471,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 ## Storage
 
-| 수준 | 보장 |
-|---|---|
-| Preserved | 사용자가 명시한 content와 metadata의 의미를 보존한다. byte-for-byte 동일성은 contract가 아니다. |
-| Normalized | Editor, VP formatter/linter 또는 선택한 tooling이 의미를 유지하는 범위에서 source formatting을 정규화할 수 있다. |
-| Reject | workspace/file contract 자체를 만족하지 못하거나 안전하게 파일로 보존할 수 없는 경우에만 저장을 거부한다. |
-
-기본 원칙:
-
-- source-oriented editing도 byte-exact 보존을 요구하지 않는다. 사용자가 명시한 의미와 explicit frontmatter value를 보존하는 것이 우선이다.
-- visual/editor/formatter-specific tooling의 **Normalized** output을 허용하며, format/lint에 따른 일관된 source 변화 자체는 실패가 아니다.
-- Markdown/MDX 문법 오류나 현재 Site가 지원하지 않는 expression은 draft file로 저장할 수 있고 publish 단계에서 Blocked될 수 있다.
-- storage contract는 DB schema나 rich-text serialization compatibility를 요구하지 않는다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#storage)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Canonical revision
 
@@ -1495,20 +1484,11 @@ canonical content의 물리적 표현은 local Git working tree의 files다. 다
 - 다른 환경과 공유·재현하는 durable canonical state는 `ooMia/oomia.github.io.docs`의 commit SHA다.
 - Git commit/history가 기본 revision, diff, rollback, provenance mechanism이다.
 
-따라서 `oomia.github.io.docs`는 generated projection이 아니라 **canonical content remote**다.
+`oomia.github.io.docs`는 작성 폴더를 Git으로 관리할 때 사용하는 remote다. 같은 문서는 editor가 작성한 콘텐츠이면서 Engine이 in-place 후처리한 generated content일 수 있다. 이 표현은 별도 output 전용 레포나 post-commit projection을 의미하지 않는다.
 
 ## Prepare
 
-`prepare`는 **commit 전 source-mutating operation**이다.
-
-- document-local persistent metadata의 기본 저장소는 frontmatter다.
-- Engine이 자동 생성 가능한 값은 정책에 따라 frontmatter에 materialize할 수 있다.
-- existing explicit frontmatter value가 있으면 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
-- unset/missing field를 어떻게 채울지와 unresolved UX는 Engine 구현이 선택한다.
-- formatting/serialization normalization은 허용하지만 사용자가 명시한 content/metadata 의미를 임의로 바꾸지 않는다.
-- Git stage/commit/push는 하지 않는다.
-
-`prepare` 이후 사용자가 diff를 검토하고 필요한 값을 조정한 뒤 commit한다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Projection
 
@@ -1529,52 +1509,11 @@ Engine은 source를 불필요하게 mutation하지 않고 publishable projection
 
 ## Publishing
 
-| 수준 | 보장 |
-|---|---|
-| Publishable | 현재 workspace content가 validation과 실제 Site consumer 검증을 통과하고 canonical docs revision으로 확정될 수 있다. |
-| Blocked | source는 workspace에 보존되지만 현재 publishing contract를 만족하지 않는다. 실패 이유를 관찰 가능하게 제공한다. |
-
-Visual editing compatibility는 Publishability의 필수조건이 아니다.
-
-목표 흐름:
-
-```text
-committed docs source revision
-        ↓
-metadata resolve / enrichment
-        ↓
-publishable projection materialization
-        ↓
-projection validation
-        ↓
-actual Site consumer build
-        ↓
-revision linkage / delivery
-```
-
-Publishing은 DB snapshot export가 아니다. 그러나 **metadata enrichment와 deterministic projection materialization은 핵심 product behavior**다. source revision과 projection을 구분하며, Site는 projection contract를 만족하는 입력을 소비한다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publishing)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## 1.0 목표 정책 테이블
 
-| 콘텐츠 유형 | Editing | Storage | Publishing | 1.0 기본 정책 |
-|---|---|---|---|---|
-| 기본 Markdown | Source + 필요 시 Visual | Preserved / Normalized | Publishable | 선택된 editor와 Site가 같은 file을 손실 없이 공유해야 한다. |
-| 일반 GFM table | Visual 또는 Source | Preserved / Normalized | Publishable | Visual 지원 수준이 source 보존 범위를 제한하지 않는다. |
-| Fumadocs Editor가 표현하지 못하는 Markdown | Source | Preserved | Publishable | 실제 Site가 지원하면 발행할 수 있다. |
-| 임의 code fence language | Visual 또는 Source | Preserved | Publishable | syntax highlighting 지원 여부와 storage/publishability를 분리한다. |
-| 일반 Markdown image | Visual 또는 Source | Preserved | Publishable | 별도 Media DB object로 강제 변환하지 않는다. |
-| workspace-relative asset | Visual 또는 Source | Preserved | Publishable | repository portability와 Site asset resolution contract를 따라야 한다. |
-| durable external asset URL | Visual 또는 Source | Preserved | Publishable | 허용 scheme/domain과 portability policy를 따른다. |
-| raw HTML | Source | Preserved | Site policy에 따라 Publishable/Blocked | Visual 지원과 실행 허용을 분리한다. |
-| Obsidian-native callout / styled Markdown primitive | Visual 또는 Source | Preserved / Normalized | Publishable | Obsidian authoring UX와 Site remark/renderer mapping을 우선 검토한다. |
-| Fumadocs built-in MDX component | Visual 또는 Source | Preserved / Normalized | Publishable | Site에서는 우선 재사용하되 canonical source syntax로 직접 사용할지는 Obsidian interoperability와 함께 판단한다. |
-| custom MDX component + visual spec | Visual | Normalized | Publishable | 명시된 component contract와 Site consumer 검증을 통과해야 한다. |
-| custom MDX component + visual spec 없음 | Source | Preserved | Publishable 가능 | visual adapter 부재만으로 차단하지 않는다. |
-| contract에 없는 MDX component | Source | Preserved | Blocked | source는 보존하되 현재 Site contract가 없으면 발행하지 않는다. |
-| 잘못된 component props | Source | Preserved | Blocked | file 저장과 publish validation을 분리한다. |
-| arbitrary JavaScript expression | Source | Preserved | Blocked by default | 명시적 지원 계약 전에는 executable content를 publish contract 밖에 둔다. |
-| 문서 내부 임의 import/export | Source | Preserved | Blocked by default | document별 arbitrary dependency를 기본 허용하지 않는다. |
-| 문법 오류가 있는 draft | Source | Preserved | Blocked | draft source는 저장 가능하며 publish에서 차단한다. |
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#10-소비-목표)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Authoring clients
 
@@ -1620,7 +1559,7 @@ Site presentation은 Fumadocs UI/Core/MDX를 적극 재사용할 수 있다. aut
 
 ### Engine
 
-Engine은 1.0에서 full CMS나 editor framework가 아니다.
+Engine의 목적은 Obsidian이 지원하는 frontmatter 포함 md-like 문서 각각의 in-place 후처리다. CLI는 현재 실행 형태이며 이 목적과 구분한다. 아래는 기존 기술 설계의 확장 책임으로, 소유 레포 이관 시 현재 구현과 대조할 대상이다.
 
 - workspace discovery / validation
 - selected layout/convention validation
@@ -1635,49 +1574,15 @@ Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존
 
 ## Metadata contract
 
-publishable Article-like document의 metadata는 frontmatter를 기본 후보로 둔다. docs layout 결정에 따라 repository-wide 또는 subtree-specific schema를 강제할 수 있다.
-
-최소 공통 예:
-
-```yaml
----
-title: Example
-description: Optional summary
-author: mia
-draft: true
----
-```
-
-정확한 required/optional field schema와 적용 범위는 선택된 docs layout/consumer contract에서 정의한다. DB field와 frontmatter를 서로 변환하는 dual-SoT 모델은 만들지 않는다.
-
-외부 source에서 import할 경우 canonical frontmatter로 normalize할 수 있지만 import adapter의 source-specific metadata를 장기 SoT로 유지하지 않는다.
+[Engine 원본 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#metadata-contract)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Component contract
 
-Fumadocs built-in component를 우선 활용한다.
-
-- built-in component의 이름/props를 그대로 canonical syntax로 사용할 수 있는 경우 불필요한 wrapper를 만들지 않는다.
-- 플랫폼에서 허용할 component subset이 필요하면 supported profile을 명시한다.
-- custom component가 필요하면 name / props / children / source semantics를 먼저 정의한다.
-- Engine authoring spec과 Site renderer가 shared runtime contract를 필요로 할 때만 manifest 또는 shared package를 도입한다.
-- 별도 `@oomia/content-components` renderer library는 1.0 필수조건이 아니다.
-
-Content Component Manifest Schema (`schemas/content-component-manifest.schema.json`)는 custom component contract가 실제로 필요해질 때 사용할 수 있는 planning schema다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## Publish validation 원칙
 
-Publish validation은 editor round-trip 여부가 아니라 **현재 canonical files가 Site에서 안전하고 재현 가능하게 소비되는가**를 판정한다.
-
-최소 검증:
-
-1. workspace/file layout와 frontmatter schema
-2. Markdown/MDX parse
-3. component contract / dangerous expression policy
-4. asset resolution
-5. Site sync/typecheck/test/build
-6. canonical docs commit과 Site revision linkage
-
-Source를 publish 전에 visual editor codec으로 decode/encode하는 절차는 요구하지 않는다.
+[Site 원본 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publish-validation-원칙)을 참조한다. 이 절은 기존 참조를 위한 진입점이며 규칙 본문을 소유하지 않는다.
 
 ## 1.0 비목표
 
@@ -2439,16 +2344,9 @@ GitHub labels는 Project #11의 필드 체계를 복제하지 않고, Issue/PR�
 - label은 Project field로 자연스럽게 표현되지 않는 운영 의미만 담는다.
 - orchestration 전용 label은 `orchestration:*` namespace를 사용한다.
 - 하나의 Issue/PR에 여러 orchestration label을 함께 붙일 수 있다.
-- `oomia.github.io.docs`는 canonical content remote다. 일반 Article/content edit에는 구현 Issue label을 요구하지 않지만, repository-level schema/tooling/policy migration Issue가 생기면 동일한 orchestration label semantics를 적용할 수 있다.
+- Issue 대상 repository의 범위는 Project Orchestration (`docs/project-orchestration.md`)이 소유한다.
 
 ## Registry
-
-| Label | 의미 | 적용 예 |
-|---|---|---|
-| `orchestration:automation` | GitHub Actions, scripts, Project/branch 동기화 등 자동화 동작 변경 | Issue activation workflow |
-| `orchestration:policy` | repository 운영 규칙, lifecycle, 권한·token 정책 변경 | branch/merge policy |
-| `orchestration:cross-repo` | 두 개 이상의 repository를 함께 조정하는 작업 | knowledge + engine + site 동기화 |
-| `orchestration:evidence` | automation 자체보다 검증·재현·evidence 수집이 Outcome인 작업 | idempotency/E2E 검증 |
 
 label의 **이름과 의미**는 config/labels.json (`config/labels.json`)을 canonical source로 사용한다. 색상은 UI 구분을 위한 표시 힌트이며 repository별 실제 색과 달라도 semantics가 바뀌지 않는다.
 
@@ -2729,11 +2627,20 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그를 중심으로 하고 LinkedIn을 초기 후보로 둔다. 자체 블로그가 준비되기 전 발행 채널은 미결이다.
 
-## LilysAI 활용 후보
+## 기능 실험 참조
 
-글 전체 기반 description/metadata, 내용 기반 외부 링크 preview, 태그 후보, 3줄 요약을 실험할 수 있다. 이는 사용자가 제시한 관심 기능이며 네 기능 모두가 1.0 필수라는 의미는 아니다. 1.0은 최소 하나의 실제 automation 경로를 요구한다.
+발표·글 정리에 활용할 기능의 범위와 AC는 책임 구현 레포의 Issue에서 관리한다. 이 문서에는 기능 정책이나 실행 상태를 복제하지 않는다.
 
-자동화는 자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 순서로 필요에 맞게 확장한다. 현재 연결된 서비스나 구현 완료된 자동화를 의미하지 않는다.
+| 관심 작업 | 책임 레포의 원본 |
+|---|---|
+| 본문 기반 metadata·태그 보완 | [Engine #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) |
+| 요약·description 제안 | [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15) |
+| 외부 링크 preview | [Engine #16](https://github.com/ooMia/oomia.github.io.engine/issues/16) |
+| LilysAI MCP 활용 비교 | [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24) |
+
+링크가 존재한다는 사실은 기능 구현이나 외부 서비스 연결 완료를 뜻하지 않는다. 릴리스 포함 여부는 해당 Issue와 release 요구사항에서 확인한다.
+
+자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 흐름에서 실제 정리 부담이 큰 단계를 선택해 활용한다.
 
 <!-- END SOURCE: docs/operating-rhythm.md -->
 
@@ -2744,87 +2651,61 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 # Current Decisions
 
-이 문서는 **현재 유효한 cross-repository / product-level 결정만** 요약한다.
-
-과거 제안, superseded decision chain, 정리 전 상세 Git history가 필요하면
-`archive/main-before-cleanup-20260921` branch를 참고한다.
-
-세부 규칙은 각 owning document가 canonical source이며, 이 문서는 현재 방향을 빠르게 파악하기 위한 index다.
+이 문서는 현재 결정의 원본을 찾는 인덱스다. 규칙 본문을 요약 복제하지 않는다. 작업별 읽기 순서는 CONTEXT (`CONTEXT.md`), 미정 소유권은 Open Questions (`docs/open-questions.md`)를 따른다.
 
 ## Knowledge
 
-- 공통 디렉토리 scheme과 문서 소유권: Repository Design (`docs/repository-design.md`).
-- 공통 branch·PR·release 전략: Git Workflow (`docs/git-workflow.md`).
-- 작업별 원본 참조 경로: CONTEXT (`CONTEXT.md`).
-- live 작업 checkpoint: `handoff/current.md`. 실제 작업 상태는 GitHub Project와 책임 구현 repository가 소유한다.
-- 아래 기존 domain 요약은 이관 검토 중이다. 소유 문서가 확정되면 해당 원본 링크로 대체하며, 이 인덱스에 새 기술 규칙을 추가하지 않는다.
+- 디렉토리 scheme (`docs/repository-design.md`)
+- 문서 소유권 (`docs/repository-design.md`)
+- Git workflow (`docs/git-workflow.md`)
+- 문서 수정·인계 (`CONTRIBUTING.md`)
 
 ## Canonical content
 
-- canonical authoring content는 Git-backed filesystem document workspace에 둔다.
-- local working tree는 draft/uncommitted state이며, `ooMia/oomia.github.io.docs`의 commit이 durable shared canonical revision이다.
-- document-local persistent metadata는 **frontmatter-first**다.
-- explicit frontmatter value가 있으면 그 값을 authoritative로 보고 Engine은 해당 field를 재계산하거나 덮어쓰지 않는다.
-- Engine enrichment는 unset/missing field를 보완하는 방향으로 시작한다.
-- byte-exact formatting preservation은 contract가 아니다. formatter/editor/tooling이 semantic content와 explicit metadata 의미를 보존하는 범위에서 source를 normalize할 수 있다.
-- sidecar/reference metadata는 frontmatter가 실제로 부적합한 사례가 생길 때 도입한다.
-- docs layout은 free-form, consumer-specific convention, strict repository-wide convention 중 어느 형태도 현재 사전에 금지하지 않는다.
+- 레포 역할과 콘텐츠 흐름 (`docs/architecture.md`)
+- [저장 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#storage), Git revision (`docs/content-authoring-contract.md`)
+- Frontmatter와 sidecar (`docs/publishable-projection.md`)
 
 ## Authoring
 
-- 기존 content corpus는 Obsidian 기반이며 basic Obsidian Markdown/file authoring은 이미 가능한 경로로 본다.
-- 최종 editor 역할은 아직 확정하지 않는다.
-- Fumadocs Editor는 custom component authoring/structured editing에서 실제 이점이 있는지 기존 corpus로 검증한다.
-- Obsidian-native custom syntax/CSS/plugin bridge는 1.0 필수 범위가 아니다.
-- synthetic fixture보다 기존 작성 corpus를 integration evidence로 우선 사용하고, fixture는 edge-case regression에 보조적으로 사용한다.
+- 편집 계약 (`docs/content-authoring-contract.md`)
+- Authoring clients (`docs/content-authoring-contract.md`)
+- 실제 corpus를 사용하는 integration 검토 (`docs/architecture-transition.md`)
 
 ## Engine
 
-- Engine 1.0은 **stateless, invocation-driven, CLI-first one-shot runtime**이다.
-- 기본 operation surface는 `doctor / prepare / verify / publish` 방향으로 설계한다.
-- `prepare`는 commit 전에 working-tree source를 수정할 수 있지만 stage/commit/push하지 않는다.
-- `verify`는 source mutation 없이 검증한다.
-- `publish`는 사용자가 확정한 committed docs revision을 대상으로 하며 dirty source를 자동 commit하지 않는다.
-- timestamp derivation, file/staged/all selection, prompt UX, formatting 방식 같은 초기 구현 세부사항은 Engine repository에서 유연하게 실험한다.
-- Engine은 Payload/PostgreSQL 기반 CMS를 target architecture로 유지하지 않는다.
+- [현재 구현·명령·제약](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
+- [Prepare 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)
+- 기존 operation 설계 (`docs/publishable-projection.md`)
+- [Migration 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 
 ## Publishable projection
 
-- canonical authoring source와 Site가 실제 소비하는 document는 동일할 필요가 없다.
-- persistent/user-meaningful metadata는 commit 전에 canonical source에 저장할 수 있다.
-- committed canonical revision 이후에는 consumer-specific/derived 정보를 deterministic publishable projection으로 만들 수 있다.
-- projection은 derived artifact이며 새로운 source of truth가 아니다.
-- 최종 publishability에는 실제 Site consumer validation/build가 포함되어야 한다.
-- projection materialization 위치는 Site/Fumadocs integration evidence를 보고 결정한다.
+- 기존 metadata / projection 설계 (`docs/publishable-projection.md`)
+- 필요성·위치·소유권의 남은 검토 (`docs/open-questions.md`)
 
 ## Site / components
 
-- Site는 현재 Astro 기반 delivery evidence를 보존하며 incremental migration을 우선한다.
-- Fumadocs UI/Core/MDX 등 검증된 built-in capability를 우선 재사용한다.
-- 별도 custom component package/profile은 실제 cross-repository sharing contract가 필요해질 때만 만든다.
-- Turbo 사용을 새 workflow에서 확대하지 않으며, 제거 여부는 Vite+ task parity와 existing build/CI evidence를 확인한 뒤 결정한다.
+- Site 전환 설계 (`docs/architecture-transition.md`)
+- [Component contract](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract)
+- 보류된 manifest 계획 (`docs/content-component-schema.md`)
 
 ## Engineering
 
-- JavaScript/TypeScript repository의 primary command surface는 Vite+ `vp`다.
-- Vite+가 제공하는 package/check/lint/fmt/test/build/task/hook 기능을 우선 사용하고 동등 역할 wrapper를 새로 중복 도입하지 않는다.
-- repository structure는 **monorepo-ready, package-light**를 기본으로 한다.
-- `apps/*`는 실행 단위, `packages/*`는 실제 reusable/dependency boundary, `tools/*`는 repository-only tooling에 사용한다.
-- 새 Engine target은 기존 repository history를 유지하면서 **greenfield scratch implementation**으로 시작한다.
-- legacy tree는 template가 아니라 reference이며 generic verified behavior만 의도적으로 port한다.
-- scratch bootstrap baseline은 현재 Node.js `24.20.0`, pnpm `12.3.4`, Vite+ `0.3.3`이다. 이후 upgrade는 별도 maintenance change로 다룬다.
-- 새 Git-backed vertical slice가 검증되기 전에 legacy path를 big-bang delete하지 않는다.
+- 공통 개발 도구 지침 (`docs/development-toolchain.md`)
+- 공통 repository 구조 (`docs/repository-design.md`)
+- 레포별 현재 적용값 (`CONTEXT.md`)
 
 ## Planning / Project
 
-- GitHub Project 분류 필드 이름은 **Work Type**을 사용한다.
-- Objective와 Target Release는 서로 다른 목적의 필드로 유지한다.
-- Scope는 작업이 직접 변경하는 책임을 표현하며 불필요한 dependency tagging을 피한다.
-- Project README는 장기 설계를 복제하지 않고 canonical Knowledge 문서를 찾기 위한 index로 유지한다.
+- 계획·Issue lifecycle·DoD (`docs/planning-model.md`)
+- 필드 의미·선택 기준 (`docs/fields.md`)
+- 공통 Project 자동화 (`docs/project-orchestration.md`)
+- Project README 형식 (`templates/project-readme.md`)
 
 ## Historical reference
 
-과거 상세 설계·provenance·변경 순서가 실제로 필요할 때만 `archive/main-before-cleanup-20260921` branch를 참고한다. 현재 방향은 항상 현재 `main`의 canonical documents를 우선한다.
+이관 전 기술 문서는 현재 소유권 검토가 끝날 때까지 기존 위치를 참조한다. 구현 완료 여부는 해당 레포의 Evidence로 판단한다. 과거 상세 history가 필요하면 `archive/main-before-cleanup-20260921` branch를 조사한다.
 
 <!-- END SOURCE: docs/decisions.md -->
 
@@ -2869,14 +2750,9 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 이들은 Engine 구현에서 가장 단순한 형태로 시작하고, 실제 제약이나 반복되는 패턴이 생기면 구현 Evidence와 함께 Knowledge decision으로 승격한다.
 
-## 고정된 최소 metadata invariant
+## Metadata 수정 계약
 
-- document-local persistent metadata는 frontmatter-first다.
-- Engine `prepare`는 commit 전에 source를 보완할 수 있지만 stage/commit/push하지 않는다.
-- **explicit user value가 있으면 그대로 유지하고 Engine은 해당 field에 대한 derivation을 수행하지 않는다**.
-- Engine은 unset/missing field를 보완하는 방향으로 시작한다.
-- formatting 변화 자체는 contract violation이 아니다. VP formatter/linter 또는 구현 도구가 deterministic consistency를 위해 source 형식을 normalize할 수 있다.
-- 다만 formatter/enrichment가 사용자가 명시한 metadata의 의미를 바꾸거나 unrelated semantic content를 임의로 변경해서는 안 된다.
+[Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)을 참조한다. metadata mutation invariant를 이 미결 목록에 반복 정의하지 않는다.
 
 ## 다음 실제 설계 gate
 
@@ -2896,18 +2772,24 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 |---|---|
 | `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. 소비자와 생산자가 함께 쓰는 계약의 원본 소유자를 확정해야 한다. |
 | `architecture-transition.md` | 레포 간 의존성은 coordination; Engine/Site 이행 상세는 각 레포. 현재 유효한 전환 범위를 먼저 확인한다. |
-| `content-authoring-contract.md` | Engine의 in-place 수정 계약과 Site의 소비 계약을 나눌 후보. 콘텐츠 공통 계약의 원본 소유자는 질문 필요. |
+| `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor·projection 설명은 별도 검토. |
 | `publishable-projection.md` | Engine/Site 중 원본 소유자 미정. 별도 projection의 필요성과 위치는 in-place 후처리 설명만으로 확정하지 않는다. |
 | `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
 | `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme과 개발 원칙은 유지. 런타임·migration 상세는 각 구현 레포의 기존 문서와 대조 후 이관한다. |
 | `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준은 유지. 현재 버전과 레포별 실행 상세는 해당 설정·문서 원본을 참조하도록 검토한다. |
 | `release-1.0.md` | 통합 제품 목표·AC를 Knowledge에 유지할지 사용자의 명시적 판단 필요. 기술 설계의 owner와 분리한다. |
 | `implementation-map.md` | 통합 검수 링크와 revision snapshot만 유지할지 검토. 레포별 구현 상태 원장 복제는 줄인다. |
-| `decisions.md` | domain별 원본이 확정되면 반복 요약을 원본 링크로 전환한다. |
+| `decisions.md` | 원본 링크 인덱스로 전환했다. 이관이 확정되면 해당 링크만 변경한다. |
 | 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 공통 콘텐츠·projection 질문은 owner를 먼저 확정한다. |
-| `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지. 이미 소유 이슈가 있는 기능은 그 이슈로 참조 전환한다. |
+| `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지하고 기능별 Engine Issue 참조로 전환했다. |
 
 Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방식은 미정이다. 해당 작업이 필요해질 때 확인하며 일반 Issue branch → develop PR 작업을 막지 않는다.
+
+### 공유 콘텐츠 계약의 원본
+
+사용자가 확정한 경계는 Engine의 파일 수정 계약 / Site의 소비 계약이다. 각 레포가 자신의 계약을 소유하고 상대 원본을 참조한다. 해당 소유권 선택은 미결 사항에서 제외한다.
+
+이관 문서의 통합과 링크 전환 상태는 handoff에서 추적한다. editor 역할, 별도 projection, content-component manifest의 owner는 이번 선택으로 확정되지 않았다.
 
 <!-- END SOURCE: docs/open-questions.md -->
 
@@ -2920,7 +2802,7 @@ Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방�
 
 1. CONTEXT.md (`CONTEXT.md`)에서 해당 규칙을 소유하는 파일을 찾는다.
 2. 원본 Markdown을 수정한다. 새로운 제안은 확정된 규칙으로 섞지 말고 open-questions.md (`docs/open-questions.md`)에 기록한다.
-3. cross-repository/product 방향이 바뀌면 Current Decisions (`docs/decisions.md`)를 **현재 유효한 상태**로 갱신한다. superseded chain이나 과거 chronology는 현재 `main`에 유지하지 않는다.
+3. 원본의 위치나 탐색 경로가 바뀌면 Current Decisions (`docs/decisions.md`)의 링크를 갱신한다. 정책 본문은 소유 문서에만 반영하고 인덱스에 요약 복제하지 않는다.
 4. 구현 상태를 변경하려면 Implementation Map (`docs/implementation-map.md`)의 기준 revision보다 구현 레포가 진행되었는지 확인하고 실제 코드·테스트·commit/deployment Evidence를 다시 조사한다.
 5. `python3 scripts/bundle.py`를 실행해 context bundle을 갱신한다.
 6. 변경 내용을 Git diff로 검토하고 커밋한다.

@@ -2,7 +2,7 @@
 
 1. [CONTEXT.md](CONTEXT.md)에서 해당 규칙을 소유하는 파일을 찾는다.
 2. 원본 Markdown을 수정한다. 새로운 제안은 확정된 규칙으로 섞지 말고 [open-questions.md](docs/open-questions.md)에 기록한다.
-3. cross-repository/product 방향이 바뀌면 [Current Decisions](docs/decisions.md)를 **현재 유효한 상태**로 갱신한다. superseded chain이나 과거 chronology는 현재 `main`에 유지하지 않는다.
+3. 원본의 위치나 탐색 경로가 바뀌면 [Current Decisions](docs/decisions.md)의 링크를 갱신한다. 정책 본문은 소유 문서에만 반영하고 인덱스에 요약 복제하지 않는다.
 4. 구현 상태를 변경하려면 [Implementation Map](docs/implementation-map.md)의 기준 revision보다 구현 레포가 진행되었는지 확인하고 실제 코드·테스트·commit/deployment Evidence를 다시 조사한다.
 5. `python3 scripts/bundle.py`를 실행해 context bundle을 갱신한다.
 6. 변경 내용을 Git diff로 검토하고 커밋한다.
