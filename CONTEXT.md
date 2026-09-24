@@ -64,6 +64,7 @@ Content 관련 구현을 계획하거나 수정할 때:
 3. GitHub 관련 핵심 객체의 주소를 알고 있다면 답변에서 **처음 소개할 때 plain text 식별자만 쓰지 말고 클릭 가능한 링크로 제시한다.** 대상에는 repository, GitHub Project, Issue, Pull Request, branch, commit, workflow run/artifact 등 작업 이해에 직접 필요한 객체가 포함된다. 이후 같은 답변에서 문맥이 명확하면 짧은 이름이나 번호로 다시 언급할 수 있다.
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 본 작업의 blocker로 만들지 않는다. 필요하면 deferred verification으로 기록하고 핵심 작업을 계속한다.
 5. 세션별 임시 상태는 `handoff/current.md`에 두되, 여러 세션에 지속 적용할 사용자 작업 방식·응답 방식은 volatile handoff가 아니라 durable context에 둔다.
+6. Issue와 연관된 코드 제안을 사용자가 development branch에 적용하라고 하면 **green scaffold를 기본값**으로 사용한다. 첫 변경은 완성 구현보다 핵심 flow와 dependency boundary를 실행 가능한 구조로 연결하는 데 집중하고, prompt·정규화·세부 validation처럼 사용자 정책이 필요한 custom logic은 명시적인 `TODO` placeholder로 남길 수 있다. 최소 contract test는 scaffold 상태에서도 통과해야 하며, 의도적인 red scaffold는 Issue 계약상 failing test 자체가 필요하거나 사용자가 명시적으로 요청한 경우에만 사용한다. 첫 branch update는 가능하면 하나의 응집된 commit으로 남기며, 이 scaffold 정책은 Issue의 최종 AC/DoD를 축소하지 않는다.
 
 ## 사용할 요청 예시
 

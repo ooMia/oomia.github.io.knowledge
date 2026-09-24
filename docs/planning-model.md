@@ -37,6 +37,16 @@ Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, E
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
 - 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
 
+### Development base 선택
+
+Development branch를 만들지 여부와 **어느 branch를 base로 삼을지**는 별개의 결정이다. 정확한 repository별 base mapping은 [Project Orchestration](project-orchestration.md)이 소유하며, Issue마다 임의로 재해석하지 않는다.
+
+- Engine과 Site의 일반 implementation Issue는 `develop`을 pre-main integration base로 사용한다.
+- Knowledge는 branch가 필요한 변경이면 `main`에서 시작한다. 작은 국소 문서·정책 수정은 별도 integration buffer가 필요 없을 때 `main`에 직접 반영할 수 있다.
+- 첫 변경이 작은 scaffold이더라도 Issue가 feature/refactor/experiment 성격이고 이후 DoD 범위 안에서 의미 있게 고도화될 가능성이 있다면, 그 확장 가능성을 기준으로 `develop` 기반을 유지한다.
+- `develop`은 장기 feature branch가 아니라 pre-main integration buffer다. 개별 Issue branch는 계속 short-lived하게 유지하고, Issue 작업은 해당 branch에서 `develop`으로 단계적으로 통합한다. `develop`을 `main`으로 승격하는 시점은 repository의 별도 integration/release 판단으로 다룬다.
+- Issue 본문에 적힌 base branch, linked Development branch와 repository policy가 충돌하면 조용히 다른 base로 작업하지 않는다. 구현 전에 Issue metadata 또는 문서를 현재 canonical policy와 맞춘다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
