@@ -19,23 +19,23 @@
 
 - [편집 계약](content-authoring-contract.md#editing)
 - [Authoring clients](content-authoring-contract.md#authoring-clients)
-- [실제 corpus를 사용하는 integration 검토](architecture-transition.md#phase-b--prove-the-fumadocssite-integration)
+- [실제 corpus를 사용하는 integration 검토](architecture-transition.md#5-cross-repository-migration-order)
 
 ## Engine
 
 - [현재 구현·명령·제약](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
 - [Prepare 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)
 - [Engine 기능 원본 참조](publishable-projection.md#8-engine-responsibility)
-- [Migration 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
+- [Migration 기록 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)
 
 ## Publishable projection
 
 - [콘텐츠 흐름과 계약 참조](publishable-projection.md)
-- [필요성·위치·소유권의 남은 검토](open-questions.md#문서-소유권-검토)
+- [현재 publishing boundary](architecture.md#publishing-boundary)
 
 ## Site / components
 
-- [Site 전환 설계](architecture-transition.md#7-site-migration-원칙)
+- [Site 전환 설계 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#consumer-integration-전환)
 - [Component contract](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract)
 - [보류된 manifest 계획](content-component-schema.md)
 
