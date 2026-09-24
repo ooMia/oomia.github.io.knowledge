@@ -274,16 +274,13 @@ GitHub Actions에서는 Vite+ official `voidzero-dev/setup-vp`를 사용한다.
 
 Vite Task result cache의 cross-run restore는 experimental이므로 correctness보다 먼저 최적화하지 않는다.
 
-## 12. Docker
+## 12. Container builds
 
 Vite+ official image는 build/CI/devcontainer에 사용할 수 있지만 production runtime image로 사용하지 않는다.
 
-Engine container는 multi-stage를 기본으로 한다.
+runtime image를 제공하는 repository는 build toolchain과 production runtime surface를 분리한다. multi-stage build는 기본 후보이며, 실제 stage 구성·artifact·runtime dependency·mount/credential 계약은 해당 구현 repository가 소유한다.
 
-1. Vite+ build stage에서 install/check/test/build/pack
-2. runtime stage에는 실제 runtime과 artifact/production dependency만 포함
-
-이렇게 하면 project toolchain이 production image surface에 불필요하게 남지 않는다.
+Engine의 현재 container/runtime 설계는 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)과 [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)를 참조한다.
 
 ## 13. IDE
 
