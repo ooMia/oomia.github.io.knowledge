@@ -28,7 +28,7 @@ Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs); 현재 Issue 작업 대상은 [Orchestration 적용 범위](docs/project-orchestration.md#적용-범위) 참고 |
 
-수정·소비 계약 링크는 각각 문서 이관 branch의 원본이다. PR 통합 전이며, 아직 main에서 사용할 수 있는 것으로 보고하지 않는다. 남은 editor·projection 설계는 아래 기존 문서에서 검토한다.
+수정·소비 계약 링크는 각각 문서 이관 branch의 원본이다. PR 통합 전이며, 아직 main에서 사용할 수 있는 것으로 보고하지 않는다. 남은 editor 설계는 아래 기존 문서에서 검토한다.
 
 ## 이관 전 기존 문서
 

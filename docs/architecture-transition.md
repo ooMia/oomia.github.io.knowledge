@@ -34,30 +34,7 @@ Astro Site
 - DB snapshot → Markdown projection
 - 별도 DB backup/restore와 dev/prod persistence 운영
 
-2026-09-21 이후 1.0은 다음 모델을 목표로 한다. authoring source와 Site input은 동일할 필요가 없으며 metadata enrichment/projection이 그 사이의 핵심 경계다.
-
-```text
-Obsidian / Fumadocs Editor / IDE
-              │
-              ▼
-      local Git docs source
-              │ commit
-              ▼
-      oomia.github.io.docs
-       canonical revision
-              │
-              ▼
-     metadata enrichment
-              │
-              ▼
-    publishable projection
-              │
-              ▼
-      oomia.github.io Site
-                                 │
-                                 ▼
-                           GitHub Pages
-```
+현재 레포 역할과 독립적인 콘텐츠 흐름은 [Architecture](architecture.md)를 따른다. Engine 사용 여부는 Docs commit·Site 소비의 전제 조건이 아니다.
 
 변경의 목적은 기능을 포기하는 것이 아니라 **canonical source와 authoring 도구 사이의 불필요한 persistence/conversion layer를 제거하는 것**이다.
 
@@ -97,25 +74,7 @@ Obsidian / Fumadocs Editor / IDE
 
 ### Engine
 
-Engine은 **workspace-oriented orchestrator**다.
-
-필수 책임 후보:
-
-- workspace discovery
-- file/frontmatter/content validation
-- Git status/revision handling
-- explicit publish orchestration
-- Site consumer verification
-- Evidence/revision linkage
-- containerized execution + mounted workspace
-
-1.0 필수가 아닌 책임:
-
-- DB CRUD
-- application-level CMS user management
-- rich-text canonical state
-- 자체 visual editor framework
-- DB migration/backup lifecycle
+문서 후처리와 legacy 전환의 기술 상세는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)를 참조한다. Engine의 선택 기능을 Site·Docs의 필수 실행 단계로 만들지 않는다.
 
 ### Site
 
@@ -143,7 +102,7 @@ Docs는 완전 자유 tree, consumer별 discovery convention, strict repository-
 
 | Repository | 기존 중심 책임 | 새 책임 / 변화 |
 |---|---|---|
-| `oomia.github.io.engine` | Payload CMS, PostgreSQL persistence, export/publish | mounted workspace validation, Git/publish orchestration, Site verification |
+| `oomia.github.io.engine` | Payload CMS, PostgreSQL persistence, export/publish | 문서의 선택적 in-place 후처리; 기능 상세는 Engine 소유 |
 | `oomia.github.io.docs` | generated projection | canonical content remote, history, assets/frontmatter |
 | `oomia.github.io` | generated docs renderer | canonical docs consumer + Fumadocs-oriented presentation |
 | `oomia.github.io.knowledge` | architecture/planning SoT | transition policy와 migration Evidence mapping |
@@ -262,12 +221,10 @@ synthetic fixture는 broken source, encoding/path edge case, custom component va
 
 ### Phase C — Rewire publishing
 
-- DB snapshot export를 publish input에서 제거
-- committed source + metadata inputs에서 deterministic projection materialization 도입
-- projection/workspace validation 도입
-- Site consumer verification 재사용
-- canonical docs commit/push semantics 구현
-- revision linkage와 idempotency 재검증
+- DB snapshot export를 필수 publish input에서 제거
+- Engine 처리 없이 작성·commit한 Docs 파일을 Site가 소비하는 경로 확인
+- Site 입력 계약에 따른 소비 검증과 Docs/Site revision·delivery 결과 연결
+- Engine의 선택 기능 검증은 해당 레포에서 별도로 수행
 
 ### Phase D — Remove legacy
 
@@ -339,9 +296,9 @@ Site는 현재 docs→Astro→Pages Evidence가 있으므로 같은 결정을 �
 
 - Docs repository가 canonical content remote로 실제 운영된다.
 - 실제 기존 content corpus가 Fumadocs/Site integration에서 검증되고, Obsidian/Fumadocs Editor의 역할이 명확히 결정된다.
-- Engine target path가 Payload/PostgreSQL 없이 workspace를 검증·publish할 수 있다.
+- Engine 전환 범위는 해당 레포의 수용 기준과 Evidence로 별도 판정한다.
 - Site가 새 canonical content revision을 실제 build/deploy한다.
-- publish Evidence가 docs SHA + Engine/Site revision + delivery result로 연결된다.
+- publish Evidence가 docs SHA + Site revision + delivery result로 연결된다. 선택적으로 사용한 Engine 기능의 Evidence는 해당 기능에 연결한다.
 - #13/#14와 관련 active backlog가 새 architecture로 re-scope되었다.
 - legacy Payload/PostgreSQL runtime이 제거되거나 명시적으로 archive 상태로 격리되었다.
 - Implementation Map이 새 main revisions 기준으로 다시 검증되었다.

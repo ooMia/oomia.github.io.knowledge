@@ -23,4 +23,4 @@ Updated: 2026-09-24
 
 ## 다음 검토
 
-파일 수정·소비 계약과 통합 목표·검수 연결의 소유권 질문은 해결됐다. release-1.0/implementation-map은 Knowledge에 유지하고 기술 상세는 원본 참조로 정리했다. Engine runtime 및 Site integration/toolchain 설계도 소유 레포의 같은 PR로 이관했다. 남은 editor 역할, 별도 projection의 필요성·위치·owner는 확정하지 않았다. `docs/open-questions.md`에 남아 있는 항목을 문서별로 검토한다.
+파일 수정·소비 계약과 통합 목표·검수 연결의 소유권 질문은 해결됐다. release-1.0/implementation-map은 Knowledge에 유지하고 기술 상세는 원본 참조로 정리했다. Engine runtime 및 Site integration/toolchain 설계도 소유 레포의 같은 PR로 이관했다. Engine 후처리를 commit·Site 소비의 선행 조건으로 둔 설명을 제거했다. Agent opt-in/out은 Engine 설계 요구로만 기록했으며 코드나 옵션을 구현한 것은 아니다. 남은 editor 역할과 component manifest 소유권은 확정하지 않았다. `docs/open-questions.md`에 남아 있는 항목을 문서별로 검토한다.

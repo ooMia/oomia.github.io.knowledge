@@ -17,7 +17,6 @@
 | Q017 | 실제 authoring editor 역할 분담 | 기존 Obsidian corpus + Fumadocs custom-component authoring Evidence 후 결정 |
 | Q019 | Site migration 방식 | 기존 Astro/docs/Pages Evidence를 보존하는 incremental migration이 현재 우선 후보. Fumadocs spike 후 재평가 |
 | Q021 | Site Turbo retirement | VP parity와 기존 CI/build Evidence를 확인한 뒤 별도 Maintenance change로 결정 |
-| Q024 | projection materialization 위치 | ephemeral staging vs Site working-tree generated projection을 실제 consumer integration으로 비교 |
 | Q025 | stable document identity / sidecar linkage | frontmatter-first이므로 초기 범위 밖. 실제 path-independent identity나 sidecar 필요가 생길 때 결정 |
 
 ## 이미 구현 레포에 위임한 세부사항
@@ -40,13 +39,9 @@
 
 ## 다음 실제 설계 gate
 
-Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
+Site 입력/layout·editor 역할은 Q015/Q017의 실제 corpus 검증으로 좁힌다. 공개 발행 정책은 Q014에서 검토한다. Engine 기능 추가와 container 설계는 해당 레포의 필요에 따라 진행하며 Site 소비의 선행 gate로 삼지 않는다.
 
-1. minimal `doctor / prepare / verify / publish` skeleton을 만든다.
-2. `prepare`는 frontmatter-first + missing-only enrichment로 시작한다.
-3. 실제 Obsidian corpus에서 구현해보고 field/timestamp/selection/formatting 전략을 책임 레포에서 조정한다.
-4. Site/Fumadocs vertical slice에 들어갈 때 Q024/Q015/Q017을 Evidence 기반으로 좁힌다.
-5. 실제 public publish 전에 Q014와 Q008의 필요한 부분을 닫는다.
+이전 Q024의 projection 위치 선택은 공통 필수 gate에서 제외했다. 현재 경계는 [Architecture](architecture.md#publishing-boundary)를 따른다.
 
 ## 문서 소유권 검토
 
@@ -54,17 +49,17 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 
 | 기존 문서 / 절 | 후보와 남은 질문 |
 |---|---|
-| `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. 소비자와 생산자가 함께 쓰는 계약의 원본 소유자를 확정해야 한다. |
+| `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. Engine 수정 / Site 소비 계약의 원본을 참조한다. |
 | `architecture-transition.md` | 레포 간 의존성은 coordination; Engine/Site 이행 상세는 각 레포. 현재 유효한 전환 범위를 먼저 확인한다. |
-| `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor·projection 설명은 별도 검토. |
-| `publishable-projection.md` | Engine/Site 중 원본 소유자 미정. 별도 projection의 필요성과 위치는 in-place 후처리 설명만으로 확정하지 않는다. |
+| `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor 설명은 별도 검토. |
+| `publishable-projection.md` | 기존 필수 파이프라인 설계를 종료하고 소유 레포 원본을 찾는 참조 문서로 정리했다. |
 | `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
 | `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme 유지. Engine runtime 설계와 Site integration 전환은 소유 레포의 이관 branch로 이동했고, Engine bootstrap은 기존 migration record를 참조한다. |
 | `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준 유지. 레포별 적용 상세는 Engine README/migration 및 Site toolchain 전환 원본 참조로 변경했다. |
 | `release-1.0.md` | 사용자 결정: Knowledge에 통합 목표·수용 기준 유지. 기술 상세는 원본 참조로 정리했다. |
 | `implementation-map.md` | 사용자 결정: Knowledge에 통합 검수 연결 유지. 기준 Evidence와 당시 판정은 보존하고 기술 구현 목록은 원본 참조로 정리했다. |
 | `decisions.md` | 원본 링크 인덱스로 전환했다. 이관이 확정되면 해당 링크만 변경한다. |
-| 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 공통 콘텐츠·projection 질문은 owner를 먼저 확정한다. |
+| 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 실제로 여러 레포가 공유할 새 계약이 생기면 owner를 먼저 확정한다. |
 | `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지하고 기능별 Engine Issue 참조로 전환했다. |
 
 Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방식은 미정이다. 해당 작업이 필요해질 때 확인하며 일반 Issue branch → develop PR 작업을 막지 않는다.
@@ -73,4 +68,4 @@ Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방�
 
 사용자가 확정한 경계는 Engine의 파일 수정 계약 / Site의 소비 계약이다. 각 레포가 자신의 계약을 소유하고 상대 원본을 참조한다. 해당 소유권 선택은 미결 사항에서 제외한다.
 
-이관 문서의 통합과 링크 전환 상태는 handoff에서 추적한다. editor 역할, 별도 projection, content-component manifest의 owner는 이번 선택으로 확정되지 않았다.
+이관 문서의 통합과 링크 전환 상태는 handoff에서 추적한다. editor 역할과 content-component manifest의 owner는 추가 검토한다. 선택 기능을 다른 레포의 필수 정책으로 전파하지 않는 경계는 Architecture를 따른다.

@@ -25,12 +25,12 @@
 
 - [현재 구현·명령·제약](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
 - [Prepare 설계](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md#prepare)
-- [기존 operation 설계](publishable-projection.md#8-engine-responsibility)
+- [Engine 기능 원본 참조](publishable-projection.md#8-engine-responsibility)
 - [Migration 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 
 ## Publishable projection
 
-- [기존 metadata / projection 설계](publishable-projection.md)
+- [콘텐츠 흐름과 계약 참조](publishable-projection.md)
 - [필요성·위치·소유권의 남은 검토](open-questions.md#문서-소유권-검토)
 
 ## Site / components

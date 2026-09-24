@@ -11,14 +11,14 @@ Deliver a usable and extensible workflow for authoring Git-backed Markdown/MDX c
 | Capability | 요구되는 관찰 가능한 결과 | 상세 계약 / 검토 원본 |
 |---|---|---|
 | Authoring | 기존 Obsidian 기반 문서를 local workspace에서 작성·수정하고 의미를 보존할 수 있다. 필요한 추가 authoring 도구의 역할은 실제 corpus로 판단한다. | [Authoring 검토](content-authoring-contract.md#authoring-clients) |
-| Canonical Content | frontmatter 포함 md-like 문서를 Engine이 in-place 후처리하고 사용자가 변경을 검토할 수 있다. Git commit으로 공유·재현할 콘텐츠 revision을 식별한다. | [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md) |
+| Canonical Content | 사용자가 작성하거나 선택한 도구로 수정한 md-like 문서를 보존하고 Git commit으로 공유·재현할 콘텐츠 revision을 식별한다. | [Canonical revision](content-authoring-contract.md#canonical-revision) |
 | Extensibility | 필요한 콘텐츠 표현을 추가할 때 source 의미와 소비 지원 범위를 명시하고 검증할 수 있다. | [Site component 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#component-contract) |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. | [책임 레포의 기능 이슈](operating-rhythm.md#기능-실험-참조) |
-| Publishing | 검토된 canonical revision이 실제 Site 소비 검증을 통과하며 발행 입력과 결과의 관계를 재현할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publishing), [기존 projection 설계](publishable-projection.md) |
+| Publishing | 검토된 canonical revision이 실제 Site 소비 검증을 통과하며 발행 입력과 결과의 관계를 재현할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#publishing), [콘텐츠 흐름](architecture.md#publishing-boundary) |
 | Presentation | Site가 해당 콘텐츠 revision의 Markdown/MDX를 사용자에게 렌더링한다. | [Site 소비 목표](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md#10-소비-목표) |
 | Delivery | 콘텐츠 revision과 Site revision이 연결되어 GitHub Pages에 배포되고 성공 Evidence가 남는다. | [Implementation Map](implementation-map.md) |
 
-Editor 선택과 별도 projection의 필요성·위치·owner는 [미결 사항](open-questions.md)이 관리한다. 위 통합 결과 정의는 기존 projection 설계를 폐기하거나 새로운 구현 방식으로 확정한 것이 아니다.
+Editor 역할의 미결 사항은 [Open Questions](open-questions.md)이 관리한다. Automation capability의 수용 기준은 모든 문서에 자동화 처리를 강제하는 규칙이 아니다. 사용자 작성 콘텐츠의 commit·Site 소비는 Engine 사용과 독립적이다.
 
 ## 1.0 Target Architecture
 

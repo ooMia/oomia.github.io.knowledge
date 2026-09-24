@@ -21,51 +21,25 @@
 | 레포 | 책임 |
 |---|---|
 | `oomia.github.io.engine` | Obsidian이 지원하는 frontmatter 포함 md-like 문서를 같은 파일에서 in-place 후처리. CLI는 현재 실행 형태이며 목적 자체가 아님 |
-| `oomia.github.io.docs` | editor가 작성하고 Engine이 in-place 수정하는 문서 폴더를 Git으로 관리할 때 사용하는 remote 및 shared revision history |
-| `oomia.github.io` | canonical authoring revision에서 materialize된 publishable projection을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
+| `oomia.github.io.docs` | editor가 작성하고 필요하면 후처리한 문서 폴더를 Git으로 관리할 때 사용하는 remote 및 shared revision history |
+| `oomia.github.io` | Docs 파일을 자신의 입력 계약에 따라 렌더링하고 GitHub Pages로 전달 |
 | `oomia.github.io.knowledge` | 공통 workflow·coordination·개발 기준 및 책임 레포 원본 문서의 참조 경로 |
 
 `mono`는 사용자가 Site repository에 붙인 로컬 별칭이며 실제 원격 repository 이름의 일부가 아니다.
 
 ## Canonical content workspace
 
-Obsidian으로 작성한 파일에 Engine이 frontmatter 등을 in-place 후처리한다. 따라서 동일 파일은 authored content이면서 generated content일 수 있다. 이는 원본과 별도의 output 레포를 반드시 만든다는 뜻이 아니다. 이 문서의 기존 post-commit projection 설계는 별도 기술 검토 대상이며, in-place 후처리와 동일시하지 않는다.
-
-공통 디렉토리 역할은 [Repository Design](repository-design.md)을 따른다. 아래 content tree layout의 선택지는 공통 `/docs/` 등의 역할을 레포별로 재정의할 권한을 뜻하지 않는다.
-
-1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository의 directory/path/layout 정책은 아직 확정하지 않는다. 완전 자유 tree, consumer별 discovery convention, strict application-specific layout 모두 유효한 구현 선택지다.
+Canonical content는 Git-backed filesystem document workspace에 보존한다. 사용자가 작성한 그대로 commit할 수 있고, 선택한 도구로 수정한 파일도 commit할 수 있다. 같은 파일에 authored content와 generated content가 공존할 수 있다는 설명은 생성 단계를 반드시 거치라는 뜻이 아니다.
 
 ```text
-Obsidian ──────────────┐
-                      │
-Fumadocs Editor ───────┼──> Authoring Draft
-                      │      Markdown / MDX
-Source editor / Agent ┘      partial frontmatter / assets
-                                  │
-                                  │ engine prepare
-                                  ▼
-                         Prepared Canonical Source
-                                  │
-                                  │ user review + git commit
-                                  ▼
-                         oomia.github.io.docs
-                          canonical Git revision
-                                  │
-                                  │ deterministic projection
-                                  ▼
-                            Site consumer
-                                  │
-                                  ▼
-                             Live Site
+Editor → 문서 파일 → 사용자 commit → Docs revision → Site → Live Site
+              ↕
+       선택적 문서 수정 도구
 ```
 
-- local working tree는 작성 중인 draft와 uncommitted state를 포함할 수 있다. Engine `prepare`는 commit 전에 frontmatter-first persistent metadata를 보완해 Prepared Canonical Source를 만들 수 있다.
-- 다른 환경과 공유·재현할 canonical revision은 `oomia.github.io.docs`의 Git commit으로 식별한다.
-- 일반적인 publishable document는 Markdown/MDX와 frontmatter를 사용할 수 있다.
-- consumer 또는 repository 자체가 필요하면 subtree 또는 repository-wide directory/path/frontmatter convention을 강제할 수 있다. 핵심은 어떤 layout도 사전에 금지하지 않고 실제 integration/maintenance 비용을 근거로 선택하는 것이다.
-- asset은 workspace에서 참조 가능한 파일 또는 명시적으로 허용된 durable external reference로 관리한다. 상세 asset policy는 별도 contract로 발전시킬 수 있다.
-- Git history가 content revision history, diff, rollback의 기본 수단이다.
-- PostgreSQL/Payload state를 canonical content로 사용하지 않는다.
+Docs commit은 공유할 콘텐츠 revision을 식별한다. Engine을 실행하지 않은 콘텐츠도 동일하게 취급한다. Site 소비 가능성은 파일의 내용과 Site 입력 계약으로 판정하며 생산 도구나 처리 이력을 조건으로 삼지 않는다.
+
+공통 디렉토리 역할은 [Repository Design](repository-design.md)이 소유한다. 콘텐츠 discovery/layout의 실제 제약은 소비 레포의 계약에서 확인한다. Git history가 revision·diff·rollback의 기본 수단이며 PostgreSQL/Payload를 canonical store로 사용하지 않는다.
 
 ## Authoring boundary
 
@@ -98,55 +72,15 @@ Engine은 full CMS나 editor framework를 재구현하지 않는다.
 
 ## Engine boundary
 
-Engine의 1.0 목표는 DB-backed CMS가 아니라 **stateless, invocation-driven, CLI-first one-shot workspace orchestrator**다.
-
-```text
-Engine CLI / one-shot container
-├─ doctor / prepare / verify / publish
-├─ workspace discovery
-├─ content/frontmatter validation
-├─ authoring-tool integration hooks
-├─ publish validation
-├─ Git/revision linkage
-└─ Site consumer verification
-          │
-          └── bind mount / volume
-                 local content repository
-```
-
-- Engine process는 command invocation마다 시작·종료하며 persistent application/job/session state를 소유하지 않는다.
-- Engine image 자체의 ephemeral filesystem을 canonical storage로 사용하지 않는다.
-- content repository는 host bind mount 또는 durable volume로 Engine에 제공한다.
-- application-level user/database/auth model, HTTP server, job queue, long-running service lifecycle은 1.0의 필수조건이 아니다. 외부 공개나 remote control이 필요해질 때 같은 operation API 위에 별도 adapter를 추가한다.
-- 검색·인덱싱·복잡한 query가 필요해지면 DB를 **derived index**로 추가할 수 있지만 canonical source를 대체하지 않는다.
-- Payload, PostgreSQL, Lexical 기반 `cms-lab` 구현은 기존 실험/legacy Evidence로 취급하며 새 target architecture의 전제가 아니다.
+문서 수정·보존 및 선택 기능의 기술 설계는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)이 소유한다. CLI·container 등 실행 형태를 다른 레포의 필수 구성으로 전파하지 않는다.
 
 ## Publishing boundary
 
-Publishing Platform은 DB state를 Markdown으로 export하지 않지만, **commit 전 canonical-source enrichment와 commit 후 Site-ready projection을 서로 다른 단계로 수행**한다.
+Site는 Docs의 콘텐츠 revision을 소비해 렌더링한다. [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md)이 입력 지원 범위와 검증을 소유한다.
 
-```text
-Authoring Draft
-        ↓ engine prepare
-Prepared Canonical Source
-        ↓ user commit
-committed docs source revision
-        ↓ deterministic publishable projection
-        ↓
-projection validation
-        ↓
-actual Site sync / typecheck / build
-        ↓
-docs remote / exact source SHA
-        ↓
-Site revision linkage / delivery
-```
-
-- canonical authoring source와 Site-consumed projection은 다를 수 있다. persistent/user-meaningful metadata enrichment는 기본적으로 `prepare`에서 frontmatter에 반영하고, 재현 가능한 consumer-derived metadata는 committed revision에서 projection할 수 있다.
-- publish 과정은 dirty source working tree를 자동 commit하지 않는다. committed docs revision과 선언된 metadata inputs를 입력으로 **projection 생성 + 검증 + remote/revision linkage + delivery**를 수행한다.
-- `oomia.github.io.docs`의 commit SHA가 published content revision의 핵심 Evidence다.
-- Site가 실제 docs revision을 소비해 성공적으로 빌드되는지가 최종 Publishability gate의 일부다.
-- 동일 content revision의 재발행이 필요한 경우 idempotent하게 처리할 수 있어야 한다.
+- Engine 후처리나 별도 projection 생성은 공통 발행 선행 조건이 아니다.
+- 입력 계약을 만족하는 사용자 작성 파일은 그대로 소비할 수 있다.
+- 발행 검수는 Docs commit, Site revision과 delivery 결과를 연결한다. Engine을 사용한 경우의 실행 증거는 해당 기능 검수에서 다룬다.
 
 ## Fumadocs boundary
 
@@ -175,14 +109,11 @@ official/custom component 지원은 다음 순서로 판단한다.
 
 | Surface | 소유 위치 |
 |---|---|
-| Content workspace / authoring / storage / publish 기술 계약 | 책임 구현 레포로 이관 검토 중; Knowledge는 참조 경로 소유 |
-| Metadata enrichment / publishable projection contract | [Publishable Projection](publishable-projection.md) |
+| 문서 수정·보존·선택 기능 | [Engine](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md) |
+| 콘텐츠 입력·렌더링·소비 검증 | [Site](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md) |
 | Canonical content revision | `oomia.github.io.docs` Git history |
-| Workspace validation / Git / publish orchestration | engine |
-| Authoring UX | editor selection 미확정: Obsidian primary candidate, Fumadocs Editor component-aware candidate, IDE/Agent source client |
-| Authoring/Site integration | shared filesystem source + 필요한 parser/remark/rehype/plugin adapters |
-| final rendering / consumer compatibility | site |
-| custom component shared contract | 필요 시 별도 profile/package |
-| 구현별 API·테스트·runtime details | 해당 구현 repository |
+| 공통 workflow·coordination·개발 기준 | Knowledge |
+| Authoring UX 및 필요한 추가 도구 | [Authoring 검토](content-authoring-contract.md#authoring-clients) |
+| custom component 공유 필요성 | [미결 사항](open-questions.md) |
 
-Engine을 container image로 배포하는 방향은 이 architecture와 정합적이다. container는 실행 환경이고 canonical state는 mount된 Git-backed content workspace에 남긴다.
+계약 간 링크는 원본 탐색을 위한 것이며 상대 레포 실행을 요구하는 의존성을 뜻하지 않는다.

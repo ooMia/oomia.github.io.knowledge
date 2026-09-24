@@ -1,6 +1,6 @@
 # Content Authoring & Publishing Contract
 
-상태: 파일 수정 계약은 Engine, 소비 계약은 Site의 문서 이관 branch로 분리했다. 링크 대상은 검토 중이며 develop/main 통합 완료를 뜻하지 않는다. 남은 editor·projection 절은 기존 위치에서 후속 검토한다.
+상태: 파일 수정 계약은 Engine, 소비 계약은 Site의 문서 이관 branch로 분리했다. 링크 대상은 검토 중이며 develop/main 통합 완료를 뜻하지 않는다. 남은 editor 절은 기존 위치에서 후속 검토한다.
 
 ## 목적
 
@@ -8,7 +8,7 @@ Publishing Platform의 canonical content는 특정 CMS, database, Visual Editor�
 
 공식 정책:
 
-> Canonical content는 Git-backed filesystem document workspace에 보존한다. working-tree draft는 Engine `prepare`에 의해 frontmatter-first persistent metadata가 보완될 수 있고, 사용자가 검토·commit한 상태가 durable canonical revision이 된다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
+> Canonical content는 Git-backed filesystem document workspace에 보존한다. 사용자가 작성한 그대로 또는 선택한 도구로 수정한 파일을 commit하면 durable canonical revision이 된다. docs layout은 free-form부터 strict convention까지 구현 목적에 맞게 선택할 수 있으며 현재 어느 쪽도 선결하지 않는다. authoring editor는 아직 확정하지 않고 기존 Obsidian corpus와 Fumadocs/Site integration을 통해 역할을 결정한다. durable shared canonical revision은 `oomia.github.io.docs` Git commit으로 식별하며, Publishability는 특정 editor의 round-trip 가능 여부가 아니라 consumer contract와 실제 Site 검증으로 판정한다.
 
 이 문서는 **Editing, Storage, Canonical Revision, Projection, Publishing**을 분리해 정의한다.
 
@@ -32,7 +32,7 @@ Visual 지원 실패가 content 지원 실패를 뜻하지 않는다.
 
 ## Canonical revision
 
-canonical content의 물리적 표현은 local Git working tree의 files다. 다만 working tree의 모든 draft가 곧 durable canonical revision인 것은 아니며, `prepare`와 user review를 거쳐 commit된 상태가 공유 가능한 canonical revision이 된다.
+canonical content의 물리적 표현은 local Git working tree의 files다. 다만 working tree의 모든 draft가 곧 durable canonical revision인 것은 아니며, 사용자가 commit한 상태가 공유 가능한 canonical revision이 된다.
 
 - Markdown/MDX-like document source는 파일 내용 자체다.
 - frontmatter는 publishable Article-like documents의 유력 metadata representation이다. repository 또는 consumer가 strict schema를 선택할 수 있고, 반대로 일부 path는 schema 밖에 둘 수도 있다. 어느 형태를 택할지는 layout decision에 따른다.
@@ -49,20 +49,7 @@ canonical content의 물리적 표현은 local Git working tree의 files다. 다
 
 ## Projection
 
-Canonical authoring source와 Site가 소비하는 publishable document는 동일할 필요가 없다.
-
-projection은 다음 입력을 deterministic하게 composition할 수 있다.
-
-- source document
-- inline frontmatter
-- sidecar/reference metadata
-- repository/consumer defaults
-- content/Git에서 유도한 deterministic metadata
-- 명시적인 publish-time override
-
-Engine은 source를 불필요하게 mutation하지 않고 publishable projection을 materialize한다. projection은 재생성 가능한 derived artifact이며 새 SoT가 아니다.
-
-구체적인 metadata 위치, precedence, document identity/linkage, materialization 위치는 [Publishable Projection & Metadata Enrichment Contract](publishable-projection.md)가 소유한다.
+[콘텐츠 흐름과 계약 참조](publishable-projection.md)를 따른다. 별도 projection은 공통 필수 단계가 아니며, Site는 Docs 파일의 입력 계약 충족 여부로 소비를 판단한다.
 
 ## Publishing
 
@@ -116,18 +103,7 @@ Site presentation은 Fumadocs UI/Core/MDX를 적극 재사용할 수 있다. aut
 
 ### Engine
 
-Engine의 목적은 Obsidian이 지원하는 frontmatter 포함 md-like 문서 각각의 in-place 후처리다. CLI는 현재 실행 형태이며 이 목적과 구분한다. 아래는 기존 기술 설계의 확장 책임으로, 소유 레포 이관 시 현재 구현과 대조할 대상이다.
-
-- workspace discovery / validation
-- selected layout/convention validation
-- Git status / revision linkage
-- explicit publish action
-- Site consumer verification
-- 필요한 경우 authoring-tool launcher/integration hook
-
-를 담당한다.
-
-Payload/PostgreSQL/Lexical 기반 CMS는 target architecture가 아니며 기존 실험/legacy implementation으로만 취급한다.
+문서 수정·보존 및 선택적 후처리 기능은 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)을 참조한다. 기능 설계를 여기서 다시 정의하지 않는다.
 
 ## Metadata contract
 
