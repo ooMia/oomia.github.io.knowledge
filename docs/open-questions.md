@@ -45,22 +45,26 @@ Site 입력/layout·editor 역할은 Q015/Q017의 실제 corpus 검증으로 좁
 
 ## 문서 소유권 검토
 
-공통 scheme과 소유권 판단 기준은 [Repository Design](repository-design.md)이 소유한다. 아래는 이동 지시가 아닌 후속 검토 목록이다. 불확실한 owner는 사용자와 확인한 뒤 변경한다.
+공통 scheme과 소유권 판단 기준은 [Repository Design](repository-design.md)이 소유한다.
 
-| 기존 문서 / 절 | 후보와 남은 질문 |
+이번 검토에서 다음 경계는 정리 완료했다.
+
+- `architecture.md`: Knowledge는 레포 역할·cross-repository 경계와 원본 탐색을 유지하고 Engine/Site 기술 설계는 각 소유 레포를 참조한다.
+- `architecture-transition.md`: Knowledge는 전환 목적·순서·안전 규칙·완료 조건·Evidence 연결만 소유한다. Engine/Site 내부 migration 전략은 각 레포 원본으로 이동했다.
+- `publishable-projection.md`: 과거 필수 projection pipeline을 종료하고 현재 owner를 찾는 compatibility reference로 유지한다.
+- `repository-design.md`: 공통 directory scheme·documentation ownership만 유지하며 Engine/Site 상세는 원본 참조로 정리했다.
+- `development-toolchain.md`: 공통 개발·scaffolding 기준만 유지하며 repository-specific runtime/container/toolchain 적용은 owning repository가 소유한다.
+- `release-1.0.md`: Knowledge가 통합 목표·수용 기준을 유지하고 기술 상세는 원본 참조로 정리했다.
+- `implementation-map.md`: Knowledge가 기준 revision·immutable Evidence·통합 검수 연결을 유지한다. 당시 판정과 현재 구현 상태를 구분한다.
+- `decisions.md`: 원본 링크 인덱스로 유지한다.
+- `operating-rhythm.md`: 기록·발표 workflow만 유지하고 기능 구현은 책임 레포 Issue를 참조한다.
+
+실제 소유권 판단이 남은 문서는 다음 두 범위다. 답변에 의존하는 이동·축소만 보류한다.
+
+| 기존 문서 / artifact | 남은 질문 |
 |---|---|
-| `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. Engine 수정 / Site 소비 계약의 원본을 참조한다. |
-| `architecture-transition.md` | 레포 간 의존성은 coordination; Engine/Site 이행 상세는 각 레포. 현재 유효한 전환 범위를 먼저 확인한다. |
-| `content-authoring-contract.md` | 파일 수정 절은 Engine, 소비 절은 Site의 이관 branch로 분리. 남은 editor 설명은 별도 검토. |
-| `publishable-projection.md` | 기존 필수 파이프라인 설계를 종료하고 소유 레포 원본을 찾는 참조 문서로 정리했다. |
-| `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
-| `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme 유지. Engine runtime 설계와 Site integration 전환은 소유 레포의 이관 branch로 이동했고, Engine bootstrap은 기존 migration record를 참조한다. |
-| `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준 유지. 레포별 적용 상세는 Engine README/migration 및 Site toolchain 전환 원본 참조로 변경했다. |
-| `release-1.0.md` | 사용자 결정: Knowledge에 통합 목표·수용 기준 유지. 기술 상세는 원본 참조로 정리했다. |
-| `implementation-map.md` | 사용자 결정: Knowledge에 통합 검수 연결 유지. 기준 Evidence와 당시 판정은 보존하고 기술 구현 목록은 원본 참조로 정리했다. |
-| `decisions.md` | 원본 링크 인덱스로 전환했다. 이관이 확정되면 해당 링크만 변경한다. |
-| 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 실제로 여러 레포가 공유할 새 계약이 생기면 owner를 먼저 확정한다. |
-| `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지하고 기능별 Engine Issue 참조로 전환했다. |
+| `content-authoring-contract.md`의 editor 관련 절 | Q017의 editor 역할이 확정된 뒤 authoring 정책의 durable owner와 문서 위치를 결정한다. Engine 수정 / Site 소비 계약은 이미 분리했다. |
+| `content-component-schema.md` 및 JSON Schema | Q012의 manifest 필요성 및 owner를 결정하기 전까지 deferred planning draft로 유지한다. Site 또는 미래 shared package로 임의 이전하지 않는다. |
 
 Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방식은 미정이다. 해당 작업이 필요해질 때 확인하며 일반 Issue branch → develop PR 작업을 막지 않는다.
 
