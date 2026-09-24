@@ -17,13 +17,13 @@
 ## Engine
 
 - [현재 구현·명령](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
-- [문서 수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/content-modification-contract.md)
-- [Migration record — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/docs/content-modification-contract/docs/migration.md)
+- [문서 수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)
+- [Migration record — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
 
 ## Site
 
 - [현재 구현](https://github.com/ooMia/oomia.github.io/blob/main/README.md)
-- [콘텐츠 소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/docs/content-consumption-contract/docs/content-consumption-contract.md)
+- [콘텐츠 소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
 
 실제 supported syntax, frontmatter schema, component package/API, editor adapter 같은 구현 정보는 owning repository의 code/docs를 확인한다. Knowledge는 별도 manifest나 compatibility summary를 유지하지 않는다.
 
