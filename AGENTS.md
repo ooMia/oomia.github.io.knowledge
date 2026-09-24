@@ -15,3 +15,4 @@
 13. During the active architecture transition, preserve unmerged work before superseding, adapting, or retiring legacy implementation.
 14. Do not treat document cleanup as runtime/build/deployment verification. Preserve revision-scoped Evidence and re-verify implementation claims in the owning repository.
 15. Follow `docs/git-workflow.md` for the common branch, PR, and release policy.
+16. For issue-linked implementation starts, follow the green-scaffold rule in `docs/planning-model.md`; keep the initial executable boundary green without weakening final AC/DoD.
