@@ -19,6 +19,7 @@ Updated: 2026-09-24
 - 추가 소유권 검토에서 architecture-transition은 cross-repository coordination/Evidence 연결만 남기고 Engine/Site migration 상세를 owner 원본으로 정리했다. development-toolchain의 Engine-specific container 지침도 공통 원칙 + owner 참조로 축소했다.
 - implementation-map의 immutable Evidence와 당시 capability 판정은 보존했다. stale transition anchor만 Engine migration record/current Issue 참조로 수정했다.
 - 기존 로컬 문서 링크·anchor/diff/bundle 검증은 이전 branch revision에서 수행된 문서 Evidence다. 이번 connector 기반 추가 편집은 문서 변경이며 runtime/build/deployment 검증으로 간주하지 않는다.
+- 후속 편집의 변경 문서 상대 경로를 branch tree와 대조했고 generated bundle을 현재 canonical 문서에 맞춰 갱신했다. Site PR head의 자동 Pages run 36016190064는 success지만, 기존 Site pipeline의 build/deploy 관찰값으로만 기록하며 새 목표 계약 구현 완료와 구분한다.
 - 기존 레포의 물리적인 디렉토리는 이동하지 않았다. 전체 레포의 scheme 준수 검사를 수행했다는 의미가 아니다.
 - 이번 branch는 Knowledge Issue activation의 개발 base를 수정한다. GitHub Issue event는 변경이 main에 도달하기 전까지 기존 default-branch workflow를 실행한다. develop에 통합하는 것만으로 새 workflow가 활성화되지 않는다.
 - 과거 Engine #21 checkpoint는 이력으로 남아 있다. 과거 handoff의 branch를 그대로 재개하지 말고 구현 작업이 필요할 때 책임 레포에서 현재 상태를 확인한다.
