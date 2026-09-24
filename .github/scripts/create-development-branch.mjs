@@ -89,7 +89,7 @@ async function main() {
   const token = process.env.GITHUB_TOKEN;
   const repository = process.env.GITHUB_REPOSITORY;
   const issueNumber = Number(process.env.ISSUE_NUMBER);
-  const baseBranch = process.env.DEVELOPMENT_BASE ?? "main";
+  const baseBranch = process.env.DEVELOPMENT_BASE ?? "develop";
 
   if (!token) throw new Error("GITHUB_TOKEN is required.");
   if (!repository || !Number.isInteger(issueNumber) || issueNumber <= 0) {

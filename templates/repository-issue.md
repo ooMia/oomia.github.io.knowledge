@@ -45,6 +45,6 @@
 - **Milestone:** <repository milestone, 없으면 비움>
 - **Labels:** <실제 존재하는 label만>
 - **Relationships:** <Parent / Blocked by / Blocking>
-- **Development branch:** Draft 단계에서는 미생성. 활성화 시 자동 생성·연결
+- **Development branch:** <활성화된 경우 실제 연결 branch; Draft이면 비움>
 
-`project-seed`는 Issue 활성화 시 Project #11을 초기화하기 위한 machine-readable seed다. 활성화 이후 field의 canonical state는 Project #11이 소유한다.
+작성·활성화 규칙: [Planning Model](../docs/planning-model.md). Seed 계약: [Project Orchestration](../docs/project-orchestration.md#project-seed).
