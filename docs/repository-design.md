@@ -1,37 +1,34 @@
 # Repository Design & Maintenance
 
-상태: 2026-09-21 project-wide engineering policy.
+상태: 공통 repository scheme과 문서 소유권의 원본. 하단의 기존 Engine/Site 설계 절은 이관 검토 중이며 공통 scheme을 재정의하지 않는다.
 
-이 문서는 Publishing Platform의 implementation repository를 **오래 유지하기 쉽게 만드는 구조 원칙**을 소유한다. 특정 framework의 boilerplate를 복제하는 문서가 아니라, Engine/Site와 향후 package/tooling repository에 공통으로 적용할 boundary와 hygiene를 정의한다.
+이 문서는 모든 repository가 공유하는 디렉토리 역할과 scaffolding 기준을 소유한다. repository의 성격은 안에 들어가는 내용으로 표현하며, 같은 이름의 디렉토리를 repository마다 다른 역할로 정의하지 않는다.
 
-조사한 공통 패턴:
+## 1. Common repository scheme
 
-- Vite+는 root config와 실제 workspace dependency graph를 중심으로 monorepo task를 구성한다.
-- pnpm은 workspace package dependency를 `workspace:` protocol로 명시하고 shared dependency version은 catalog로 중앙 관리할 수 있다.
-- Astro는 코드 구조를 실행 context와 책임에 따라 `core`, `runtime/client`, `runtime/server`처럼 나눈다.
-- 성숙한 대형 monorepo도 `apps` / `packages` 또는 역할별 package를 사용하지만, package 수 자체를 목표로 삼지는 않는다.
+| 경로 | 모든 repository에서 동일한 역할 |
+|---|---|
+| `docs/` | 해당 repository가 소유하는 설계·계약·참조 문서 |
+| `apps/` | 독립적으로 실행·배포하는 프로그램 |
+| `packages/` | 실제 재사용·의존성 경계를 가진 라이브러리 |
+| `tools/` | 제품 runtime 밖의 repository 개발 도구·generator |
+| `scripts/` | repository 작업을 실행하는 작은 script entry point |
+| `templates/` | 반복 생성할 문서·산출물의 입력 형상 |
+| `schemas/` | 해당 repository가 소유하는 기계 판독 가능한 계약 |
+| `config/` | 해당 repository가 소유하는 선언적 설정·registry |
+| `tests/` | 소유 코드·계약의 검증과 fixture; app/package 내부에도 같은 역할 적용 |
+| `.github/` | GitHub automation 및 GitHub용 설정 |
+| `.vite-hooks/` | repository가 관리하는 Vite+ Git hook |
+| `dist/` | 원본에서 재생성하는 build·배포 산출물 |
+| `handoff/` | 현재 작업을 이어받기 위한 일시적 checkpoint |
 
-핵심 원칙:
+동일한 scheme은 사용하지 않는 빈 디렉토리를 모두 만들라는 의미가 아니다. 필요한 경로를 사용할 때 위 역할을 유지한다. 새로운 공통 경로가 필요하면 여기서 의미를 먼저 정의한다. framework가 요구하는 하위 경로와 실제 package 구성은 구현 레포가 설명한다.
 
-> directory는 기술 이름보다 **실행 단위와 소유 책임**을 표현한다. package는 재사용 가능성, dependency boundary, 독립 검증 또는 배포 경계가 실제로 존재할 때만 만든다.
+`oomia.github.io.docs`는 repository 이름이며, 각 repository의 `/docs/` 경로와 다르다. 콘텐츠 저장 레포라는 이유로 `/docs/`의 의미를 발행용 콘텐츠로 재정의하지 않는다. 콘텐츠 tree의 세부 배치는 별도 domain contract이며 이번 공통 scheme 정리에서 이동하지 않는다.
 
-## 1. Default workspace shape
+Knowledge의 `docs/`에는 공통 workflow·coordination·개발 기준을, Engine/Site의 `docs/`에는 각 구현이 소유한 기술 설계를 둔다. 디렉토리의 역할은 같고 문서가 다루는 대상만 다르다.
 
-JavaScript/TypeScript implementation repository의 기본 shape는 다음을 사용한다.
-
-```text
-/
-├─ apps/        # independently runnable/deployable programs
-├─ packages/    # reusable libraries with explicit dependency boundaries
-├─ tools/       # repository-development-only tools/generators
-├─ .github/     # CI / repository automation
-├─ vite.config.ts
-├─ pnpm-workspace.yaml
-├─ package.json
-└─ tsconfig.json
-```
-
-모든 directory가 처음부터 존재할 필요는 없다.
+JavaScript/TypeScript workspace는 필요한 경우 `apps/`, `packages/`, `tools/`와 root 설정 파일을 사용한다. 비실행 레포에 JS/TS package 파일을 의무적으로 추가하지 않는다.
 
 ### apps
 
@@ -226,31 +223,25 @@ root `tests` 하나에 모든 레벨의 test를 섞지 않는다.
 
 ## 11. Repository documentation
 
-Knowledge repository와 implementation repository가 같은 내용을 두 번 소유하지 않는다.
+Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 경로를 소유한다.
 
-Knowledge가 소유:
+| 내용 | 단일 원본의 소유자 |
+|---|---|
+| 공통 디렉토리 scheme·scaffolding 기준 | 이 문서 |
+| 공통 개발 도구 지침 | [Development Toolchain](development-toolchain.md) |
+| 공통 branch·PR·release 전략 | [Git Workflow](git-workflow.md) |
+| Issue lifecycle·계획·완료 의미 | [Planning Model](planning-model.md) |
+| Project/Issue 공통 자동화 계약 | [Project Orchestration](project-orchestration.md) |
+| 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
+| 작업별 읽기 경로 | [CONTEXT](../CONTEXT.md) |
 
-- product architecture
-- cross-repo contract
-- migration direction
-- global engineering policy
+기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. producer/consumer 사이의 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
 
-implementation repo가 소유:
+공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 Git flow나 디렉토리 역할을 반복 복사할 필요는 없다.
 
-- 실제 command
-- package/runtime API
-- local setup
-- debugging
-- test/evidence reproduction
+새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
-따라서 implementation repository의 다음 종류 문서는 장기적으로 최소화한다.
-
-- 중복 architecture prompt
-- 오래된 전체 TODO
-- 별도의 상태 원장
-- Knowledge와 다른 decision history
-
-필요한 local ADR은 실제 code-specific decision에 한정하고 Knowledge cross-repo decision과 서로 link한다.
+기존 기술 문서는 목적지 원본과 참조 전환이 준비되기 전까지 제거하지 않는다. 하단 Engine/Site 설계 절과 다른 기술 문서의 이관 판단은 [Open Questions](open-questions.md)에 기록한다.
 
 ## 12. Agent context
 

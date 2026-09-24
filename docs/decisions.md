@@ -9,10 +9,11 @@
 
 ## Knowledge
 
-- Knowledge `main`은 과거 변화 기록보다 **현재 목표·계약·미결 사항**을 설명한다.
-- 장시간·다문서·다단계 변경은 별도 branch에서 수행하고 PR로 검토한 뒤 **squash merge**를 기본으로 한다.
-- 작은 국소 수정만 `main`에 직접 반영할 수 있다.
-- live 작업 상태는 `handoff/current.md`, 구현 수준은 revision-bound [Implementation Map](implementation-map.md), 실제 작업 상태는 GitHub Project와 책임 구현 repository가 소유한다.
+- 공통 디렉토리 scheme과 문서 소유권: [Repository Design](repository-design.md).
+- 공통 branch·PR·release 전략: [Git Workflow](git-workflow.md).
+- 작업별 원본 참조 경로: [CONTEXT](../CONTEXT.md).
+- live 작업 checkpoint: `handoff/current.md`. 실제 작업 상태는 GitHub Project와 책임 구현 repository가 소유한다.
+- 아래 기존 domain 요약은 이관 검토 중이다. 소유 문서가 확정되면 해당 원본 링크로 대체하며, 이 인덱스에 새 기술 규칙을 추가하지 않는다.
 
 ## Canonical content
 

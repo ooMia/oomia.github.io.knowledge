@@ -1,6 +1,6 @@
 # Architecture
 
-상태: 2026-09-21 Git-backed document workspace와 editor/integration 재검토 방향을 반영.
+상태: 레포 역할과 콘텐츠 흐름을 설명하는 기존 문서. 기술 설계 절은 책임 구현 레포로 이관 검토 중이다.
 
 ## 원칙
 
@@ -20,14 +20,18 @@
 
 | 레포 | 책임 |
 |---|---|
-| `oomia.github.io.engine` | local content workspace를 열고 검증하며 publish/Git/Site 검증 workflow를 orchestration하는 Engine |
-| `oomia.github.io.docs` | document directory/tree와 assets의 durable Git remote 및 shared revision history. layout은 자유 tree부터 strict path/schema까지 구현 목적에 맞게 선택 가능하며 현재 Knowledge가 한 형태를 선결하지 않음 |
+| `oomia.github.io.engine` | Obsidian이 지원하는 frontmatter 포함 md-like 문서를 같은 파일에서 in-place 후처리. CLI는 현재 실행 형태이며 목적 자체가 아님 |
+| `oomia.github.io.docs` | editor가 작성하고 Engine이 in-place 수정하는 문서 폴더를 Git으로 관리할 때 사용하는 remote 및 shared revision history |
 | `oomia.github.io` | canonical authoring revision에서 materialize된 publishable projection을 소비해 사이트를 빌드하고 GitHub Pages로 전달 |
-| `oomia.github.io.knowledge` | 제품·아키텍처·계획 계약의 canonical knowledge |
+| `oomia.github.io.knowledge` | 공통 workflow·coordination·개발 기준 및 책임 레포 원본 문서의 참조 경로 |
 
 `mono`는 사용자가 Site repository에 붙인 로컬 별칭이며 실제 원격 repository 이름의 일부가 아니다.
 
 ## Canonical content workspace
+
+Obsidian으로 작성한 파일에 Engine이 frontmatter 등을 in-place 후처리한다. 따라서 동일 파일은 authored content이면서 generated content일 수 있다. 이는 원본과 별도의 output 레포를 반드시 만든다는 뜻이 아니다. 이 문서의 기존 post-commit projection 설계는 별도 기술 검토 대상이며, in-place 후처리와 동일시하지 않는다.
+
+공통 디렉토리 역할은 [Repository Design](repository-design.md)을 따른다. 아래 content tree layout의 선택지는 공통 `/docs/` 등의 역할을 레포별로 재정의할 권한을 뜻하지 않는다.
 
 1.0의 canonical content representation은 **Git-backed filesystem document workspace**다. docs repository의 directory/path/layout 정책은 아직 확정하지 않는다. 완전 자유 tree, consumer별 discovery convention, strict application-specific layout 모두 유효한 구현 선택지다.
 
@@ -171,7 +175,7 @@ official/custom component 지원은 다음 순서로 판단한다.
 
 | Surface | 소유 위치 |
 |---|---|
-| Content workspace / authoring / storage / publish 정책 | knowledge repository |
+| Content workspace / authoring / storage / publish 기술 계약 | 책임 구현 레포로 이관 검토 중; Knowledge는 참조 경로 소유 |
 | Metadata enrichment / publishable projection contract | [Publishable Projection](publishable-projection.md) |
 | Canonical content revision | `oomia.github.io.docs` Git history |
 | Workspace validation / Git / publish orchestration | engine |

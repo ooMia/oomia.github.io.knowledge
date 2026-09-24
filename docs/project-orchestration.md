@@ -15,16 +15,13 @@ Project #11은 user-owned Project이므로 Actions의 repository-scoped `GITHUB_
 
 Repository 내부 Development branch 생성에는 PAT을 사용하지 않는다. 각 workflow의 `GITHUB_TOKEN`에 최소 권한만 부여한다.
 
-## Repository policy
+## 적용 범위
 
-| Repository | Issue activation Action | Development base | 비고 |
-|---|---|---|---|
-| `oomia.github.io.knowledge` | 사용 | `main` | 작은 문서·정책 정리는 `main` 직접 반영 가능. 큰 변화는 PR 사용. branch가 필요 없는 Item은 `development: false` |
-| `oomia.github.io.engine` | 사용 | `develop` | 일반 implementation Issue |
-| `oomia.github.io` | 사용 | `develop` | Site implementation Issue도 pre-main integration branch인 `develop`에서 시작 |
-| `oomia.github.io.docs` | 기본적으로 미사용 | - | canonical content remote. 일반 Article/content edit는 Git content revision으로 관리하고, repository-level tooling/policy 변경이 생길 때만 implementation Issue 필요 여부를 별도 판단 |
+공통 branch·PR·release 전략은 [Git Workflow](git-workflow.md)를 따른다. repository별로 같은 base branch 표를 반복 관리하지 않는다.
 
-Site repository에는 verified-signature repository rule이 적용되어 있어 automation 파일 자체도 서명된 commit으로 반영해야 한다.
+현재 Issue 작업 대상은 Knowledge, Engine, Site다. `oomia.github.io.docs`는 editor가 작성하고 Engine이 in-place 후처리한 콘텐츠의 remote이며, 현재 이 레포 자체에 Issue를 할당하지 않는다. 해당 레포에 별도 Issue 운영 문서를 만들지 않는다.
+
+공통 생성 절차·Project seed·인증·자동화 계약은 이 문서가 소유한다. 실행되는 workflow/script와 적용된 권한 설정은 각 실행 레포가 소유하며 공통 설명을 복제하지 않는다. 실제 적용 여부는 작업 시 확인한다.
 
 ## Workflow와 Node script의 역할
 
@@ -66,9 +63,8 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 - token: repository `GITHUB_TOKEN`
 - permissions: `contents: write`, `issues: write`
 - 역할: GitHub GraphQL `createLinkedBranch`로 현재 repository에 Issue-linked Development branch 생성
-- knowledge base: `main`
-- engine/site base: `develop`
-- docs는 일반 content edit를 위해 Issue-linked branch를 자동 생성하지 않는다. canonical content branch/PR workflow가 필요해질 경우 Q016의 Git publish semantics 결정에 따라 별도 설계한다.
+- `DEVELOPMENT_BASE`는 Git Workflow의 공통 개발 branch를 사용한다.
+- 콘텐츠 레포의 Issue 비대상 범위는 위 적용 범위를 따른다.
 - `project-seed.development === false`이면 생략
 
 Project PAT은 이 job에 전달하지 않는다.

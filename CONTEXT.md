@@ -1,59 +1,50 @@
 # Context entry point
 
-## 먼저 이해할 것
+Knowledge는 Chat/Agent의 공통 workflow·coordination·개발 기준과 작업별 원본 참조 경로를 제공한다. 정보 소유권과 공통 디렉토리 역할은 [Repository Design](docs/repository-design.md)이 정의한다. 기술 설계는 구현되는 레포의 `/docs/`에서 관리하고 여기서는 링크로 참조한다.
 
-이 저장소는 Publishing Platform의 제품·아키텍처·계획 지식에 대한 canonical source다. 설계가 존재한다는 사실과 구현 완료를 구분한다.
+이전 작업을 이어받을 때는 [Current Handoff](handoff/current.md)를 먼저 읽는다. handoff는 현재 checkpoint이며 정책이나 최신 구현 완료의 증거가 아니다.
 
-콘텐츠 작업에서는 특히 다음 원칙을 먼저 적용한다.
+## 자주 하는 작업
 
-- canonical authoring content는 Git-backed local filesystem document workspace에 보존한다. Site가 소비하는 publishable document는 metadata enrichment를 거친 deterministic projection일 수 있으며 source와 byte-for-byte 동일할 필요가 없다. docs layout은 free-form부터 strict convention까지 아직 열려 있다.
-- local working tree는 authoring/draft state이며, 공유·재현 가능한 durable canonical revision은 `ooMia/oomia.github.io.docs` Git commit이다.
-- authoring editor는 아직 확정하지 않는다. Obsidian을 primary candidate로, Fumadocs Editor를 component-aware candidate로 두고 동일 docs workspace + Site integration을 실제 corpus로 비교한다.
-- Engine은 DB-backed CMS가 아니라 workspace validation / Git / publishing orchestration을 담당하는 stateless, invocation-driven CLI-first one-shot runtime을 목표로 한다.
-- storage / visual editing / publishing / presentation 가능성을 동일시하지 않는다.
-- Fumadocs UI/Core/MDX를 Site에서 우선 재사용하고, Fumadocs Editor는 custom-component authoring 이점이 실제로 필요한지 비교한다. Obsidian-native custom syntax bridge는 1.0 필수 고려사항이 아니다.
-- JavaScript/TypeScript 구현에서는 [Development Toolchain](docs/development-toolchain.md)의 VP-first 정책과 [Repository Design](docs/repository-design.md)의 monorepo-ready/package-light 원칙을 적용한다.
-- 실제 구현 수준은 [Implementation Map](docs/implementation-map.md)의 기준 revision과 책임 레포 Evidence로 판정한다.
-
-현재 Engine/Site/Docs는 architecture migration 중이다. 해당 repository의 구현·리팩터링·Issue 재범위화 작업은 먼저 [Architecture Transition](docs/architecture-transition.md)을 읽는다. 현재 유효한 방향은 [Current Decisions](docs/decisions.md), 남은 결정은 [Open Questions](docs/open-questions.md)을 따른다. 이전 작업을 이어받는 경우에는 [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) 순으로 읽되, handoff는 volatile checkpoint이며 canonical policy가 아님을 전제로 한다.
-
-## 작업별 읽기
-
-| 작업 | 읽을 문서 |
+| 작업 | 참조 순서 |
 |---|---|
-| architecture migration 구현/이어받기 | [Architecture Transition](docs/architecture-transition.md) → [Current Handoff](handoff/current.md) → 필요한 canonical 문서와 live GitHub 상태 재검증 |
-| 전체 이해 | [Architecture](docs/architecture.md), [Release 1.0](docs/release-1.0.md) |
-| legacy → new target migration 판단 | [Architecture Transition](docs/architecture-transition.md), [Implementation Map](docs/implementation-map.md) |
-| VP 명령·환경·CI·hooks 정책 | [Development Toolchain](docs/development-toolchain.md) |
-| monorepo/package/repository 구조 | [Repository Design](docs/repository-design.md) |
-| Markdown/MDX authoring·storage·publish 정책 | [Content Authoring & Publishing Contract](docs/content-authoring-contract.md) |
-| custom MDX component profile/manifest | [Content Component Manifest Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
-| 현재 1.0 구현 수준·migration gap | [Implementation Map](docs/implementation-map.md) → 기준 revision의 구현 레포 코드·테스트 |
-| Item 작성·분류·완료 검토 | [Planning](docs/planning-model.md), [Fields](docs/fields.md), 관련 release, 실제 Item의 Outcome/AC/Evidence |
-| Issue activation / Project field / Development branch 자동화 | [Project Orchestration](docs/project-orchestration.md), [Planning](docs/planning-model.md) |
-| 구현 논의 | Architecture → 관련 contract → Implementation Map → 소유 레포의 최신 문서·코드·테스트 |
-| 주간 계획·발표 | [Operating Rhythm](docs/operating-rhythm.md), 실제 Project Status Update, 실제 Evidence |
-| 설계 수정 | 해당 원본 문서, [Current Decisions](docs/decisions.md), [CONTRIBUTING](CONTRIBUTING.md) |
-| GitHub Project README 정리 | [Project README 템플릿](templates/project-readme.md) |
-| 과거 설계/history 확인 | `archive/main-before-cleanup-20260921` branch |
+| Issue 생성·수정·활성화 | [Issue 형식](templates/repository-issue.md) → [lifecycle·DoD](docs/planning-model.md) → 필요한 [Fields](docs/fields.md) / [Labels](docs/labels.md) → [activation·Project seed](docs/project-orchestration.md) |
+| 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Issue-linked branch](docs/project-orchestration.md#development-branch-naming) → 해당 Issue |
+| PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
+| major/minor release | [Git Workflow](docs/git-workflow.md) → 해당 release의 AC·Evidence |
+| 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → JS/TS이면 [Development Toolchain](docs/development-toolchain.md) |
+| 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 Issue·코드·테스트 |
+| Knowledge 문서 수정 | [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 → [CONTRIBUTING](CONTRIBUTING.md) |
+| 계획·분류·완료 검토 | [Planning](docs/planning-model.md) → [Fields](docs/fields.md) → 실제 Item의 Outcome/AC/Evidence |
+| 기록·발표·주간 회고 | [Operating Rhythm](docs/operating-rhythm.md) → 실제 Project Status Update·Evidence |
+| Project README 정리 | [Project README 형식](templates/project-readme.md) |
+| 미결 소유권·이관 판단 | [Open Questions](docs/open-questions.md#문서-소유권-검토) |
 
-## Agent 작업 원칙
+## 레포별 원본 참조
 
-Content 관련 구현을 계획하거나 수정할 때:
+| 대상 | 현재 확인 가능한 참조 |
+|---|---|
+| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [docs](https://github.com/ooMia/oomia.github.io.engine/tree/main/docs), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs); 현재 Issue 작업 대상은 [Orchestration 적용 범위](docs/project-orchestration.md#적용-범위) 참고 |
 
-1. PostgreSQL/Payload 같은 특정 persistence/CMS 구현을 canonical content requirement로 확대하지 않는다.
-2. content file과 frontmatter를 직접 다루는 Git-backed workspace contract를 우선한다.
-3. Fumadocs Editor가 표현하지 못하는 syntax를 삭제/정규화해서 손실시키기보다 Obsidian/IDE Source path를 유지한다.
-4. uncommitted working tree와 committed docs canonical revision을 구분한다.
-5. publish는 DB export보다 validation / Git revision / Site consumer verification에 집중한다.
-6. Fumadocs UI/Core/MDX는 Site에서 우선 재사용하되 Fumadocs Editor를 필수 authoring client로 가정하지 않는다. custom component authoring UX/DX가 editor 선택의 핵심 비교점이며 Obsidian-native custom syntax bridge는 1.0 범위 밖이다.
-7. TypeScript type이나 editor spec만으로 Publishability가 증명된다고 가정하지 않는다. 최종 Site consumer 검증을 포함한다.
-8. legacy Payload/PostgreSQL code의 성공 Evidence를 새 target architecture 완료로 해석하지 않는다.
-9. migration 중에는 기존 코드를 `keep / adapt / retire`로 분류하고 새 vertical slice가 검증되기 전 big-bang delete를 하지 않는다. Engine은 greenfield scratch build를 기본 전략으로 하고 Site는 별도 Evidence로 판단한다.
-10. 과거 Issue/branch의 목표가 현재 Knowledge와 충돌하면 현재 canonical Knowledge를 target으로, 과거 구현을 migration input으로 취급한다.
-11. JS/TS 작업은 VP-first command surface를 사용하고, `vp` built-in과 `vp run`/`vpr` task를 구분한다. 새 Engine에 Turbo/Husky 등 동등 역할 wrapper를 다시 추가하지 않는다.
-12. Engine 1.0은 one-shot CLI adapter를 사용한다. `prepare`는 working-tree source의 unset metadata를 보완할 수 있지만 explicit value를 덮어쓰지 않고 stage/commit/push하지 않는다. timestamp 계산, file/staged/all selection, prompt UX, formatting 방식은 구현 레포에서 유연하게 결정한다. core operation 안에 HTTP request/session/job lifecycle이나 CLI parsing/stdout/process-exit concerns를 섞지 않는다.
-13. Knowledge의 다문서·장시간·다단계 변경은 branch + PR을 사용하고 squash merge를 기본으로 한다. 작은 국소 수정만 `main` 직행을 허용한다.
+Site의 기술 문서 목적지와 개별 기술 계약의 이관은 아직 완료되지 않았다. 없는 파일을 참조하거나 이동 완료로 간주하지 않는다.
+
+## 이관 전 기존 문서
+
+아래 문서는 삭제·이관 전 검토를 위해 유지한다. 목록에 있다는 사실은 Knowledge의 영구 소유권을 뜻하지 않는다. 규칙 변경은 소유권을 확인한 뒤 원본 한 곳에 반영한다.
+
+| 조사 대상 | 기존 참조 |
+|---|---|
+| 레포 관계·콘텐츠 흐름 | [Architecture](docs/architecture.md) |
+| 기존 architecture 전환·legacy 보존 | [Architecture Transition](docs/architecture-transition.md) |
+| 편집·파일 수정·발행 계약 | [Content Authoring Contract](docs/content-authoring-contract.md) |
+| metadata·projection | [Publishable Projection](docs/publishable-projection.md) |
+| 보류된 component 계약 | [Component Schema](docs/content-component-schema.md), [JSON Schema](schemas/content-component-manifest.schema.json) |
+| 통합 목표·검수 | [Release 1.0](docs/release-1.0.md), [Implementation Map](docs/implementation-map.md) |
+| 결정 탐색 | [Current Decisions](docs/decisions.md) |
+
+설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며, 현재 구현은 책임 레포에서 확인한다. 과거 상세 history는 `archive/main-before-cleanup-20260921`에서 필요할 때만 조사한다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -65,16 +56,6 @@ Content 관련 구현을 계획하거나 수정할 때:
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 본 작업의 blocker로 만들지 않는다. 필요하면 deferred verification으로 기록하고 핵심 작업을 계속한다.
 5. 세션별 임시 상태는 `handoff/current.md`에 두되, 여러 세션에 지속 적용할 사용자 작업 방식·응답 방식은 volatile handoff가 아니라 durable context에 둔다.
 
-## 사용할 요청 예시
+## 문서 사용
 
-> Git-backed Content Authoring Contract에 따라 이 Markdown/MDX 표현의 Editing, Storage, Publishing 수준을 판정하고 필요한 구현 delta를 나눠줘.
-
-> Implementation Map 기준 revision보다 구현 레포가 진행되었는지 확인하고, filesystem workspace target에 대한 1.0 capability 상태를 갱신해줘.
-
-> Fumadocs built-in으로 해결 가능한지 먼저 확인하고, custom component가 정말 필요할 때만 Engine editor spec과 Site renderer contract를 분리해줘.
-
-> 이 설계 변경을 원본 문서에 반영하고, 영향받는 규칙과 미결 사항을 확인한 뒤 통합 문서를 다시 생성해줘.
-
-세션을 종료하기 전에는 장기적으로 남아야 할 결정과 정책을 먼저 owning canonical 문서에 반영하고, 아직 진행 중인 live 상태와 다음 안전한 행동만 `handoff/current.md`에 남긴다. handoff는 매번 overwrite하며 과거 세션 로그를 누적하지 않는다. raw conversation transcript와 과거 decision chronology는 현재 `main`에 복제하지 않는다. 필요하면 historical archive branch를 참조한다.
-
-설계 정의 Item의 Evidence에는 canonical 문서의 immutable commit/permalink를 사용할 수 있다. 기능 구현·배포 Item은 구현 레포의 재현 가능한 Evidence가 별도로 필요하다.
+원본 문서를 수정하고 `python3 scripts/bundle.py`로 Chat 첨부물을 재생성한다. 생성된 `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다. 지속할 규칙은 소유 문서에, 현재 작업 상태와 다음 행동은 handoff에 둔다.

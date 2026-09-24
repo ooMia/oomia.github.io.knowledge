@@ -52,3 +52,24 @@ Engine scratch 자체는 metadata 세부 결정 때문에 막지 않는다.
 3. 실제 Obsidian corpus에서 구현해보고 field/timestamp/selection/formatting 전략을 책임 레포에서 조정한다.
 4. Site/Fumadocs vertical slice에 들어갈 때 Q024/Q015/Q017을 Evidence 기반으로 좁힌다.
 5. 실제 public publish 전에 Q014와 Q008의 필요한 부분을 닫는다.
+
+## 문서 소유권 검토
+
+공통 scheme과 소유권 판단 기준은 [Repository Design](repository-design.md)이 소유한다. 아래는 이동 지시가 아닌 후속 검토 목록이다. 불확실한 owner는 사용자와 확인한 뒤 변경한다.
+
+| 기존 문서 / 절 | 후보와 남은 질문 |
+|---|---|
+| `architecture.md` | 레포 탐색 정보는 Knowledge; 기술 경계 설명은 구현 레포. 소비자와 생산자가 함께 쓰는 계약의 원본 소유자를 확정해야 한다. |
+| `architecture-transition.md` | 레포 간 의존성은 coordination; Engine/Site 이행 상세는 각 레포. 현재 유효한 전환 범위를 먼저 확인한다. |
+| `content-authoring-contract.md` | Engine의 in-place 수정 계약과 Site의 소비 계약을 나눌 후보. 콘텐츠 공통 계약의 원본 소유자는 질문 필요. |
+| `publishable-projection.md` | Engine/Site 중 원본 소유자 미정. 별도 projection의 필요성과 위치는 in-place 후처리 설명만으로 확정하지 않는다. |
+| `content-component-schema.md` 및 JSON Schema | deferred draft 유지. Site 또는 미래 shared package로 임의 이전하지 않는다. |
+| `repository-design.md`의 Engine/Site 설계 절 | 공통 scheme과 개발 원칙은 유지. 런타임·migration 상세는 각 구현 레포의 기존 문서와 대조 후 이관한다. |
+| `development-toolchain.md`의 레포별 적용 상세 | 공통 개발·scaffolding 기준은 유지. 현재 버전과 레포별 실행 상세는 해당 설정·문서 원본을 참조하도록 검토한다. |
+| `release-1.0.md` | 통합 제품 목표·AC를 Knowledge에 유지할지 사용자의 명시적 판단 필요. 기술 설계의 owner와 분리한다. |
+| `implementation-map.md` | 통합 검수 링크와 revision snapshot만 유지할지 검토. 레포별 구현 상태 원장 복제는 줄인다. |
+| `decisions.md` | domain별 원본이 확정되면 반복 요약을 원본 링크로 전환한다. |
+| 이 문서의 기존 domain 질문 | Q008은 Engine, Q019/Q021은 Site 후보. 공통 콘텐츠·projection 질문은 owner를 먼저 확정한다. |
+| `operating-rhythm.md`의 제품 기능 아이디어 | 기록·발표 workflow는 유지. 이미 소유 이슈가 있는 기능은 그 이슈로 참조 전환한다. |
+
+Git flow의 작은 변경 직접 반영 대상, patch/hotfix 절차, merge 방식은 미정이다. 해당 작업이 필요해질 때 확인하며 일반 Issue branch → develop PR 작업을 막지 않는다.

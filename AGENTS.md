@@ -1,7 +1,7 @@
 # Agent instructions
 
 1. Read CONTEXT.md before planning or editing. While `docs/architecture-transition.md` is Active, read it before changing Engine, Site, Docs, related Issues, or migration-sensitive implementation. For JavaScript/TypeScript implementation, also read `docs/development-toolchain.md` and `docs/repository-design.md` before scaffolding or adding tooling/packages.
-2. Canonical documents are docs/*.md. dist/CONTEXT-BUNDLE.md is generated; never edit it directly.
+2. Knowledge owns shared workflow/coordination and engineering guidance in docs/*.md. Technical designs belong to the implementing repository; follow docs/repository-design.md for ownership and the common directory scheme. Existing technical documents remain pending reviewed relocation. dist/CONTEXT-BUNDLE.md is generated; never edit it directly.
 3. Keep product direction separate from repository implementation and live Project state.
 4. Treat current canonical documents as authoritative. Historical decision/provenance context belongs to `archive/main-before-cleanup-20260921`, not current `main`.
 5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. New unresolved product-level questions belong in docs/open-questions.md.
@@ -16,4 +16,4 @@
 14. Do not perform a big-bang legacy deletion before the new Git-backed workspace path has a verified vertical slice through Site build/delivery.
 15. Use Vite+ `vp` as the default JS/TS command surface. Distinguish built-ins (`vp check`, `vp test`, `vp build`) from repository scripts/tasks (`vp run` / `vpr`). Do not introduce a second task runner, hook manager, formatter, or linter when Vite+ already satisfies the requirement.
 16. For the Engine migration, treat greenfield scratch build as the default target strategy. Preserve Git history and unmerged work, but do not copy legacy Payload/PostgreSQL directory structure or task taxonomy into the new skeleton.
-17. For substantial Knowledge changes—multi-document edits, architecture reorganization, or work expected to require multiple commits—create a branch first, finish and review the whole diff in a PR, and squash merge by default. Direct `main` writes are reserved for small localized corrections.
+17. Follow docs/git-workflow.md for the common branch, PR and release policy. Do not infer direct-main exceptions or repeat the policy in repository-local instructions.

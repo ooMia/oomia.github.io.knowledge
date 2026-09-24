@@ -10,7 +10,7 @@ ORDER = [
     'docs/development-toolchain.md', 'docs/repository-design.md', 'docs/content-authoring-contract.md',
     'docs/publishable-projection.md',
     'docs/content-component-schema.md', 'docs/planning-model.md',
-    'docs/fields.md', 'docs/release-1.0.md', 'docs/implementation-map.md',
+    'docs/fields.md', 'docs/git-workflow.md', 'docs/project-orchestration.md', 'docs/labels.md', 'docs/release-1.0.md', 'docs/implementation-map.md',
     'docs/operating-rhythm.md', 'docs/decisions.md', 'docs/open-questions.md',
     'CONTRIBUTING.md',
 ]
