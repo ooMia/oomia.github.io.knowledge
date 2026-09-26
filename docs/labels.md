@@ -8,16 +8,9 @@ GitHub labels는 Project #11의 필드 체계를 복제하지 않고, Issue/PR�
 - label은 Project field로 자연스럽게 표현되지 않는 운영 의미만 담는다.
 - orchestration 전용 label은 `orchestration:*` namespace를 사용한다.
 - 하나의 Issue/PR에 여러 orchestration label을 함께 붙일 수 있다.
-- `oomia.github.io.docs`는 canonical content remote다. 일반 Article/content edit에는 구현 Issue label을 요구하지 않지만, repository-level schema/tooling/policy migration Issue가 생기면 동일한 orchestration label semantics를 적용할 수 있다.
+- Issue 대상 repository의 범위는 [Project Orchestration](project-orchestration.md#적용-범위)이 소유한다.
 
 ## Registry
-
-| Label | 의미 | 적용 예 |
-|---|---|---|
-| `orchestration:automation` | GitHub Actions, scripts, Project/branch 동기화 등 자동화 동작 변경 | Issue activation workflow |
-| `orchestration:policy` | repository 운영 규칙, lifecycle, 권한·token 정책 변경 | branch/merge policy |
-| `orchestration:cross-repo` | 두 개 이상의 repository를 함께 조정하는 작업 | knowledge + engine + site 동기화 |
-| `orchestration:evidence` | automation 자체보다 검증·재현·evidence 수집이 Outcome인 작업 | idempotency/E2E 검증 |
 
 label의 **이름과 의미**는 [config/labels.json](../config/labels.json)을 canonical source로 사용한다. 색상은 UI 구분을 위한 표시 힌트이며 repository별 실제 색과 달라도 semantics가 바뀌지 않는다.
 

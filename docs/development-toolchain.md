@@ -274,16 +274,13 @@ GitHub Actions에서는 Vite+ official `voidzero-dev/setup-vp`를 사용한다.
 
 Vite Task result cache의 cross-run restore는 experimental이므로 correctness보다 먼저 최적화하지 않는다.
 
-## 12. Docker
+## 12. Container builds
 
 Vite+ official image는 build/CI/devcontainer에 사용할 수 있지만 production runtime image로 사용하지 않는다.
 
-Engine container는 multi-stage를 기본으로 한다.
+runtime image를 제공하는 repository는 build toolchain과 production runtime surface를 분리한다. multi-stage build는 기본 후보이며, 실제 stage 구성·artifact·runtime dependency·mount/credential 계약은 해당 구현 repository가 소유한다.
 
-1. Vite+ build stage에서 install/check/test/build/pack
-2. runtime stage에는 실제 runtime과 artifact/production dependency만 포함
-
-이렇게 하면 project toolchain이 production image surface에 불필요하게 남지 않는다.
+Engine의 현재 container/runtime 설계는 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)과 [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)를 참조한다.
 
 ## 13. IDE
 
@@ -333,30 +330,10 @@ vp config --no-agent
 
 ## 16. Current repository implications
 
-### Engine
+공통 기준을 적용한 실제 구성은 각 레포의 문서와 설정이 소유한다. 현행 버전·명령·전환 상태를 이 공통 지침에 복제하지 않는다.
 
-현재 Engine은 Vite+를 이미 사용하지만 task taxonomy가 legacy architecture에 결합되어 있다.
-
-예:
-- `db:*`
-- `cms:*`
-- DB-based `docs:publish`
-
-scratch build에서는 이 task set을 이어받지 않는다.
-
-VP 자체와 다음 종류의 정책만 재사용한다.
-
-- root lint/fmt/check
-- catalog/pinning model
-- workspace task execution
-- evidence `NO_COLOR`
-- generic verification
-
-### Site
-
-현재 Site는 Vite+와 Turbo를 함께 사용한다.
-
-새 policy에서는 VP가 default task runner다. Turbo는 즉시 삭제하지 않지만 **새 workflow가 Turbo dependency를 확대하지 않는다**. VP recursive/filter/cache가 현재 Turbo usage를 대체할 수 있는지 별도 parity migration으로 검증한 뒤 정리한다.
+- Engine: [개발 명령과 버전](https://github.com/ooMia/oomia.github.io.engine/blob/develop/README.md#development), [독립 이력 전환](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md). legacy의 `db:*` / `cms:*` task 설명을 현재 Engine 상태로 사용하지 않는다.
+- Site: [consumer integration / Turbo 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#toolchain-전환).
 
 ## External references reviewed
 

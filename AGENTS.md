@@ -1,19 +1,18 @@
 # Agent instructions
 
-1. Read CONTEXT.md before planning or editing. While `docs/architecture-transition.md` is Active, read it before changing Engine, Site, Docs, related Issues, or migration-sensitive implementation. For JavaScript/TypeScript implementation, also read `docs/development-toolchain.md` and `docs/repository-design.md` before scaffolding or adding tooling/packages.
-2. Canonical documents are docs/*.md. dist/CONTEXT-BUNDLE.md is generated; never edit it directly.
-3. Keep product direction separate from repository implementation and live Project state.
+1. Read CONTEXT.md before planning or editing. While `docs/architecture-transition.md` is Active, read it before migration-sensitive work across Engine, Site, or Docs.
+2. Knowledge acts as the project coordination/PM layer: shared workflow, engineering guidance, integration goals, acceptance, and Evidence linkage belong here. Repository-specific technical design belongs to the implementing repository and code.
+3. Keep product direction, repository implementation, and live Project state separate.
 4. Treat current canonical documents as authoritative. Historical decision/provenance context belongs to `archive/main-before-cleanup-20260921`, not current `main`.
-5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. New unresolved product-level questions belong in docs/open-questions.md.
-6. Edit only the owning document for a rule; update Current Decisions only when a cross-cutting current rule changes.
+5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. Only unresolved product or cross-repository questions belong in `docs/open-questions.md`.
+6. Edit only the owning source for a rule. Do not keep compatibility documents solely to duplicate implementation details that are already expressed by repository code or owner docs.
 7. Do not mark work Done or invent GitHub field IDs, issue links, implementation evidence, or release dates.
-8. Use Korean prose and retain exact English field/option names. If returning copy-paste replacements, return complete changed sections or files including unchanged intervening text.
-9. Run python3 scripts/bundle.py after edits. Report changed files and unresolved questions.
-10. When resuming work, read handoff/current.md before inspecting live state; treat it as a volatile checkpoint, not canonical policy.
-11. Before ending substantial work, promote durable decisions to their owning canonical documents, update revision-bound snapshots only after re-verification, then overwrite handoff/current.md with remaining live state and the next safe action.
-12. Do not accumulate session transcripts, historical handoffs, or decision chronology in handoff/current.md. Promote durable current meaning into canonical docs and keep handoff/current.md limited to the latest volatile execution checkpoint.
-13. During the active architecture transition, do not continue a legacy Issue or branch merely because implementation already exists. Reconcile its Outcome/AC against the transition guide first; preserve unmerged work before superseding, adapting, or retiring it.
-14. Do not perform a big-bang legacy deletion before the new Git-backed workspace path has a verified vertical slice through Site build/delivery.
-15. Use Vite+ `vp` as the default JS/TS command surface. Distinguish built-ins (`vp check`, `vp test`, `vp build`) from repository scripts/tasks (`vp run` / `vpr`). Do not introduce a second task runner, hook manager, formatter, or linter when Vite+ already satisfies the requirement.
-16. For the Engine migration, treat greenfield scratch build as the default target strategy. Preserve Git history and unmerged work, but do not copy legacy Payload/PostgreSQL directory structure or task taxonomy into the new skeleton.
-17. For substantial Knowledge changes—multi-document edits, architecture reorganization, or work expected to require multiple commits—create a branch first, finish and review the whole diff in a PR, and squash merge by default. Direct `main` writes are reserved for small localized corrections.
+8. Use Korean prose and retain exact English field/option names.
+9. Run `python3 scripts/bundle.py` after Knowledge edits. Report changed files and unresolved questions.
+10. When resuming work, read `handoff/current.md` before inspecting live state; treat it as a volatile checkpoint, not canonical policy.
+11. Before ending substantial work, promote durable decisions to their owning canonical sources and keep `handoff/current.md` limited to remaining live state and the next safe action.
+12. Do not accumulate session transcripts, historical handoffs, or implementation inventories in Knowledge.
+13. During the active architecture transition, preserve unmerged work before superseding, adapting, or retiring legacy implementation.
+14. Do not treat document cleanup as runtime/build/deployment verification. Preserve revision-scoped Evidence and re-verify implementation claims in the owning repository.
+15. Follow `docs/git-workflow.md` for the common branch, PR, and release policy.
+16. For issue-linked implementation starts, follow the green-scaffold rule in `docs/planning-model.md`; keep the initial executable boundary green without weakening final AC/DoD.

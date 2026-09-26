@@ -18,6 +18,6 @@ Turn structured content into customizable, deployable sites through explicit aut
 
 This Project owns current execution state: Iteration, Status, field values, Item commitments, and Status Updates.
 
-While the architecture transition is Active, Engine/Site/Docs Items must reconcile legacy Issue/branch assumptions against the transition guide before implementation. Each executable Item should describe a verifiable **Outcome**, binary **Acceptance Criteria**, and reproducible **Evidence**. Product direction and planning rules belong in the knowledge repository; implementation details and tests belong in the responsible implementation repository.
+While the architecture transition is Active, Engine/Site/Docs Items must reconcile legacy Issue/branch assumptions against the transition guide before implementation. Each executable Item should describe a verifiable **Outcome**, binary **Acceptance Criteria**, and reproducible **Evidence**. Shared workflow and planning rules belong in Knowledge; technical designs, implementation details and tests belong in the implementing repository.
 
 For completed design-definition Items such as **Publishing Platform 1.0 Definition** or **Project Planning Model**, use the relevant knowledge document's immutable commit/permalink as Evidence rather than copying the definition into this README.
