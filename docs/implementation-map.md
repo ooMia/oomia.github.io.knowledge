@@ -4,6 +4,17 @@
 
 2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + repository-owned consumer/mutation implementation**으로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
 
+## Post-snapshot checkpoint — 2026-09-27
+
+2026-09-21 판정표 자체는 immutable snapshot으로 유지한다. 이후 다음 새 Evidence가 생겼다.
+
+- Engine model-assisted metadata enrichment: [Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23), [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30).
+- portable Engine artifact verification: [PR #34](https://github.com/ooMia/oomia.github.io.engine/pull/34), [Engine run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854).
+- Docs trusted consumer E2E: [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694).
+- resulting canonical Docs revision: [`bf93bb5`](https://github.com/ooMia/oomia.github.io.docs/commit/bf93bb536b8a4e3a7149737b15723514ce1bdfd8).
+
+이는 **Automation과 Canonical Content 경로의 새로운 Evidence**지만, 현재 Docs layout을 Site가 직접 소비해 build/render/deploy했다는 증거는 아니다. 따라서 아래 2026-09-21 capability 판정을 여기서 소급 변경하지 않고, 다음 Site vertical slice에서 current Docs revision → Site revision → delivery result가 연결된 뒤 새 기준 revision으로 재평가한다.
+
 ## 기준 revision
 
 | 역할 | Repository | Revision | 의미 |
