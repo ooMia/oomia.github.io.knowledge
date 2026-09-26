@@ -17,8 +17,8 @@
 ## Engine
 
 - [현재 구현·명령](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
-- [문서 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)
-- [Migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
+- [문서 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md)
+- [Migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 
 ## Site
 

@@ -34,11 +34,11 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflo
 
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
-| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
+| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. 링크가 `develop`을 가리키는 경우 해당 계약의 현재 개발 통합 상태를 뜻하며, `main` 승격 여부와 완료 Evidence는 repository live state에서 별도로 확인한다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약은 검증된 runtime과 함께 `main`에 승격되었다. Site 소비 계약은 현재 `develop` integration state를 가리키며, 다음 Site vertical slice에서 현재 Docs layout과 함께 재검증한다.
 
 ## PM-level 원본
 
@@ -1147,6 +1147,7 @@ Authoring Experience는 CMS UI에 한정되지 않는다. Obsidian, Fumadocs Edi
 - 작업 branch의 변경은 PR로 검토해 `develop`에 통합한다.
 - major/minor release마다 `develop`에서 `main`으로 PR을 열어 merge한다.
 - 작업 branch에서 `main`으로 직접 PR을 보내 공통 통합 단계를 생략하지 않는다.
+- repository에서 **Automatically delete head branches**를 사용하면 `develop → main` promotion PR의 head인 장기 `develop`까지 삭제될 수 있다. promotion 직후 `develop`이 사라졌다면 merged `main`에서 즉시 같은 이름의 `develop`을 복구한 뒤 다음 Issue activation을 진행한다. 장기 integration branch를 보호하는 repository 설정이 있다면 그 설정을 우선한다.
 
 작은 변경이라는 이유만으로 `main` 직접 쓰기를 허용한다고 해석하지 않는다. 작은 변경의 직접 반영 대상, patch/hotfix 경로, merge 방식은 아직 확정하지 않았으며 필요해질 때 사용자에게 확인한다. 일반 작업은 위 PR 경로로 진행할 수 있다.
 
@@ -1520,8 +1521,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 ## Engine
 
 - [현재 구현·명령](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
-- [문서 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)
-- [Migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
+- [문서 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md)
+- [Migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 
 ## Site
 
