@@ -20,15 +20,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## 기능 실험 참조
 
-발표·글 정리에 활용할 기능의 범위와 AC는 책임 구현 레포의 Issue에서 관리한다. 이 문서에는 기능 정책이나 실행 상태를 복제하지 않는다.
+기능 실험의 활성/폐기 상태와 AC는 책임 구현 repository의 live Issue/Project에서 관리한다. 완료되거나 `not_planned`로 종료된 실험 목록을 이 문서에 별도 catalog로 복제하지 않는다.
 
-| 관심 작업 | 책임 레포의 원본 |
-|---|---|
-| 본문 기반 metadata·태그 보완 | [Engine #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) |
-| 요약·description 제안 | [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15) |
-| 외부 링크 preview | [Engine #16](https://github.com/ooMia/oomia.github.io.engine/issues/16) |
-| LilysAI MCP 활용 비교 | [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24) |
-
-링크가 존재한다는 사실은 기능 구현이나 외부 서비스 연결 완료를 뜻하지 않는다. 릴리스 포함 여부는 해당 Issue와 release 요구사항에서 확인한다.
+현재 반복 가능한 automation Evidence가 필요하면 Engine/Docs의 최신 Issue·PR·workflow run을 직접 확인한다. 이 문서는 활동 리듬과 Evidence → Story 원칙만 유지한다.
 
 자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 흐름에서 실제 정리 부담이 큰 단계를 선택해 활용한다.
