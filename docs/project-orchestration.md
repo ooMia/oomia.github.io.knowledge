@@ -69,6 +69,14 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 Project PAT은 이 job에 전달하지 않는다.
 
+### Lifecycle synchronization boundary
+
+현재 automation은 **activation 초기화**만 소유한다. trigger는 `opened`, `reopened`, manual `workflow_dispatch`이며 Issue `closed` 이벤트를 Project Status에 반영하지 않는다.
+
+따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
+
+close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
+
 ## Orchestration labels
 
 Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` namespace를 사용한다.
