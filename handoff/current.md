@@ -7,7 +7,7 @@ Updated: 2026-09-27
 - Knowledge는 PM/coordination layer이며 [Issue #10](https://github.com/ooMia/oomia.github.io.knowledge/issues/10)의 ownership 정리는 완료됐다.
 - trusted self-hosted inference consumer topology는 [Knowledge Issue #12](https://github.com/ooMia/oomia.github.io.knowledge/issues/12)에서 completed로 종료했다.
 - Engine의 model-assisted frontmatter enrichment는 [Engine Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30)에서 완료됐다.
-- portable Engine artifact는 [Engine run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854)에서 Linux/macOS/Windows 및 post-download isolation 검증을 통과했다.
+- portable Engine artifact는 [Engine run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854)에서 Linux/macOS/Windows 및 post-download isolation 검증을 통과했고, [Engine PR #37](https://github.com/ooMia/oomia.github.io.engine/pull/37)로 `main`에 승격됐다.
 - Docs는 [run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694)에서 실제 model-backed fixture enrichment와 canonical content commit/push를 완료했다.
 - 결과 Docs commit은 [`bf93bb5`](https://github.com/ooMia/oomia.github.io.docs/commit/bf93bb536b8a4e3a7149737b15723514ce1bdfd8)이며 `Engine-Revision`과 `Engine-Run` provenance를 기록한다.
 
@@ -30,6 +30,13 @@ Site 작업 전 확인된 핵심 integration risk:
 3. 현재 Docs layout은 `content/articles/**`, `content/diary/**`, `content/templates/**`, `docs/**`로 분리되어 있어 단순 submodule revision update만으로는 article collection 경계가 깨질 수 있다.
 4. Site가 가리키는 Docs revision은 현재 canonical Docs main보다 뒤처져 있으므로, 기존 Pages 성공을 새 layout 호환 Evidence로 사용하지 않는다.
 5. 다음 Site vertical slice는 repository integration boundary와 article consumption boundary를 분리하고, 현재 Docs revision으로 build/render/delivery를 재검증해야 한다.
+
+## 현재 branch checkpoint
+
+- Knowledge `main`은 current coordination policy를 포함한다.
+- Knowledge `develop`은 promotion 후 자동 삭제되어 `main`에서 즉시 복구했다.
+- Engine `main`은 verified enrichment/artifact slice를 포함한다.
+- Docs는 `main`만 유지하며 merged head branch 자동 삭제가 동작한다.
 
 ## 정리 시 보존할 것
 
