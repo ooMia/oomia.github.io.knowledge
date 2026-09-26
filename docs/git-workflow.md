@@ -9,6 +9,7 @@
 - 작업 branch의 변경은 PR로 검토해 `develop`에 통합한다.
 - major/minor release마다 `develop`에서 `main`으로 PR을 열어 merge한다.
 - 작업 branch에서 `main`으로 직접 PR을 보내 공통 통합 단계를 생략하지 않는다.
+- repository에서 **Automatically delete head branches**를 사용하면 `develop → main` promotion PR의 head인 장기 `develop`까지 삭제될 수 있다. promotion 직후 `develop`이 사라졌다면 merged `main`에서 즉시 같은 이름의 `develop`을 복구한 뒤 다음 Issue activation을 진행한다. 장기 integration branch를 보호하는 repository 설정이 있다면 그 설정을 우선한다.
 
 작은 변경이라는 이유만으로 `main` 직접 쓰기를 허용한다고 해석하지 않는다. 작은 변경의 직접 반영 대상, patch/hotfix 경로, merge 방식은 아직 확정하지 않았으며 필요해질 때 사용자에게 확인한다. 일반 작업은 위 PR 경로로 진행할 수 있다.
 
