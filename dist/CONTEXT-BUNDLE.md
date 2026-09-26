@@ -34,11 +34,11 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflo
 
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
-| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
-| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약 링크는 현재 이관 branch를 가리킨다. PR 통합 전이며 아직 main 적용 완료로 보고하지 않는다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. 링크가 `develop`을 가리키는 경우 해당 계약의 현재 개발 통합 상태를 뜻하며, `main` 승격 여부와 완료 Evidence는 repository live state에서 별도로 확인한다.
 
 ## PM-level 원본
 
@@ -953,12 +953,6 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 <!-- END SOURCE: docs/repository-design.md -->
 
 
-
-
-
-
-
-
 ---
 
 <!-- BEGIN SOURCE: docs/planning-model.md -->
@@ -1248,6 +1242,14 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 Project PAT은 이 job에 전달하지 않는다.
 
+### Lifecycle synchronization boundary
+
+현재 automation은 **activation 초기화**만 소유한다. trigger는 `opened`, `reopened`, manual `workflow_dispatch`이며 Issue `closed` 이벤트를 Project Status에 반영하지 않는다.
+
+따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
+
+close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
+
 ## Orchestration labels
 
 Orchestration 관련 Issue/PR label은 Labels (`docs/labels.md`)의 `orchestration:*` namespace를 사용한다.
@@ -1399,6 +1401,17 @@ Implementation Map (`docs/implementation-map.md`)은 기준 revision과 capabili
 
 2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + repository-owned consumer/mutation implementation**으로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
 
+## Post-snapshot checkpoint — 2026-09-27
+
+2026-09-21 판정표 자체는 immutable snapshot으로 유지한다. 이후 다음 새 Evidence가 생겼다.
+
+- Engine model-assisted metadata enrichment: [Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23), [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30).
+- portable Engine artifact verification: [PR #34](https://github.com/ooMia/oomia.github.io.engine/pull/34), [Engine run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854).
+- Docs trusted consumer E2E: [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694).
+- resulting canonical Docs revision: [`bf93bb5`](https://github.com/ooMia/oomia.github.io.docs/commit/bf93bb536b8a4e3a7149737b15723514ce1bdfd8).
+
+이는 **Automation과 Canonical Content 경로의 새로운 Evidence**지만, 현재 Docs layout을 Site가 직접 소비해 build/render/deploy했다는 증거는 아니다. 따라서 아래 2026-09-21 capability 판정을 여기서 소급 변경하지 않고, 다음 Site vertical slice에서 current Docs revision → Site revision → delivery result가 연결된 뒤 새 기준 revision으로 재평가한다.
+
 ## 기준 revision
 
 | 역할 | Repository | Revision | 의미 |
@@ -1475,16 +1488,9 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## 기능 실험 참조
 
-발표·글 정리에 활용할 기능의 범위와 AC는 책임 구현 레포의 Issue에서 관리한다. 이 문서에는 기능 정책이나 실행 상태를 복제하지 않는다.
+기능 실험의 활성/폐기 상태와 AC는 책임 구현 repository의 live Issue/Project에서 관리한다. 완료되거나 `not_planned`로 종료된 실험 목록을 이 문서에 별도 catalog로 복제하지 않는다.
 
-| 관심 작업 | 책임 레포의 원본 |
-|---|---|
-| 본문 기반 metadata·태그 보완 | [Engine #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) |
-| 요약·description 제안 | [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15) |
-| 외부 링크 preview | [Engine #16](https://github.com/ooMia/oomia.github.io.engine/issues/16) |
-| LilysAI MCP 활용 비교 | [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24) |
-
-링크가 존재한다는 사실은 기능 구현이나 외부 서비스 연결 완료를 뜻하지 않는다. 릴리스 포함 여부는 해당 Issue와 release 요구사항에서 확인한다.
+현재 반복 가능한 automation Evidence가 필요하면 Engine/Docs의 최신 Issue·PR·workflow run을 직접 확인한다. 이 문서는 활동 리듬과 Evidence → Story 원칙만 유지한다.
 
 자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 흐름에서 실제 정리 부담이 큰 단계를 선택해 활용한다.
 
@@ -1514,13 +1520,13 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 ## Engine
 
 - [현재 구현·명령](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
-- [문서 수정 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)
-- [Migration record — 이관 PR](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
+- [문서 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)
+- [Migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
 
 ## Site
 
 - [현재 구현](https://github.com/ooMia/oomia.github.io/blob/main/README.md)
-- [콘텐츠 소비 계약 — 이관 PR](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
+- [콘텐츠 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
 
 실제 supported syntax, frontmatter schema, component package/API, editor adapter 같은 구현 정보는 owning repository의 code/docs를 확인한다. Knowledge는 별도 manifest나 compatibility summary를 유지하지 않는다.
 
