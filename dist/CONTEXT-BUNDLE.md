@@ -1006,6 +1006,27 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
 - 상세 동작과 PAT 설정은 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
 
+### Project Status lifecycle
+
+Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
+
+| Status | 의미 |
+|---|---|
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 우선순위·활성화 결정을 기다리며 일반적으로 Iteration을 비운다. |
+| Todo | Iteration에 commit되었고 착수 가능한 상태다. 아직 실제 수행은 시작하지 않았다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. repository Issue가 있으면 원칙적으로 `closed / completed`와 대응한다. |
+| Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. repository Issue가 있으면 원칙적으로 `closed / not_planned`와 대응한다. |
+
+추가 규칙:
+
+- `closed` 자체를 `Done`으로 해석하지 않는다. 종료 이유가 `completed`인지 `not_planned`인지 구분한다.
+- connector 제약 때문에 repository Issue를 `draft:` + `closed / not_planned`로 보관하더라도 **여전히 유효한 candidate**라면 Project에서는 `Backlog`로 관리할 수 있다. 반대로 완전히 superseded된 historical draft는 Project에 넣지 않거나 `Cancelled`로 정리한다.
+- `Backlog`는 Iteration commitment가 아니므로 일반적으로 Iteration을 비운다. `Todo`부터 현재/예정 Iteration을 갖는다.
+- 실제로 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
+- 주간 목표가 실제 수행 과정에서 바뀌면 repository Issue의 Outcome을 주간 계획에 맞춰 다시 쓰지 않는다. **Iteration Goal과 목표 변경·회고는 GitHub Project Status Update에 기록**하고, Issue는 자기 Outcome/AC/Evidence만 유지한다.
+- Project item이면 Status는 필수다. Work Type은 원칙적으로 지정한다. Scope/Objectve/Target Release는 해당 의미가 실제로 존재할 때만 채우며 빈 값 자체를 오류로 취급하지 않는다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
@@ -1250,6 +1271,28 @@ Project PAT은 이 job에 전달하지 않는다.
 따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
 
 close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
+
+### Plugin-assisted reconciliation
+
+ChatGPT의 GitHub Projects 연결은 Project #11의 운영 상태를 직접 읽고 수정할 수 있다.
+
+현재 사용할 수 있는 작업:
+
+- Project, field, item, view, Status Update 조회
+- repository Issue/PR을 Project item으로 추가
+- Status / Iteration / Work Type / Scope / Objective / Target Release 값 수정
+- 최대 50개 item에 대한 동일 field bulk update
+- Project item 삭제
+- Project view 생성·수정
+- Project Status Update 생성
+
+repository Issue 자체의 생성·본문/상태 수정, branch/PR 작업은 GitHub repository 연결이 담당한다. Project field schema 자체의 option 추가·삭제·description 수정은 현재 Projects 연결이 제공하지 않으므로 GitHub UI에서 관리한다.
+
+따라서 activation Action은 **초기 등록·seed 적용·linked Development branch 생성**에 집중한다. 주간 closeout이나 migration 정리처럼 사람이 맥락을 검토해야 하는 reconciliation은 Projects 연결로 수행할 수 있으며, 이를 이유로 즉시 close-event automation을 추가하지 않는다. 무인 동기화가 반복적으로 필요해질 때 별도 Maintenance Issue로 분리한다.
+
+유효한 fallback draft를 Project에서 추적할 때는 `Backlog`를 사용한다. superseded/rejected 작업은 `Cancelled` 또는 Project 비포함으로 구분하며, `Done`으로 처리하지 않는다.
+
+Iteration 목표가 실제 수행에 따라 바뀌면 기존 repository Issue를 계획에 맞춰 변형하지 않고 Project Status Update에 변경 이유와 실제 결과를 기록한다.
 
 ## Orchestration labels
 
