@@ -22,14 +22,11 @@ jobs:
           delete_ref() {
             local repo="$1"
             local branch="$2"
-            local endpoint="repos/$repo/git/ref/heads/$branch"
+            local encoded_ref
+            encoded_ref="$(jq -rn --arg value "heads/$branch" '$value|@uri')"
 
-            if gh api "$endpoint" >/dev/null 2>&1; then
-              echo "Deleting $repo:$branch"
-              gh api --method DELETE "repos/$repo/git/refs/heads/$branch"
-            else
-              echo "Already absent: $repo:$branch"
-            fi
+            echo "Deleting $repo:$branch"
+            gh api --method DELETE "repos/$repo/git/refs/$encoded_ref"
           }
 
           delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/issue-13-local-wip"
