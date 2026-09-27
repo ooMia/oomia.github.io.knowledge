@@ -47,6 +47,27 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
 - 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
 
+### Project Status lifecycle
+
+Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
+
+| Status | 의미 |
+|---|---|
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 우선순위·활성화 결정을 기다리며 일반적으로 Iteration을 비운다. |
+| Todo | Iteration에 commit되었고 착수 가능한 상태다. 아직 실제 수행은 시작하지 않았다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. repository Issue가 있으면 원칙적으로 `closed / completed`와 대응한다. |
+| Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. repository Issue가 있으면 원칙적으로 `closed / not_planned`와 대응한다. |
+
+추가 규칙:
+
+- `closed` 자체를 `Done`으로 해석하지 않는다. 종료 이유가 `completed`인지 `not_planned`인지 구분한다.
+- connector 제약 때문에 repository Issue를 `draft:` + `closed / not_planned`로 보관하더라도 **여전히 유효한 candidate**라면 Project에서는 `Backlog`로 관리할 수 있다. 반대로 완전히 superseded된 historical draft는 Project에 넣지 않거나 `Cancelled`로 정리한다.
+- `Backlog`는 Iteration commitment가 아니므로 일반적으로 Iteration을 비운다. `Todo`부터 현재/예정 Iteration을 갖는다.
+- 실제로 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
+- 주간 목표가 실제 수행 과정에서 바뀌면 repository Issue의 Outcome을 주간 계획에 맞춰 다시 쓰지 않는다. **Iteration Goal과 목표 변경·회고는 GitHub Project Status Update에 기록**하고, Issue는 자기 Outcome/AC/Evidence만 유지한다.
+- Project item이면 Status는 필수다. Work Type은 원칙적으로 지정한다. Scope/Objectve/Target Release는 해당 의미가 실제로 존재할 때만 채우며 빈 값 자체를 오류로 취급하지 않는다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
