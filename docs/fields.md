@@ -6,12 +6,28 @@
 
 | 이름 | 답하는 질문 | 설계상 형태 |
 |---|---|---|
-| Status | 지금 어떤 작업 상태인가? | 단일 값, 실제 옵션 미확인 |
+| Status | 지금 어떤 실행 상태인가? | 단일 선택: Backlog / Todo / In progress / Done / Cancelled |
 | Iteration | 언제 수행하는가? | Iteration |
 | Work Type | 어떤 종류의 일인가? | 단일 선택 |
 | Scope | 완료를 위해 어떤 시스템 책임이 바뀌는가? | 다중 선택 방향 |
 | Target Release | 어느 통합 제품 버전에 포함할 것인가? | 단일 버전 값 |
 | Objective | 어떤 지속적인 제품 결과를 발전시키는가? | 주된 결과 하나 |
+
+## Status
+
+Field description:
+
+> Execution state of a Project item. Distinguish viable backlog, committed work, active work, completed outcomes, and intentionally cancelled work.
+
+| Option | Description |
+|---|---|
+| Backlog | Valid candidate not yet committed to an Iteration. |
+| Todo | Committed to an Iteration and ready to start. |
+| In progress | Actively being worked on. |
+| Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
+| Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
+
+`Done`은 단순한 Issue close가 아니라 완료된 Outcome을 뜻한다. `Cancelled`는 완료 성과로 계산하지 않는다. connector 제약 때문에 repository Issue가 `draft:` + `closed / not_planned`로 보관되더라도 여전히 유효한 candidate라면 Project에서는 `Backlog`로 관리할 수 있다. 자세한 lifecycle 규칙은 [Planning Model](planning-model.md)을 따른다.
 
 ## Scope
 
