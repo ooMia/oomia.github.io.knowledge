@@ -1,8 +1,8 @@
 # Context entry point
 
-Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflow·개발 기준·통합 목표·수용 기준·검수 연결을 관리하고, 구현 상세는 책임 repository의 문서와 코드가 소유한다.
+Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 **canonical entry point**다. 먼저 현재 작업 유형을 식별하고 아래 routing에서 필요한 최소 원본만 읽는다. 구현 상세는 책임 repository의 문서와 코드가 소유한다.
 
-이전 작업을 이어받을 때는 [Current Handoff](handoff/current.md)를 먼저 읽는다. handoff는 현재 checkpoint이며 정책이나 최신 구현 완료의 증거가 아니다.
+이전 작업을 실제로 이어받거나 최근 checkpoint가 필요한 경우에만 [Current Handoff](handoff/current.md)를 읽는다. handoff는 정책이나 최신 구현 완료의 증거가 아니다.
 
 ## 자주 하는 작업
 
@@ -40,7 +40,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflo
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 문서를 만들지 않는다.
 
-설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며 현재 구현은 책임 레포에서 확인한다. 과거 상세 history는 `archive/main-before-cleanup-20260921`에서 필요할 때만 조사한다.
+설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며 현재 구현은 책임 레포에서 확인한다. 과거 설계 맥락은 [Architecture Transition](docs/architecture-transition.md)과 owning repository의 migration 기록에서 추적한다.
 
 ## 프로젝트 협업·응답 원칙
 
