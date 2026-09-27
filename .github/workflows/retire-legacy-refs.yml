@@ -1,0 +1,34 @@
+name: Retire legacy refs
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    if: github.event.head_commit.message == 'chore: retire legacy refs'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete legacy refs
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          delete_ref() {
+            local repo="$1"
+            local branch="$2"
+            echo "Deleting $repo:$branch"
+            gh api --method DELETE "repos/$repo/git/refs/heads/$branch"
+          }
+
+          delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/issue-13-local-wip"
+          delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/main"
+          delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/2-feat-project-orchestration-automation"
+          delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/2-fix-avoid-duplicate-issue-activation"
+          delete_ref "ooMia/oomia.github.io" "legacy-tistory"
+          delete_ref "ooMia/oomia.github.io.knowledge" "archive/main-before-cleanup-20260921"
+          delete_ref "ooMia/oomia.github.io.knowledge" "backup/pre-history-cleanup-20260918"
