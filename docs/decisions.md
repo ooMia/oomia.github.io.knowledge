@@ -29,4 +29,4 @@
 
 ## Historical reference
 
-삭제된 과거 설계와 provenance가 필요하면 Git history 또는 `archive/main-before-cleanup-20260921` branch를 조사한다.
+과거 설계의 지속 가치가 있는 맥락은 [전환 coordination](architecture-transition.md)과 owning repository의 migration 기록에서 추적한다. legacy/archive/backup branch 자체는 장기 지식 archive로 유지하지 않는다.
