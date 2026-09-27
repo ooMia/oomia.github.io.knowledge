@@ -21,6 +21,13 @@ PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남�
 
 Merge method는 공통 강제 정책으로 고정하지 않는다. 다만 작업 과정의 중간·정리 commit이 많이 쌓였고 최종 diff가 하나의 응집된 변화로 읽히는 PR은 **squash merge를 우선 권장**한다. 의미 있는 commit history 자체가 검토·추적 가치가 있으면 rebase 또는 merge를 선택할 수 있다.
 
+## Legacy refs와 archive
+
+- Git branch를 장기 지식 archive로 사용하지 않는다.
+- legacy/archive/backup branch의 지속 가치가 결정·설계 맥락 수준이면 현재 Knowledge 또는 owning repository의 migration 문서에 흡수한 뒤 ref를 제거한다.
+- 원본 commit graph 자체가 재현성·forensic Evidence로 필요한 경우에만 명시적 tag로 보존한다.
+- 일회성 migration safety ref는 대체 경로와 지속 문서가 확인되면 제거한다.
+
 ## 정책 적용과 기존 상태
 
 공통 전략은 목표 정책이다. 문서를 수정했다고 기존 branch, workflow, protection 설정까지 변경된 것으로 보고하지 않는다. 작업 대상 레포에서 실행에 필요한 차이를 확인하고, 수정할 수 있는 범위에서 적용한다. 전체 레포를 순회하는 동기화 검사를 작업의 필수 조건으로 추가하지 않는다.
