@@ -77,6 +77,28 @@ Project PAT은 이 job에 전달하지 않는다.
 
 close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
 
+### Plugin-assisted reconciliation
+
+ChatGPT의 GitHub Projects 연결은 Project #11의 운영 상태를 직접 읽고 수정할 수 있다.
+
+현재 사용할 수 있는 작업:
+
+- Project, field, item, view, Status Update 조회
+- repository Issue/PR을 Project item으로 추가
+- Status / Iteration / Work Type / Scope / Objective / Target Release 값 수정
+- 최대 50개 item에 대한 동일 field bulk update
+- Project item 삭제
+- Project view 생성·수정
+- Project Status Update 생성
+
+repository Issue 자체의 생성·본문/상태 수정, branch/PR 작업은 GitHub repository 연결이 담당한다. Project field schema 자체의 option 추가·삭제·description 수정은 현재 Projects 연결이 제공하지 않으므로 GitHub UI에서 관리한다.
+
+따라서 activation Action은 **초기 등록·seed 적용·linked Development branch 생성**에 집중한다. 주간 closeout이나 migration 정리처럼 사람이 맥락을 검토해야 하는 reconciliation은 Projects 연결로 수행할 수 있으며, 이를 이유로 즉시 close-event automation을 추가하지 않는다. 무인 동기화가 반복적으로 필요해질 때 별도 Maintenance Issue로 분리한다.
+
+유효한 fallback draft를 Project에서 추적할 때는 `Backlog`를 사용한다. superseded/rejected 작업은 `Cancelled` 또는 Project 비포함으로 구분하며, `Done`으로 처리하지 않는다.
+
+Iteration 목표가 실제 수행에 따라 바뀌면 기존 repository Issue를 계획에 맞춰 변형하지 않고 Project Status Update에 변경 이유와 실제 결과를 기록한다.
+
 ## Orchestration labels
 
 Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` namespace를 사용한다.
