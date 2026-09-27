@@ -3,13 +3,14 @@ name: Retire legacy refs
 on:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/retire-legacy-refs.yml"
 
 permissions:
   contents: read
 
 jobs:
   cleanup:
-    if: github.event.head_commit.message == 'chore: retire legacy refs'
     runs-on: ubuntu-latest
     steps:
       - name: Delete legacy refs
@@ -21,8 +22,14 @@ jobs:
           delete_ref() {
             local repo="$1"
             local branch="$2"
-            echo "Deleting $repo:$branch"
-            gh api --method DELETE "repos/$repo/git/refs/heads/$branch"
+            local endpoint="repos/$repo/git/ref/heads/$branch"
+
+            if gh api "$endpoint" >/dev/null 2>&1; then
+              echo "Deleting $repo:$branch"
+              gh api --method DELETE "repos/$repo/git/refs/heads/$branch"
+            else
+              echo "Already absent: $repo:$branch"
+            fi
           }
 
           delete_ref "ooMia/oomia.github.io.engine" "archive/legacy-2026-09-21/issue-13-local-wip"
