@@ -34,7 +34,7 @@ optional Engine mutation → same Docs workspace
 - 과거 Issue·branch 구현 계획이 현재 owner code/docs보다 우선한다.
 - 기존 코드 투자량이 새 architecture의 책임 경계를 결정한다.
 
-과거 구현과 branch는 migration input/Evidence로 보존한다.
+과거 구현에서 지속 가치가 있는 결정·전환 맥락은 migration 기록과 Knowledge 문서에 흡수한다. 일회성 legacy/archive branch 자체는 장기 archive로 유지하지 않는다.
 
 ## 3. Cross-repository target
 
