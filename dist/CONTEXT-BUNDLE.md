@@ -1006,6 +1006,24 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
 - 상세 동작과 PAT 설정은 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
 
+## Project Status lifecycle
+
+Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
+
+| Status | 의미 |
+|---|---|
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 일반적으로 Iteration을 비운다. |
+| Todo | Iteration에 commit되었고 착수 가능한 상태다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
+| Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
+
+- repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
+- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리할 수 있다.
+- 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
+- Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
+- `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
@@ -1067,12 +1085,28 @@ Chat/Agent workflow는 결과를 수정할 수 있는 인터페이스와 권한�
 
 | 이름 | 답하는 질문 | 설계상 형태 |
 |---|---|---|
-| Status | 지금 어떤 작업 상태인가? | 단일 값, 실제 옵션 미확인 |
+| Status | 지금 어떤 실행 상태인가? | 단일 선택: Backlog / Todo / In progress / Done / Cancelled |
 | Iteration | 언제 수행하는가? | Iteration |
 | Work Type | 어떤 종류의 일인가? | 단일 선택 |
 | Scope | 완료를 위해 어떤 시스템 책임이 바뀌는가? | 다중 선택 방향 |
 | Target Release | 어느 통합 제품 버전에 포함할 것인가? | 단일 버전 값 |
 | Objective | 어떤 지속적인 제품 결과를 발전시키는가? | 주된 결과 하나 |
+
+## Status
+
+Field description:
+
+> Execution state of a Project item. Distinguish viable backlog, committed work, active work, completed outcomes, and intentionally cancelled work.
+
+| Option | Description |
+|---|---|
+| Backlog | Valid candidate not yet committed to an Iteration. |
+| Todo | Committed to an Iteration and ready to start. |
+| In progress | Actively being worked on. |
+| Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
+| Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
+
+`Done`과 `Cancelled`의 lifecycle 의미는 Planning Model (`docs/planning-model.md`)을 따른다.
 
 ## Scope
 
@@ -1092,7 +1126,7 @@ Field description:
 
 예: canonical docs commit을 만들기 전 validation/Git revision flow를 바꾸면 Publishing. workspace layout/frontmatter 저장 계약을 바꾸면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
 
-최신 Scope 제안은 6개 옵션과 다중 선택이다. 사용자가 초기에 확인한 옵션은 Delivery를 제외한 5개였으므로 Delivery의 실제 등록 여부와 다중 선택 적용 여부는 미확인이다.
+Project #11의 Scope는 6개 옵션을 사용하는 다중 선택 field로 운영한다.
 
 ## Objective
 
@@ -1413,6 +1447,18 @@ Implementation Map (`docs/implementation-map.md`)은 기준 revision과 capabili
 
 이는 **Automation과 Canonical Content 경로의 새로운 Evidence**지만, 현재 Docs layout을 Site가 직접 소비해 build/render/deploy했다는 증거는 아니다. 따라서 아래 2026-09-21 capability 판정을 여기서 소급 변경하지 않고, 다음 Site vertical slice에서 current Docs revision → Site revision → delivery result가 연결된 뒤 새 기준 revision으로 재평가한다.
 
+## Post-snapshot checkpoint — 2026-09-28
+
+2026-09-27 checkpoint 이후 canonical Docs의 현재 layout을 Site가 직접 소비하는 Evidence가 확보됐다.
+
+- canonical Docs revision: [`c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c)
+- direct Article corpus consumption: [Site #12](https://github.com/ooMia/oomia.github.io/issues/12) / [PR #13](https://github.com/ooMia/oomia.github.io/pull/13), integrated develop revision [`f50ba57b`](https://github.com/ooMia/oomia.github.io/commit/f50ba57b9d1e270b286794cb9a7998f7df780648)
+- current Docs → Site build/render Evidence: [Site run 36406348962](https://github.com/ooMia/oomia.github.io/actions/runs/36406348962). 11 Article pages were built from the canonical corpus.
+- release-only live mutation boundary: [Site #14](https://github.com/ooMia/oomia.github.io/issues/14) / [PR #15](https://github.com/ooMia/oomia.github.io/pull/15), integrated develop revision [`6d8cc03f`](https://github.com/ooMia/oomia.github.io/commit/6d8cc03f2f28df28e31a97a38b31b06fd8148b25)
+- PR gate Evidence: [Site run 36418285983](https://github.com/ooMia/oomia.github.io/actions/runs/36418285983), `build=success`, `deploy=skipped`.
+
+Run 36406348962 occurred before the release-only deployment gate and therefore proves direct consumption/build/render but is not treated as final release-boundary Evidence. Phase B의 direct Docs consumption은 integration state에서 검증됐고, Phase C의 최종 release Evidence는 Site `develop → main` promotion 후 새 `main` build/deploy로 Docs revision + Site revision + delivery result를 다시 연결해야 한다.
+
 ## 기준 revision
 
 | 역할 | Repository | Revision | 의미 |
@@ -1548,8 +1594,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q003 | 1.0 final release gate | 새 canonical Docs → Site vertical slice의 실제 acceptance/Evidence chain이 확보된 뒤 구체화 |
-| Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
+| Q003 | 1.0 final release gate | Site `develop → main` promotion 후 새 main build/deploy에서 canonical Docs revision + Site revision + delivery result를 연결해 확정 |
+| Q006 | 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값 유지 |
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
