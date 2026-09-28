@@ -15,6 +15,18 @@
 
 이는 **Automation과 Canonical Content 경로의 새로운 Evidence**지만, 현재 Docs layout을 Site가 직접 소비해 build/render/deploy했다는 증거는 아니다. 따라서 아래 2026-09-21 capability 판정을 여기서 소급 변경하지 않고, 다음 Site vertical slice에서 current Docs revision → Site revision → delivery result가 연결된 뒤 새 기준 revision으로 재평가한다.
 
+## Post-snapshot checkpoint — 2026-09-28
+
+2026-09-27 checkpoint 이후 canonical Docs의 현재 layout을 Site가 직접 소비하는 Evidence가 확보됐다.
+
+- canonical Docs revision: [`c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c)
+- direct Article corpus consumption: [Site #12](https://github.com/ooMia/oomia.github.io/issues/12) / [PR #13](https://github.com/ooMia/oomia.github.io/pull/13), integrated develop revision [`f50ba57b`](https://github.com/ooMia/oomia.github.io/commit/f50ba57b9d1e270b286794cb9a7998f7df780648)
+- current Docs → Site build/render Evidence: [Site run 36406348962](https://github.com/ooMia/oomia.github.io/actions/runs/36406348962). 11 Article pages were built from the canonical corpus.
+- release-only live mutation boundary: [Site #14](https://github.com/ooMia/oomia.github.io/issues/14) / [PR #15](https://github.com/ooMia/oomia.github.io/pull/15), integrated develop revision [`6d8cc03f`](https://github.com/ooMia/oomia.github.io/commit/6d8cc03f2f28df28e31a97a38b31b06fd8148b25)
+- PR gate Evidence: [Site run 36418285983](https://github.com/ooMia/oomia.github.io/actions/runs/36418285983), `build=success`, `deploy=skipped`.
+
+Run 36406348962 occurred before the release-only deployment gate and therefore proves direct consumption/build/render but is not treated as final release-boundary Evidence. Phase B의 direct Docs consumption은 integration state에서 검증됐고, Phase C의 최종 release Evidence는 Site `develop → main` promotion 후 새 `main` build/deploy로 Docs revision + Site revision + delivery result를 다시 연결해야 한다.
+
 ## 기준 revision
 
 | 역할 | Repository | Revision | 의미 |
