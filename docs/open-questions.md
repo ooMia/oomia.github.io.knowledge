@@ -4,8 +4,8 @@
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q003 | 1.0 final release gate | 새 canonical Docs → Site vertical slice의 실제 acceptance/Evidence chain이 확보된 뒤 구체화 |
-| Q006 | Status 옵션 및 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
+| Q003 | 1.0 final release gate | Site `develop → main` promotion 후 새 main build/deploy에서 canonical Docs revision + Site revision + delivery result를 연결해 확정 |
+| Q006 | 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값 유지 |
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
