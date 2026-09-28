@@ -47,6 +47,24 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
 - 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
 
+## Project Status lifecycle
+
+Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
+
+| Status | 의미 |
+|---|---|
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 일반적으로 Iteration을 비운다. |
+| Todo | Iteration에 commit되었고 착수 가능한 상태다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
+| Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
+
+- repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
+- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리할 수 있다.
+- 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
+- Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
+- `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+
 ## 완료 판정
 
 - **Acceptance Criteria**: 이번 변화가 제공해야 하는 관찰 가능한 결과.
