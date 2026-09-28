@@ -6,12 +6,28 @@
 
 | 이름 | 답하는 질문 | 설계상 형태 |
 |---|---|---|
-| Status | 지금 어떤 작업 상태인가? | 단일 값, 실제 옵션 미확인 |
+| Status | 지금 어떤 실행 상태인가? | 단일 선택: Backlog / Todo / In progress / Done / Cancelled |
 | Iteration | 언제 수행하는가? | Iteration |
 | Work Type | 어떤 종류의 일인가? | 단일 선택 |
 | Scope | 완료를 위해 어떤 시스템 책임이 바뀌는가? | 다중 선택 방향 |
 | Target Release | 어느 통합 제품 버전에 포함할 것인가? | 단일 버전 값 |
 | Objective | 어떤 지속적인 제품 결과를 발전시키는가? | 주된 결과 하나 |
+
+## Status
+
+Field description:
+
+> Execution state of a Project item. Distinguish viable backlog, committed work, active work, completed outcomes, and intentionally cancelled work.
+
+| Option | Description |
+|---|---|
+| Backlog | Valid candidate not yet committed to an Iteration. |
+| Todo | Committed to an Iteration and ready to start. |
+| In progress | Actively being worked on. |
+| Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
+| Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
+
+`Done`과 `Cancelled`의 lifecycle 의미는 [Planning Model](planning-model.md)을 따른다.
 
 ## Scope
 
@@ -31,7 +47,7 @@ Field description:
 
 예: canonical docs commit을 만들기 전 validation/Git revision flow를 바꾸면 Publishing. workspace layout/frontmatter 저장 계약을 바꾸면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
 
-최신 Scope 제안은 6개 옵션과 다중 선택이다. 사용자가 초기에 확인한 옵션은 Delivery를 제외한 5개였으므로 Delivery의 실제 등록 여부와 다중 선택 적용 여부는 미확인이다.
+Project #11의 Scope는 6개 옵션을 사용하는 다중 선택 field로 운영한다.
 
 ## Objective
 
