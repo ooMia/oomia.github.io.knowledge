@@ -2,25 +2,76 @@
 
 Updated: 2026-09-28
 
-## 현재 checkpoint
+## Current checkpoint
 
-- C1-W3의 canonical Docs → Site direct consumption은 [Site #12](https://github.com/ooMia/oomia.github.io/issues/12) / [PR #13](https://github.com/ooMia/oomia.github.io/pull/13)에서 검증됐다.
-- PR build와 live Pages mutation 분리는 [Site #14](https://github.com/ooMia/oomia.github.io/issues/14) / [PR #15](https://github.com/ooMia/oomia.github.io/pull/15)로 `develop`에 통합됐다.
-- Site `main`은 아직 이 integration state로 promotion하지 않았다. Q003 final release gate는 main promotion 뒤 새 delivery Evidence가 필요하다.
-- [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15)는 #23과 중복되는 authoring value와 별도 summary consumer 부재 때문에 `not_planned`로 종료했다.
-- 다음 핵심 작업은 [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24)의 LilysAI MCP-assisted enrichment 실험이다. 구현 전에 네 repository의 stale/unused state를 정리하고 현재 architecture 기준 계획을 다시 세운다.
+- canonical Docs → Site direct consumption: [Site #12](https://github.com/ooMia/oomia.github.io/issues/12) / [PR #13](https://github.com/ooMia/oomia.github.io/pull/13)
+- PR build / live Pages mutation boundary: [Site #14](https://github.com/ooMia/oomia.github.io/issues/14) / [PR #15](https://github.com/ooMia/oomia.github.io/pull/15)
+- Site `develop` remains intentionally ahead of `main`; final Q003 release Evidence still requires explicit `develop → main` promotion and a new main delivery run.
+- [Engine #15](https://github.com/ooMia/oomia.github.io.engine/issues/15) is closed `not_planned`. #23 already covers the concrete metadata-generation need and there is no current consumer for a separate three-line summary suggestion lifecycle.
+- [Engine #24](https://github.com/ooMia/oomia.github.io.engine/issues/24) is the next priority and now contains the current LilysAI MCP experiment plan.
 
-## Pre-MCP cleanup
+## Pre-MCP cleanup completed
 
-- Engine: pseudo-backlog `docs/TODO.md` 제거, migration/agent 안내를 current branch model과 canonical Knowledge 링크에 맞춤.
-- Site: 미사용 Notion export stylesheet 제거, template README를 실제 Site consumer/delivery 책임으로 교체.
-- Docs: 실제 enrichment workflow와 consumer contract는 유지하고 불필요한 `docs/.gitkeep`만 제거.
-- Knowledge: stale handoff/Implementation Map/Q003를 현재 Evidence로 갱신하고, stale `develop`에만 있던 유효한 Project Status lifecycle 결정을 canonical source에 흡수한다.
+### Engine
 
-각 cleanup은 별도 repository branch/PR로 검증·통합한다. #24 구현 branch는 cleanup 완료 뒤 `develop`에서 시작한다.
+- removed repository-local `docs/TODO.md` pseudo-backlog
+- reconciled migration/AGENTS guidance with current branch state and canonical Knowledge `main`
+- restored repository Issue activation automation
+- verified hosted Linux/macOS/Windows checks and packaged artifact
+- promoted cleanup/automation through `main`
+- `main` / `develop`: `bbebc64ae327ff23060b9859aa5970c02b201b4d`
 
-## Project automation
+One cancelled-work branch remains because the current Chat GitHub connector exposes no branch-delete action:
 
-이전 `PROJECT_TOKEN` Unauthorized는 만료된 credential이 원인으로 판단됐고 사용자가 token을 갱신했다. 다음 Issue activation에서 Project sync가 정상 복구됐는지 확인한다. credential 자체의 내용이나 보안 설정은 자동 변경하지 않는다.
+`15-experiment-add-agent-assisted-article-summary-suggestions`
 
-Project-level canonical entry point는 [CONTEXT.md](../CONTEXT.md)다.
+Delete it manually before #24 implementation.
+
+### Site
+
+- replaced the stale generic template README with the current canonical Docs consumer/delivery responsibility
+- attempted removal of `notion.css`, but CI proved it remains an active `Article.astro` runtime dependency; restored it
+- active Notion-era Article presentation (hard-coded cover/icon/style) is therefore not treated as dead cleanup. Changing it is a separate Presentation decision.
+- `develop`: `6f3ae9902c5832eb49372979e39adf2c367468b0`
+- `main`: `0f6e38a502cccf085312bedb1d7c7c1d77fba295`
+
+### Docs
+
+- removed obsolete `docs/.gitkeep`
+- preserved the active self-hosted enrichment workflow documentation
+- `main`: `dfdbe6f74b5eb70e4dd09bca589b4ee01b8da8ca`
+
+### Knowledge
+
+- absorbed the durable Project Status lifecycle that had been stranded on stale `develop`
+- refreshed field definitions, Site integration Evidence, Q003 and handoff
+- intentionally did not preserve fast-changing tool/plugin capability prose as canonical policy
+- `main` / `develop`: `0a039727e0afea44644e4173e676e0992bc20e63` before this handoff refresh
+
+## #24 experiment plan
+
+The first slice evaluates value before production integration.
+
+- baseline: current #23 `body + explicit metadata → title / description / tags`
+- MCP-assisted: same body/metadata/model/temperature/schema plus LilysAI note/summary context
+- actual canonical files are never mutated by the comparison harness
+- LilysAI-specific types stay outside the enrichment core
+- first MCP connection is read-only; no `create_project`, `create_note`, upload, rename, move or trash operations
+- hosted CI uses a fake MCP context reader and does not require OAuth or a self-hosted runner
+- actual LilysAI OAuth approval and note/project preparation remain user-controlled
+- OAuth credentials/tokens are not stored in repository, Actions secrets, fixtures or Evidence artifacts
+- fixtures are actual canonical Docs Articles fixed by immutable Docs SHA
+- compare quality, MCP read latency, local generation latency, failure behavior, reproducibility and context size
+- only evidence of material benefit creates a follow-up production-integration Issue
+
+Official remote MCP endpoint: `https://mcp.lilys.ai/mcp` (Streamable HTTP + OAuth 2.1).
+
+## Next action
+
+1. delete the cancelled #15 branch manually
+2. activate #24
+3. verify the restored Issue activation workflow: Project #11 sync + linked Development branch
+4. implement the experiment-only context-reader/comparison harness
+5. stop for user-controlled read-only LilysAI OAuth when real MCP Evidence is required
+
+Project-level canonical entry point remains [CONTEXT.md](../CONTEXT.md).
