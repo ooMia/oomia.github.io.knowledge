@@ -54,7 +54,7 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 - secret: `PROJECT_TOKEN`
 - Project: `ooMia/projects/11`
-- 역할: Item 추가 및 Status / Iteration / Work Type / Scope / Objective / Target Release 초기화
+- 역할: Item 추가 및 Status / Iteration / Work Type 초기화
 - field ID와 option ID는 runtime에 이름으로 조회
 - 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
 
