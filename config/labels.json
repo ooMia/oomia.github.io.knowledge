@@ -1,22 +1,77 @@
 [
   {
-    "name": "orchestration:automation",
-    "colorHint": "1D76DB",
-    "description": "Repository/Project workflow and automation behavior"
-  },
-  {
-    "name": "orchestration:policy",
+    "name": "mcp",
+    "repositories": [
+      "ooMia/oomia.github.io.engine"
+    ],
     "colorHint": "5319E7",
-    "description": "Repository lifecycle, permissions, and orchestration policy"
+    "description": "MCP integration, transport, tools, or provider interaction"
   },
   {
-    "name": "orchestration:cross-repo",
+    "name": "inference",
+    "repositories": [
+      "ooMia/oomia.github.io.engine"
+    ],
     "colorHint": "0E8A16",
-    "description": "Coordination spanning multiple Publishing Platform repositories"
+    "description": "Model inference integration and runtime behavior"
   },
   {
-    "name": "orchestration:evidence",
-    "colorHint": "FBCA04",
-    "description": "Verification, reproducibility, and evidence-focused orchestration work"
+    "name": "filesystem",
+    "repositories": [
+      "ooMia/oomia.github.io.engine"
+    ],
+    "colorHint": "1D76DB",
+    "description": "Document workspace and filesystem behavior"
+  },
+  {
+    "name": "ci",
+    "repositories": [
+      "ooMia/oomia.github.io.engine",
+      "ooMia/oomia.github.io"
+    ],
+    "colorHint": "0052CC",
+    "description": "Build, verification, or GitHub Actions pipeline behavior"
+  },
+  {
+    "name": "dependencies",
+    "repositories": [
+      "ooMia/oomia.github.io.engine"
+    ],
+    "colorHint": "0366D6",
+    "description": "Dependency updates and dependency-management work"
+  },
+  {
+    "name": "orchestration",
+    "repositories": [
+      "ooMia/oomia.github.io.engine",
+      "ooMia/oomia.github.io",
+      "ooMia/oomia.github.io.knowledge"
+    ],
+    "colorHint": "1D76DB",
+    "description": "Issue, Project, branch, PR, or cross-repository workflow orchestration"
+  },
+  {
+    "name": "content-loading",
+    "repositories": [
+      "ooMia/oomia.github.io"
+    ],
+    "colorHint": "0E8A16",
+    "description": "Discovery and consumption of canonical content"
+  },
+  {
+    "name": "deployment",
+    "repositories": [
+      "ooMia/oomia.github.io"
+    ],
+    "colorHint": "B60205",
+    "description": "Live delivery and deployment behavior"
+  },
+  {
+    "name": "planning",
+    "repositories": [
+      "ooMia/oomia.github.io.knowledge"
+    ],
+    "colorHint": "5319E7",
+    "description": "Project planning, taxonomy, lifecycle, and operating model"
   }
 ]
