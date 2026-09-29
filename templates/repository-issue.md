@@ -4,9 +4,6 @@
 {
   "iteration": null,
   "workType": null,
-  "scope": [],
-  "objective": null,
-  "targetRelease": null,
   "status": "Todo"
 }
 -->
@@ -37,14 +34,11 @@
 - **Assignee:** <GitHub login>
 - **Project:** `Publishing Platform` (#11)
 - **Status:** `Todo`
-- **Iteration:** <예: `C1-W2`>
-- **Work Type:** <Feature | Experiment | Decision | Documentation | Maintenance>
-- **Scope:** <직접 바뀌는 scope만, 없으면 비움>
-- **Objective:** <주된 product outcome, 없으면 비움>
-- **Target Release:** <예: `1.0.0`, 없으면 비움>
-- **Milestone:** <repository milestone, 없으면 비움>
-- **Labels:** <실제 존재하는 label만>
-- **Relationships:** <Parent / Blocked by / Blocking>
+- **Iteration:** <예: `C1-W3`; Backlog이면 비움>
+- **Work Type:** <Feature | Fix | Refactor | Maintenance | Documentation | Investigation>
+- **Labels:** <registry의 실제 label만; 필요 없으면 비움>
+- **Milestone:** <repository milestone이 실제로 필요할 때만>
+- **Relationships:** <Parent / Blocked by / Blocking; 해당 없으면 비움>
 - **Development branch:** <활성화된 경우 실제 연결 branch; Draft이면 비움>
 
-작성·활성화 규칙: [Planning Model](../docs/planning-model.md). Seed 계약: [Project Orchestration](../docs/project-orchestration.md#project-seed).
+Work Type/Labels: [Work Classification](../docs/work-classification.md). Lifecycle/DoD: [Planning Model](../docs/planning-model.md). Seed 계약: [Project Orchestration](../docs/project-orchestration.md#project-seed).
