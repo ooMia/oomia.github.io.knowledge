@@ -8,8 +8,6 @@
 |---|---|
 | Release Goal | 릴리스가 달성할 제품 상태 한 문장. 기술·작업 나열은 Product Boundary로 분리 |
 | Product Boundary | 해당 릴리스에 필요한 capability 및 제외 범위. 구현 순서가 아님 |
-| Target Release | Item의 결과를 포함할 통합 제품 버전 |
-| Objective | 여러 릴리스에서 반복 발전시키는 제품 결과 축 |
 | Iteration Goal | 이번 Iteration에서 달라질 가장 중요한 상태 한 문장 |
 | Iteration Commitment | Goal을 위해 선택한 Item 집합. 대화 기준 통상 2–5개 |
 | Project Item | 독립적으로 검증 가능한 하나의 변화(delta) |
@@ -88,7 +86,8 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | 구현되는 기술 설계 | 책임 구현 레포의 docs; Knowledge는 원본 링크로 참조 |
 | 1.0 capability별 검증 스냅샷 | 이 레포의 [Implementation Map](implementation-map.md) |
 | Iteration Goal 및 회고 | GitHub Project Status Update |
-| Status / Iteration / Work Type 값 | GitHub Project fields |\n| Labels | repository-native GitHub labels; canonical registry는 `config/labels.json` |
+| Status / Iteration / Work Type 값 | GitHub Project fields |
+| Labels | repository-native GitHub labels; canonical registry는 `config/labels.json` |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
 | canonical content draft/working state | local Git working tree |
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
@@ -98,9 +97,7 @@ Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 [Arch
 
 ## 릴리스와 시간
 
-Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리거나 Objective마다 버전을 고정 배정하지 않는다. 대화에서 0.x → 1.0 → 1.x 발전을 제안했지만 실제 버전 목록과 공개 계약의 호환성 범위는 미결이다. Definition과 Readiness는 정의/검증 활동이며 Objective나 버전 값이 아니다.
-
-`System view`는 과거에 제안된 사용자 정의 View 이름이다. Scope별 변경 이력을 보는 `By Scope`라는 이름으로 정리하며, 실제 View가 생성되어 있다는 의미는 아니다.
+Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리지 않는다. release 목표와 readiness는 release 문서와 integration Evidence에서 관리하며 개별 Item의 필수 custom field로 복제하지 않는다.
 
 ## 생성과 검증의 피드백
 
