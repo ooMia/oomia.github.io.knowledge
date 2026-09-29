@@ -77,26 +77,21 @@ Project PAT은 이 job에 전달하지 않는다.
 
 close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
 
-## Orchestration labels
+## Labels
 
-Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` namespace를 사용한다.
+Issue/PR label은 Project field를 복제하지 않는 optional controlled tag다. orchestration 관련 작업에는 registry에 정의된 `orchestration` label을 사용한다. repository마다 필요한 label set은 다를 수 있다.
 
-- Project의 Status / Iteration / Work Type / Scope / Objective / Target Release를 label로 복제하지 않는다.
-- label은 automation, policy, cross-repository coordination, evidence처럼 Project field와 직교하는 횡단 관심사만 표시한다.
-- canonical registry는 [config/labels.json](../config/labels.json)이며 Issue-owning repository는 같은 이름과 의미를 사용한다.
+상세 기준은 [Work Classification](work-classification.md)과 [Labels](labels.md)을 따른다.
 
 ## Project seed
 
-새 Issue는 hidden JSON을 Project 초기화 seed로 가진다.
+새 Issue는 activation 초기값을 전달하는 hidden JSON을 가질 수 있다.
 
 ```md
 <!-- project-seed
 {
-  "iteration": "C1-W2",
+  "iteration": "C1-W3",
   "workType": "Feature",
-  "scope": ["Content", "Persistence"],
-  "objective": "Canonical Content",
-  "targetRelease": "1.0.0",
   "status": "Todo"
 }
 -->
@@ -107,9 +102,6 @@ Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` 
 - `status`
 - `iteration`
 - `workType`
-- `scope`
-- `objective`
-- `targetRelease`
 - `branch` — 기본 branch naming을 override할 때만 사용
 - `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
 
