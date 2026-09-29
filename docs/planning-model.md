@@ -15,11 +15,11 @@
 | Project Item | 독립적으로 검증 가능한 하나의 변화(delta) |
 | Repository Issue | 해당 결과를 실현하는 특정 레포의 구현 단위 |
 
-Objective와 capability 자체를 영구적으로 Done 처리하지 않는다. 이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 특정 릴리스가 요구하는 capability 수준은 릴리스 기준으로 검증한다.
+이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 릴리스 계획은 Project Item의 필수 분류 field로 복제하지 않고 release 문서와 실제 integration evidence에서 관리한다.
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. 시스템 변경에는 직접 바뀌는 Scope를 지정하고, 계획·분류 규칙 작업에는 Scope를 비울 수 있다. 구현 레포 이름이나 프레임워크만으로 제품 결과를 정의하지 않는다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 [Work Classification](work-classification.md)을 따른다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -88,7 +88,7 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | 구현되는 기술 설계 | 책임 구현 레포의 docs; Knowledge는 원본 링크로 참조 |
 | 1.0 capability별 검증 스냅샷 | 이 레포의 [Implementation Map](implementation-map.md) |
 | Iteration Goal 및 회고 | GitHub Project Status Update |
-| Status / Iteration / Work Type / Scope / Target Release / Objective 값 | GitHub Project fields |
+| Status / Iteration / Work Type 값 | GitHub Project fields |\n| Labels | repository-native GitHub labels; canonical registry는 `config/labels.json` |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
 | canonical content draft/working state | local Git working tree |
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
