@@ -21,6 +21,14 @@ PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남�
 
 Merge method는 공통 강제 정책으로 고정하지 않는다. 다만 작업 과정의 중간·정리 commit이 많이 쌓였고 최종 diff가 하나의 응집된 변화로 읽히는 PR은 **squash merge를 우선 권장**한다. 의미 있는 commit history 자체가 검토·추적 가치가 있으면 rebase 또는 merge를 선택할 수 있다.
 
+## Develop 단계 검증
+
+- `develop`에 병합하기 위한 작업 branch와 `develop` 자체의 검증은, 해당 repository가 제공하는 self-hosted develop gate를 우선 실행 주체로 사용한다.
+- Chat/Agent 세션에서 구현 완료를 판단할 때도 실제 `check/test/build` 명령을 이 self-hosted runner가 실행한 결과를 확인한다. 같은 명령을 GitHub-hosted runner에 중복시켜 Evidence만 바꾸는 방식은 기본값으로 삼지 않는다.
+- `develop → main` 승격은 별도 release/integration gate다. 이 단계에서는 repository가 정한 전체 OS·artifact 검증을 유지할 수 있다.
+- 특정 app이 POSIX/Linux 전용이면 Windows self-hosted runner에 억지로 옮기지 않는다. 해당 app의 별도 platform gate를 보조 검증으로 유지하거나, 필요할 때 같은 신뢰 경계의 Linux self-hosted runner를 추가한다.
+- self-hosted runner의 이름은 routing 조건이 아니다. workflow의 `runs-on`은 실제 runner label만 사용한다.
+
 ## Legacy refs와 archive
 
 - Git branch를 장기 지식 archive로 사용하지 않는다.
