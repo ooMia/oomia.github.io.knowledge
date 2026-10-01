@@ -11,22 +11,22 @@ Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷�
 
 # Context entry point
 
-Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflow·개발 기준·통합 목표·수용 기준·검수 연결을 관리하고, 구현 상세는 책임 repository의 문서와 코드가 소유한다.
+Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 **canonical entry point**다. 먼저 현재 작업 유형을 식별하고 아래 routing에서 필요한 최소 원본만 읽는다. 구현 상세는 책임 repository의 문서와 코드가 소유한다.
 
-이전 작업을 이어받을 때는 Current Handoff (`handoff/current.md`)를 먼저 읽는다. handoff는 현재 checkpoint이며 정책이나 최신 구현 완료의 증거가 아니다.
+이전 작업을 실제로 이어받거나 최근 checkpoint가 필요한 경우에만 Current Handoff (`handoff/current.md`)를 읽는다. handoff는 정책이나 최신 구현 완료의 증거가 아니다.
 
 ## 자주 하는 작업
 
 | 작업 | 참조 순서 |
 |---|---|
-| Issue 생성·수정·활성화 | Issue 형식 (`templates/repository-issue.md`) → lifecycle·DoD (`docs/planning-model.md`) → 필요한 Fields (`docs/fields.md`) / Labels (`docs/labels.md`) → activation·Project seed (`docs/project-orchestration.md`) |
+| Issue 생성·수정·활성화 | Issue 형식 (`templates/repository-issue.md`) → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Issue-linked branch (`docs/project-orchestration.md`) → 해당 Issue |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | Git Workflow (`docs/git-workflow.md`) → 통합 목표 (`docs/release-1.0.md`) → 검수 연결 (`docs/implementation-map.md`) |
 | 새 레포 scaffolding·디렉토리 역할 | Repository Design (`docs/repository-design.md`) → JS/TS이면 Development Toolchain (`docs/development-toolchain.md`) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
 | Knowledge 문서 수정 | 소유권 (`docs/repository-design.md`) → 해당 원본 → CONTRIBUTING (`CONTRIBUTING.md`) |
-| 계획·분류·완료 검토 | Planning (`docs/planning-model.md`) → Fields (`docs/fields.md`) → 실제 Item의 Outcome/AC/Evidence |
+| 계획·분류·완료 검토 | Work Classification (`docs/work-classification.md`) → Planning (`docs/planning-model.md`) → Fields (`docs/fields.md`) → 실제 Item의 Outcome/AC/Evidence |
 | 기록·발표·주간 회고 | Operating Rhythm (`docs/operating-rhythm.md`) → 실제 Project Status Update·Evidence |
 | 제품/cross-repository 미결 사항 | Open Questions (`docs/open-questions.md`) |
 
@@ -51,7 +51,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**다. 공통 workflo
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 문서를 만들지 않는다.
 
-설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며 현재 구현은 책임 레포에서 확인한다. 과거 상세 history는 `archive/main-before-cleanup-20260921`에서 필요할 때만 조사한다.
+설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며 현재 구현은 책임 레포에서 확인한다. 과거 설계 맥락은 Architecture Transition (`docs/architecture-transition.md`)과 owning repository의 migration 기록에서 추적한다.
 
 ## 프로젝트 협업·응답 원칙
 
@@ -108,7 +108,7 @@ optional Engine mutation → same Docs workspace
 - 과거 Issue·branch 구현 계획이 현재 owner code/docs보다 우선한다.
 - 기존 코드 투자량이 새 architecture의 책임 경계를 결정한다.
 
-과거 구현과 branch는 migration input/Evidence로 보존한다.
+과거 구현에서 지속 가치가 있는 결정·전환 맥락은 migration 기록과 Knowledge 문서에 흡수한다. 일회성 legacy/archive branch 자체는 장기 archive로 유지하지 않는다.
 
 ## 3. Cross-repository target
 
@@ -967,18 +967,16 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 |---|---|
 | Release Goal | 릴리스가 달성할 제품 상태 한 문장. 기술·작업 나열은 Product Boundary로 분리 |
 | Product Boundary | 해당 릴리스에 필요한 capability 및 제외 범위. 구현 순서가 아님 |
-| Target Release | Item의 결과를 포함할 통합 제품 버전 |
-| Objective | 여러 릴리스에서 반복 발전시키는 제품 결과 축 |
 | Iteration Goal | 이번 Iteration에서 달라질 가장 중요한 상태 한 문장 |
 | Iteration Commitment | Goal을 위해 선택한 Item 집합. 대화 기준 통상 2–5개 |
 | Project Item | 독립적으로 검증 가능한 하나의 변화(delta) |
 | Repository Issue | 해당 결과를 실현하는 특정 레포의 구현 단위 |
 
-Objective와 capability 자체를 영구적으로 Done 처리하지 않는다. 이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 특정 릴리스가 요구하는 capability 수준은 릴리스 기준으로 검증한다.
+이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 릴리스 계획은 Project Item의 필수 분류 field로 복제하지 않고 release 문서와 실제 integration evidence에서 관리한다.
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. 시스템 변경에는 직접 바뀌는 Scope를 지정하고, 계획·분류 규칙 작업에는 Scope를 비울 수 있다. 구현 레포 이름이나 프레임워크만으로 제품 결과를 정의하지 않는다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -1019,10 +1017,11 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
-- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리할 수 있다.
+- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리한다. 이 repository state는 draft storage fallback일 뿐 cancellation을 뜻하지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. 상세 책임과 write cutover는 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
 
 ## 완료 판정
 
@@ -1047,7 +1046,8 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | 구현되는 기술 설계 | 책임 구현 레포의 docs; Knowledge는 원본 링크로 참조 |
 | 1.0 capability별 검증 스냅샷 | 이 레포의 Implementation Map (`docs/implementation-map.md`) |
 | Iteration Goal 및 회고 | GitHub Project Status Update |
-| Status / Iteration / Work Type / Scope / Target Release / Objective 값 | GitHub Project fields |
+| Status / Iteration / Work Type 값 | GitHub Project fields |
+| Labels | repository-native GitHub labels; canonical registry는 `config/labels.json` |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
 | canonical content draft/working state | local Git working tree |
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
@@ -1057,9 +1057,7 @@ Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 Archi
 
 ## 릴리스와 시간
 
-Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리거나 Objective마다 버전을 고정 배정하지 않는다. 대화에서 0.x → 1.0 → 1.x 발전을 제안했지만 실제 버전 목록과 공개 계약의 호환성 범위는 미결이다. Definition과 Readiness는 정의/검증 활동이며 Objective나 버전 값이 아니다.
-
-`System view`는 과거에 제안된 사용자 정의 View 이름이다. Scope별 변경 이력을 보는 `By Scope`라는 이름으로 정리하며, 실제 View가 생성되어 있다는 의미는 아니다.
+Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리지 않는다. release 목표와 readiness는 release 문서와 integration Evidence에서 관리하며 개별 Item의 필수 custom field로 복제하지 않는다.
 
 ## 생성과 검증의 피드백
 
@@ -1079,24 +1077,21 @@ Chat/Agent workflow는 결과를 수정할 수 있는 인터페이스와 권한�
 
 # Project Fields
 
-상태: 대화 기준 설계 정의. 실제 GitHub 설정을 조회한 스냅샷이 아니다. 출처: S2 `138f8f89`, `178bf729`, `82ef0a72`; S3 `5a382a65`, `f4b8c972`, `f55d6e75`.
+Project #11은 repository가 이미 제공하는 1차 분류를 반복하지 않는다. custom field는 실제 운영과 통계에 지속적으로 쓰이는 최소 축만 유지한다.
 
-## 필드
+## Core fields
 
-| 이름 | 답하는 질문 | 설계상 형태 |
+| 이름 | 질문 | 규칙 |
 |---|---|---|
-| Status | 지금 어떤 실행 상태인가? | 단일 선택: Backlog / Todo / In progress / Done / Cancelled |
-| Iteration | 언제 수행하는가? | Iteration |
-| Work Type | 어떤 종류의 일인가? | 단일 선택 |
-| Scope | 완료를 위해 어떤 시스템 책임이 바뀌는가? | 다중 선택 방향 |
-| Target Release | 어느 통합 제품 버전에 포함할 것인가? | 단일 버전 값 |
-| Objective | 어떤 지속적인 제품 결과를 발전시키는가? | 주된 결과 하나 |
+| Status | 지금 어떤 실행 상태인가? | Backlog / Todo / In progress / Done / Cancelled |
+| Iteration | 언제 수행하는가? | committed 또는 historical work에 사용 |
+| Work Type | 왜 이 Issue가 존재하는가? | 정확히 하나. Work Classification (`docs/work-classification.md`) 기준 |
+
+Repository, Labels, Linked pull requests, Parent issue, Sub-issues progress, Assignees 등은 GitHub native field를 그대로 사용한다.
+
+Objective, Scope, Target Release, Deadline, Estimate custom field는 repository와 중복되거나 일관된 판정·운영 사용이 부족하여 Project taxonomy에서 제거한다.
 
 ## Status
-
-Field description:
-
-> Execution state of a Project item. Distinguish viable backlog, committed work, active work, completed outcomes, and intentionally cancelled work.
 
 | Option | Description |
 |---|---|
@@ -1106,62 +1101,36 @@ Field description:
 | Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
 | Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
 
-`Done`과 `Cancelled`의 lifecycle 의미는 Planning Model (`docs/planning-model.md`)을 따른다.
+Lifecycle 의미는 Planning Model (`docs/planning-model.md`)을 따른다.
 
-## Scope
 
-Field description:
-> Platform responsibilities that must change for the item's Outcome and Acceptance Criteria to be satisfied. Select only directly affected scopes, not incidental dependencies.
+## Completeness
 
-판정 질문: **해당 Scope의 동작이나 계약이 전혀 바뀌지 않아도 AC를 만족할 수 있는가?** 가능하면 선택하지 않는다. 하나가 기본이며 두 책임의 독립적인 변화가 필요하면 복수 선택한다. 3개 이상이면 Item 분해를 검토한다. 관련 레포, 사용 기술, 단순 의존성을 태그로 붙이지 않는다.
+Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필요한 값이 비어 있지 않게 한다**는 뜻이다.
 
-| Option | Description |
-|---|---|
-| Content | Article semantics, authoring, validation, and user/developer-facing content operations. |
-| Persistence | Durable storage, retrieval, consistency, revisioning, and lifecycle of canonical platform state, including Git-backed filesystem state. |
-| Automation | Agent-assisted, scheduled, triggered, or background execution of platform workflows. |
-| Publishing | Validation, revision finalization, and preparation of canonical content for reproducible Site consumption and release. |
-| Presentation | Rendering, composition, navigation, and visual presentation of publishable content as a user-facing site. |
-| Delivery | Propagation, deployment, and verification of validated site output in the live environment. |
+- `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
+- `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
+- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 fallback Draft는 일반적으로 비운다.
+- `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
+- `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
+- Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
 
-예: canonical docs commit을 만들기 전 validation/Git revision flow를 바꾸면 Publishing. workspace layout/frontmatter 저장 계약을 바꾸면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
-
-Project #11의 Scope는 6개 옵션을 사용하는 다중 선택 field로 운영한다.
-
-## Objective
-
-Field description:
-> Select the Objective that best represents the primary product outcome advanced by this item, based on its Outcome and Acceptance Criteria rather than its implementation area or dependencies.
-
-사용자가 최신 메시지에서 실제 필드에 존재한다고 제시한 5개 옵션을 유지한다. 아래 description은 그 메시지에 대한 최신 제안이다.
-
-| Option | Description |
-|---|---|
-| Authoring Experience | Select when the item improves how authors create, edit, inspect, or validate content through tooling or user-facing authoring interactions. |
-| Canonical Content | Select when the item improves the authoritative content model, persistence, lifecycle, or rules governing canonical state. |
-| Publishable Projection | Select when the item improves how canonical content is validated, finalized as a reproducible revision, and made consumable by the Site/publishing path. The historical field name does not imply that docs must be a generated projection. |
-| Extensible Workflow | Select when the item adds or improves supported extension points, custom logic, components, or automation in the publishing workflow. |
-| Live Delivery | Select when the item improves how publishable artifacts are rendered, deployed, or propagated to the live user-facing site. |
-
-Authoring Experience는 CMS UI에 한정되지 않는다. Obsidian, Fumadocs Editor, CLI, IDE, form, agent-assisted authoring도 포함할 수 있다. Scope는 책임 영역, Objective는 개선된 제품 결과이므로 서로 일대일 대응하지 않는다.
+자동화는 확실한 invariant만 materialize한다. historical Iteration, Work Type, Assignee처럼 문맥 해석이 필요한 값은 현재 Project state와 Evidence를 확인해 보정한다.
 
 ## Work Type
 
-이름은 사용자가 `Category`에서 `Work Type`으로 정정했다. 옵션은 대화에 나온 5개를 보존한다. 아래 짧은 선택 설명은 이번 정리에서 편집한 요약이며 실제 필드 description의 복제본이 아니다.
+GitHub Project option description은 아래 문구를 사용한다.
 
-| Option | 선택 기준 |
+| Option | Field description |
 |---|---|
-| Feature | 사용 가능한 새로운 기능 또는 동작 개선을 제공한다. |
-| Experiment | 불확실한 가설을 검증하고 관찰 결과를 남긴다. |
-| Decision | 대안을 판단하고 선택한 방향과 이유를 확정한다. |
-| Documentation | 지속적으로 참조할 지식과 설명을 정리한다. |
-| Maintenance | 기존 시스템의 유지·정비를 수행한다. |
+| Feature | Adds or extends an intended behavior or rule within the owning repository. |
+| Fix | Restores behavior or rules that were already intended or defined. |
+| Refactor | Changes internal structure while preserving intended observable or normative behavior. |
+| Maintenance | Keeps the repository healthy without a meaningful behavior, rule, or structural redesign. |
+| Documentation | Improves communication of existing behavior, rules, or knowledge without changing the normative state. |
+| Investigation | Reduces uncertainty through conclusions and evidence rather than making a production change the outcome. |
 
-작업의 주된 결과를 기준으로 하나를 고른다. `Validation` 추가는 대화에서 보류된 제안이며 기본 옵션에 넣지 않는다.
-
-## Target Release
-
-`1.0.0`처럼 통합 버전만 사용한다. `1.0 / Canonical Content` 같은 버전+목표 결합 값은 사용하지 않는다. 하나의 릴리스에 여러 Objective가 포함되고 동일 Objective가 여러 릴리스에서 발전할 수 있다. 실제 릴리스 옵션과 Item별 할당은 Project에서 확인한다.
+Work Type은 commit type이나 기술 영역이 아니다. 상세 decision tree, Investigation 승격 정책, few-shot examples는 Work Classification (`docs/work-classification.md`)을 따른다.
 
 <!-- END SOURCE: docs/fields.md -->
 
@@ -1192,6 +1161,22 @@ Issue lifecycle은 Planning Model (`docs/planning-model.md`), branch 생성·연
 PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남은 제한을 적는다. 여러 commit을 사용한 작업도 최종 diff가 하나의 검토 가능한 변화로 읽혀야 한다. merge 완료 전에는 완료된 integration으로 보고하지 않는다.
 
 Merge method는 공통 강제 정책으로 고정하지 않는다. 다만 작업 과정의 중간·정리 commit이 많이 쌓였고 최종 diff가 하나의 응집된 변화로 읽히는 PR은 **squash merge를 우선 권장**한다. 의미 있는 commit history 자체가 검토·추적 가치가 있으면 rebase 또는 merge를 선택할 수 있다.
+
+## 단계별 CI 검증
+
+- 작업 branch → `develop` PR과 `develop` push는 해당 repository의 self-hosted develop gate가 실제 `check/test/build`를 실행한다. 개발 단계에서는 빠른 피드백을 위해 formatting gate를 생략할 수 있다.
+- Chat/Agent 세션에서 develop 대상 구현 완료를 판단할 때도 이 self-hosted run을 실제 실행 검증으로 사용한다. 동일 검증을 GitHub-hosted runner에 중복시키는 것을 기본값으로 삼지 않는다.
+- `develop → main` promotion PR은 self-hosted runner를 사용하지 않는다. GitHub-hosted Ubuntu에서 formatting을 포함한 전체 static check, tests, build, artifact verification을 수행한다.
+- `main` push는 self-hosted runner를 사용하지 않는다. GitHub-hosted Ubuntu, macOS, Windows에서 동일한 전체 검증을 수행해 최종 cross-platform regression을 확인한다.
+- 특정 app이 POSIX/Linux 전용이면 Windows self-hosted runner에 억지로 옮기지 않는다. 해당 app의 별도 platform gate를 보조 검증으로 유지하거나, 필요할 때 같은 신뢰 경계의 Linux self-hosted runner를 추가한다.
+- self-hosted runner의 이름은 routing 조건이 아니다. workflow의 `runs-on`은 실제 runner label만 사용한다.
+
+## Legacy refs와 archive
+
+- Git branch를 장기 지식 archive로 사용하지 않는다.
+- legacy/archive/backup branch의 지속 가치가 결정·설계 맥락 수준이면 현재 Knowledge 또는 owning repository의 migration 문서에 흡수한 뒤 ref를 제거한다.
+- 원본 commit graph 자체가 재현성·forensic Evidence로 필요한 경우에만 명시적 tag로 보존한다.
+- 일회성 migration safety ref는 대체 경로와 지속 문서가 확인되면 제거한다.
 
 ## 정책 적용과 기존 상태
 
@@ -1262,7 +1247,7 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 - secret: `PROJECT_TOKEN`
 - Project: `ooMia/projects/11`
-- 역할: Item 추가 및 Status / Iteration / Work Type / Scope / Objective / Target Release 초기화
+- 역할: Item 추가 및 Status / Iteration / Work Type 초기화
 - field ID와 option ID는 runtime에 이름으로 조회
 - 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
 
@@ -1279,32 +1264,56 @@ Project PAT은 이 job에 전달하지 않는다.
 
 ### Lifecycle synchronization boundary
 
-현재 automation은 **activation 초기화**만 소유한다. trigger는 `opened`, `reopened`, manual `workflow_dispatch`이며 Issue `closed` 이벤트를 Project Status에 반영하지 않는다.
+Issue activation workflow와 장기 lifecycle reconciliation은 서로 다른 책임을 가진다.
 
-따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
+- repository의 `issue-activated.yml`은 **activation 초기화**를 소유한다: Project Item 등록, 초기 `Status / Iteration / Work Type`, Issue-linked Development branch.
+- Engine의 `apps/github-automation` webhook runtime은 activation 이후 **Issue lifecycle과 Project Status invariant**를 reconcile한다.
+- `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- webhook runtime은 Work Type, Assignee, historical Iteration처럼 해석이 필요한 field를 추론해 채우지 않는다. 이런 값은 Issue Outcome/Evidence와 실제 수행 이력으로 확인 가능한 경우에만 baseline normalization에서 보정한다.
 
-close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
+현재 canonical lifecycle invariant는 다음과 같다.
 
-## Orchestration labels
+| Repository Issue / Project 상태 | Reconciliation |
+|---|---|
+| fallback Draft: `draft:` + `closed/not_planned` | automation 제외; 유효한 candidate이면 Project `Backlog` 유지 |
+| ordinary `closed/completed` | `Done` |
+| ordinary `closed/not_planned` 또는 `duplicate` | `Cancelled` |
+| open + Iteration 없음 | `Backlog` |
+| open + Iteration 있음 + Backlog/empty | `Todo` |
+| `Todo` / `In progress`에서 Iteration 제거 | `Backlog` |
+| cancelled Issue가 reopen됨 | `Backlog`, stale Iteration 제거 |
+| 새로운 Development PR link 관찰 | `In progress`; lifecycle event가 아닌 경우 필요한 recovery만 수행 |
 
-Orchestration 관련 Issue/PR label은 Labels (`docs/labels.md`)의 `orchestration:*` namespace를 사용한다.
+`Done` 상태의 open Issue는 자동으로 되돌리지 않는다. unknown Status/close reason 또는 concurrent Project change는 임의로 덮어쓰지 않고 실패로 남긴다.
 
-- Project의 Status / Iteration / Work Type / Scope / Objective / Target Release를 label로 복제하지 않는다.
-- label은 automation, policy, cross-repository coordination, evidence처럼 Project field와 직교하는 횡단 관심사만 표시한다.
-- canonical registry는 config/labels.json (`config/labels.json`)이며 Issue-owning repository는 같은 이름과 의미를 사용한다.
+### Webhook write cutover
+
+Webhook runtime은 기본적으로 read-only이며 `GITHUB_AUTOMATION_APPLY=true`가 명시적 write switch다. write mode를 일반 개발 flow에 넣기 전에 다음 순서를 따른다.
+
+1. 현재 Project baseline의 명백한 field/status drift를 먼저 정리한다.
+2. 검증된 Engine revision 또는 그 merge descendant를 사용한다.
+3. `APPLY=false`에서 전체 reconciliation 결과가 예상 invariant와 일치하는지 확인한다.
+4. applying worker는 하나만 실행하고 `APPLY=true`로 canary를 수행한다.
+5. 첫 mutation 결과를 Project read로 재검증한 뒤 일반 `./dev` flow에 포함한다.
+6. 이상이 있으면 즉시 `GITHUB_AUTOMATION_APPLY=false`로 복귀하고 원인을 별도 Fix/Investigation으로 분리한다.
+
+현재 write-cutover의 선행 Evidence는 Engine #58 integration, #59 real read-only validation, #60 FSM alignment다. runtime 구현 상세와 실제 process/env 계약은 Engine repository가 소유한다.
+
+## Labels
+
+Issue/PR label은 Project field를 복제하지 않는 optional controlled tag다. orchestration 관련 작업에는 registry에 정의된 `orchestration` label을 사용한다. repository마다 필요한 label set은 다를 수 있다.
+
+상세 기준은 Work Classification (`docs/work-classification.md`)과 Labels (`docs/labels.md`)을 따른다.
 
 ## Project seed
 
-새 Issue는 hidden JSON을 Project 초기화 seed로 가진다.
+새 Issue는 activation 초기값을 전달하는 hidden JSON을 가질 수 있다.
 
 ```md
 <!-- project-seed
 {
-  "iteration": "C1-W2",
+  "iteration": "C1-W3",
   "workType": "Feature",
-  "scope": ["Content", "Persistence"],
-  "objective": "Canonical Content",
-  "targetRelease": "1.0.0",
   "status": "Todo"
 }
 -->
@@ -1315,9 +1324,6 @@ Orchestration 관련 Issue/PR label은 Labels (`docs/labels.md`)의 `orchestrati
 - `status`
 - `iteration`
 - `workType`
-- `scope`
-- `objective`
-- `targetRelease`
 - `branch` — 기본 branch naming을 override할 때만 사용
 - `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
 
@@ -1354,32 +1360,27 @@ PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상�
 
 # GitHub labels
 
-GitHub labels는 Project #11의 필드 체계를 복제하지 않고, Issue/PR을 여러 repository에서 빠르게 찾기 위한 **횡단 관심사 metadata**로만 사용한다.
+Labels는 Project Work Type을 보조하는 **optional controlled tags**다.
 
-## 원칙
+- Repository: 어디의 작업인가
+- Work Type: 왜 이 Issue가 존재하는가
+- Labels: 무엇에 관한 작업인가
 
-- Status / Iteration / Work Type / Scope / Objective / Target Release는 GitHub Project가 SoT다.
-- label은 Project field로 자연스럽게 표현되지 않는 운영 의미만 담는다.
-- orchestration 전용 label은 `orchestration:*` namespace를 사용한다.
-- 하나의 Issue/PR에 여러 orchestration label을 함께 붙일 수 있다.
-- Issue 대상 repository의 범위는 Project Orchestration (`docs/project-orchestration.md`)이 소유한다.
+따라서 Feature/Fix/Refactor/Maintenance/Documentation/Investigation을 label로 복제하지 않는다. `experimental`도 현재는 만들지 않는다. 실험적인 구현 방식과 Investigation Outcome을 구분하고, 제품 maturity가 실제 contract/workflow를 바꾸는 시점에만 별도 정책을 검토한다.
 
 ## Registry
 
-label의 **이름과 의미**는 config/labels.json (`config/labels.json`)을 canonical source로 사용한다. 색상은 UI 구분을 위한 표시 힌트이며 repository별 실제 색과 달라도 semantics가 바뀌지 않는다.
+label의 이름·적용 repository·의미는 config/labels.json (`config/labels.json`)을 canonical source로 사용한다. label은 repository-specific일 수 있으며 모든 repository가 같은 label set을 가질 필요가 없다.
 
-## 사용 기준
+새 label 생성 기준, granularity, negative examples는 Work Classification (`docs/work-classification.md`)을 따른다.
 
-주된 Outcome이 자동화 구현이면 `orchestration:automation`을 붙인다. 여러 repository에 걸치면 `orchestration:cross-repo`를 추가한다. 정책 자체를 변경할 때만 `orchestration:policy`, 검증 자체가 독립적인 Outcome일 때만 `orchestration:evidence`를 사용한다.
+## Usage
 
-예를 들어 repository Issue activation을 구축하는 coordination Issue에는 다음 조합이 적합하다.
-
-```text
-orchestration:automation
-orchestration:cross-repo
-```
-
-단순히 Acceptance Criteria에 검증 단계가 있다는 이유만으로 `orchestration:evidence`를 추가하지 않는다.
+- label은 0개여도 정상이다.
+- 실제 반복 검색/filtering 가치가 있을 때만 붙인다.
+- 보통 domain/component 1개 + cross-cutting concern 0–2개면 충분하다.
+- registry에 없는 keyword를 Agent가 즉석에서 label로 만들지 않는다.
+- 기존 label이 Work Type이나 제거된 Project field를 복제하면 migration 시 제거한다.
 
 <!-- END SOURCE: docs/labels.md -->
 
@@ -1579,7 +1580,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## Historical reference
 
-삭제된 과거 설계와 provenance가 필요하면 Git history 또는 `archive/main-before-cleanup-20260921` branch를 조사한다.
+과거 설계의 지속 가치가 있는 맥락은 전환 coordination (`docs/architecture-transition.md`)과 owning repository의 migration 기록에서 추적한다. legacy/archive/backup branch 자체는 장기 지식 archive로 유지하지 않는다.
 
 <!-- END SOURCE: docs/decisions.md -->
 
