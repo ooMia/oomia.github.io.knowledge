@@ -1351,6 +1351,8 @@ branch는 Issue 활성화 전 미리 만들지 않는다. GitHub `createLinkedBr
 
 PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상태를 확인하려면 Actions UI에서 `Issue activation` workflow를 수동 실행하고 `issue_number`를 전달한다.
 
+Project field를 GitHub CLI로 직접 보정할 때 field type에 맞는 ID 기반 option을 사용한다. 특히 **Iteration은 이름으로 설정할 수 없으며 `--iteration-id`를 사용한다.** 현재 iteration title을 CLI 인자 값으로 추론하거나 `--field Iteration --value <title>` 형태를 만들지 않는다. 필요한 field/iteration ID는 Project metadata를 먼저 조회해 확인한다.
+
 <!-- END SOURCE: docs/project-orchestration.md -->
 
 
