@@ -8,18 +8,16 @@
 |---|---|
 | Release Goal | 릴리스가 달성할 제품 상태 한 문장. 기술·작업 나열은 Product Boundary로 분리 |
 | Product Boundary | 해당 릴리스에 필요한 capability 및 제외 범위. 구현 순서가 아님 |
-| Target Release | Item의 결과를 포함할 통합 제품 버전 |
-| Objective | 여러 릴리스에서 반복 발전시키는 제품 결과 축 |
 | Iteration Goal | 이번 Iteration에서 달라질 가장 중요한 상태 한 문장 |
 | Iteration Commitment | Goal을 위해 선택한 Item 집합. 대화 기준 통상 2–5개 |
 | Project Item | 독립적으로 검증 가능한 하나의 변화(delta) |
 | Repository Issue | 해당 결과를 실현하는 특정 레포의 구현 단위 |
 
-Objective와 capability 자체를 영구적으로 Done 처리하지 않는다. 이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 특정 릴리스가 요구하는 capability 수준은 릴리스 기준으로 검증한다.
+이전 Item을 다음 버전용으로 복제하지 말고 새로 달라지는 결과만 Item으로 만든다. 릴리스 계획은 Project Item의 필수 분류 field로 복제하지 않고 release 문서와 실제 integration evidence에서 관리한다.
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. 시스템 변경에는 직접 바뀌는 Scope를 지정하고, 계획·분류 규칙 작업에는 Scope를 비울 수 있다. 구현 레포 이름이나 프레임워크만으로 제품 결과를 정의하지 않는다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 [Work Classification](work-classification.md)을 따른다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -60,10 +58,11 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
-- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리할 수 있다.
+- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리한다. 이 repository state는 draft storage fallback일 뿐 cancellation을 뜻하지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. 상세 책임과 write cutover는 [Project Orchestration](project-orchestration.md#lifecycle-synchronization-boundary)을 따른다.
 
 ## 완료 판정
 
@@ -88,7 +87,8 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | 구현되는 기술 설계 | 책임 구현 레포의 docs; Knowledge는 원본 링크로 참조 |
 | 1.0 capability별 검증 스냅샷 | 이 레포의 [Implementation Map](implementation-map.md) |
 | Iteration Goal 및 회고 | GitHub Project Status Update |
-| Status / Iteration / Work Type / Scope / Target Release / Objective 값 | GitHub Project fields |
+| Status / Iteration / Work Type 값 | GitHub Project fields |
+| Labels | repository-native GitHub labels; canonical registry는 `config/labels.json` |
 | Outcome / AC / Evidence | 실제 Project Item 또는 Repository Issue |
 | canonical content draft/working state | local Git working tree |
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
@@ -98,9 +98,7 @@ Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 [Arch
 
 ## 릴리스와 시간
 
-Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리거나 Objective마다 버전을 고정 배정하지 않는다. 대화에서 0.x → 1.0 → 1.x 발전을 제안했지만 실제 버전 목록과 공개 계약의 호환성 범위는 미결이다. Definition과 Readiness는 정의/검증 활동이며 Objective나 버전 값이 아니다.
-
-`System view`는 과거에 제안된 사용자 정의 View 이름이다. Scope별 변경 이력을 보는 `By Scope`라는 이름으로 정리하며, 실제 View가 생성되어 있다는 의미는 아니다.
+Iteration과 제품 버전은 별개다. 매주 자동으로 버전을 올리지 않는다. release 목표와 readiness는 release 문서와 integration Evidence에서 관리하며 개별 Item의 필수 custom field로 복제하지 않는다.
 
 ## 생성과 검증의 피드백
 

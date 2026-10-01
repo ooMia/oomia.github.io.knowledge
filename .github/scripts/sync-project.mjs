@@ -64,7 +64,8 @@ async function fetchProject(token, owner, number) {
             nodes {
               __typename
               ... on ProjectV2FieldCommon { id name dataType }
-              ... on ProjectV2SingleSelectField { options { id name } }              ... on ProjectV2IterationField {
+              ... on ProjectV2SingleSelectField { options { id name } }
+              ... on ProjectV2IterationField {
                 configuration {
                   iterations { id title }
                   completedIterations { id title }

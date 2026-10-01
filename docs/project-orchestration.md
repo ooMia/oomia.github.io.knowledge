@@ -54,7 +54,7 @@ workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
 
 - secret: `PROJECT_TOKEN`
 - Project: `ooMia/projects/11`
-- 역할: Item 추가 및 Status / Iteration / Work Type / Scope / Objective / Target Release 초기화
+- 역할: Item 추가 및 Status / Iteration / Work Type 초기화
 - field ID와 option ID는 runtime에 이름으로 조회
 - 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
 
@@ -71,32 +71,56 @@ Project PAT은 이 job에 전달하지 않는다.
 
 ### Lifecycle synchronization boundary
 
-현재 automation은 **activation 초기화**만 소유한다. trigger는 `opened`, `reopened`, manual `workflow_dispatch`이며 Issue `closed` 이벤트를 Project Status에 반영하지 않는다.
+Issue activation workflow와 장기 lifecycle reconciliation은 서로 다른 책임을 가진다.
 
-따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
+- repository의 `issue-activated.yml`은 **activation 초기화**를 소유한다: Project Item 등록, 초기 `Status / Iteration / Work Type`, Issue-linked Development branch.
+- Engine의 `apps/github-automation` webhook runtime은 activation 이후 **Issue lifecycle과 Project Status invariant**를 reconcile한다.
+- `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- webhook runtime은 Work Type, Assignee, historical Iteration처럼 해석이 필요한 field를 추론해 채우지 않는다. 이런 값은 Issue Outcome/Evidence와 실제 수행 이력으로 확인 가능한 경우에만 baseline normalization에서 보정한다.
 
-close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
+현재 canonical lifecycle invariant는 다음과 같다.
 
-## Orchestration labels
+| Repository Issue / Project 상태 | Reconciliation |
+|---|---|
+| fallback Draft: `draft:` + `closed/not_planned` | automation 제외; 유효한 candidate이면 Project `Backlog` 유지 |
+| ordinary `closed/completed` | `Done` |
+| ordinary `closed/not_planned` 또는 `duplicate` | `Cancelled` |
+| open + Iteration 없음 | `Backlog` |
+| open + Iteration 있음 + Backlog/empty | `Todo` |
+| `Todo` / `In progress`에서 Iteration 제거 | `Backlog` |
+| cancelled Issue가 reopen됨 | `Backlog`, stale Iteration 제거 |
+| 새로운 Development PR link 관찰 | `In progress`; lifecycle event가 아닌 경우 필요한 recovery만 수행 |
 
-Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` namespace를 사용한다.
+`Done` 상태의 open Issue는 자동으로 되돌리지 않는다. unknown Status/close reason 또는 concurrent Project change는 임의로 덮어쓰지 않고 실패로 남긴다.
 
-- Project의 Status / Iteration / Work Type / Scope / Objective / Target Release를 label로 복제하지 않는다.
-- label은 automation, policy, cross-repository coordination, evidence처럼 Project field와 직교하는 횡단 관심사만 표시한다.
-- canonical registry는 [config/labels.json](../config/labels.json)이며 Issue-owning repository는 같은 이름과 의미를 사용한다.
+### Webhook write cutover
+
+Webhook runtime은 기본적으로 read-only이며 `GITHUB_AUTOMATION_APPLY=true`가 명시적 write switch다. write mode를 일반 개발 flow에 넣기 전에 다음 순서를 따른다.
+
+1. 현재 Project baseline의 명백한 field/status drift를 먼저 정리한다.
+2. 검증된 Engine revision 또는 그 merge descendant를 사용한다.
+3. `APPLY=false`에서 전체 reconciliation 결과가 예상 invariant와 일치하는지 확인한다.
+4. applying worker는 하나만 실행하고 `APPLY=true`로 canary를 수행한다.
+5. 첫 mutation 결과를 Project read로 재검증한 뒤 일반 `./dev` flow에 포함한다.
+6. 이상이 있으면 즉시 `GITHUB_AUTOMATION_APPLY=false`로 복귀하고 원인을 별도 Fix/Investigation으로 분리한다.
+
+현재 write-cutover의 선행 Evidence는 Engine #58 integration, #59 real read-only validation, #60 FSM alignment다. runtime 구현 상세와 실제 process/env 계약은 Engine repository가 소유한다.
+
+## Labels
+
+Issue/PR label은 Project field를 복제하지 않는 optional controlled tag다. orchestration 관련 작업에는 registry에 정의된 `orchestration` label을 사용한다. repository마다 필요한 label set은 다를 수 있다.
+
+상세 기준은 [Work Classification](work-classification.md)과 [Labels](labels.md)을 따른다.
 
 ## Project seed
 
-새 Issue는 hidden JSON을 Project 초기화 seed로 가진다.
+새 Issue는 activation 초기값을 전달하는 hidden JSON을 가질 수 있다.
 
 ```md
 <!-- project-seed
 {
-  "iteration": "C1-W2",
+  "iteration": "C1-W3",
   "workType": "Feature",
-  "scope": ["Content", "Persistence"],
-  "objective": "Canonical Content",
-  "targetRelease": "1.0.0",
   "status": "Todo"
 }
 -->
@@ -107,9 +131,6 @@ Orchestration 관련 Issue/PR label은 [Labels](labels.md)의 `orchestration:*` 
 - `status`
 - `iteration`
 - `workType`
-- `scope`
-- `objective`
-- `targetRelease`
 - `branch` — 기본 branch naming을 override할 때만 사용
 - `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
 
@@ -136,3 +157,5 @@ branch는 Issue 활성화 전 미리 만들지 않는다. GitHub `createLinkedBr
 ## Manual replay
 
 PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상태를 확인하려면 Actions UI에서 `Issue activation` workflow를 수동 실행하고 `issue_number`를 전달한다.
+
+Project field를 GitHub CLI로 직접 보정할 때 field type에 맞는 ID 기반 option을 사용한다. 특히 **Iteration은 이름으로 설정할 수 없으며 `--iteration-id`를 사용한다.** 현재 iteration title을 CLI 인자 값으로 추론하거나 `--field Iteration --value <title>` 형태를 만들지 않는다. 필요한 field/iteration ID는 Project metadata를 먼저 조회해 확인한다.

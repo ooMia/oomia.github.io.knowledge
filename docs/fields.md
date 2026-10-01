@@ -1,23 +1,20 @@
 # Project Fields
 
-상태: 대화 기준 설계 정의. 실제 GitHub 설정을 조회한 스냅샷이 아니다. 출처: S2 `138f8f89`, `178bf729`, `82ef0a72`; S3 `5a382a65`, `f4b8c972`, `f55d6e75`.
+Project #11은 repository가 이미 제공하는 1차 분류를 반복하지 않는다. custom field는 실제 운영과 통계에 지속적으로 쓰이는 최소 축만 유지한다.
 
-## 필드
+## Core fields
 
-| 이름 | 답하는 질문 | 설계상 형태 |
+| 이름 | 질문 | 규칙 |
 |---|---|---|
-| Status | 지금 어떤 실행 상태인가? | 단일 선택: Backlog / Todo / In progress / Done / Cancelled |
-| Iteration | 언제 수행하는가? | Iteration |
-| Work Type | 어떤 종류의 일인가? | 단일 선택 |
-| Scope | 완료를 위해 어떤 시스템 책임이 바뀌는가? | 다중 선택 방향 |
-| Target Release | 어느 통합 제품 버전에 포함할 것인가? | 단일 버전 값 |
-| Objective | 어떤 지속적인 제품 결과를 발전시키는가? | 주된 결과 하나 |
+| Status | 지금 어떤 실행 상태인가? | Backlog / Todo / In progress / Done / Cancelled |
+| Iteration | 언제 수행하는가? | committed 또는 historical work에 사용 |
+| Work Type | 왜 이 Issue가 존재하는가? | 정확히 하나. [Work Classification](work-classification.md) 기준 |
+
+Repository, Labels, Linked pull requests, Parent issue, Sub-issues progress, Assignees 등은 GitHub native field를 그대로 사용한다.
+
+Objective, Scope, Target Release, Deadline, Estimate custom field는 repository와 중복되거나 일관된 판정·운영 사용이 부족하여 Project taxonomy에서 제거한다.
 
 ## Status
-
-Field description:
-
-> Execution state of a Project item. Distinguish viable backlog, committed work, active work, completed outcomes, and intentionally cancelled work.
 
 | Option | Description |
 |---|---|
@@ -27,59 +24,33 @@ Field description:
 | Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
 | Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
 
-`Done`과 `Cancelled`의 lifecycle 의미는 [Planning Model](planning-model.md)을 따른다.
+Lifecycle 의미는 [Planning Model](planning-model.md)을 따른다.
 
-## Scope
 
-Field description:
-> Platform responsibilities that must change for the item's Outcome and Acceptance Criteria to be satisfied. Select only directly affected scopes, not incidental dependencies.
+## Completeness
 
-판정 질문: **해당 Scope의 동작이나 계약이 전혀 바뀌지 않아도 AC를 만족할 수 있는가?** 가능하면 선택하지 않는다. 하나가 기본이며 두 책임의 독립적인 변화가 필요하면 복수 선택한다. 3개 이상이면 Item 분해를 검토한다. 관련 레포, 사용 기술, 단순 의존성을 태그로 붙이지 않는다.
+Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필요한 값이 비어 있지 않게 한다**는 뜻이다.
 
-| Option | Description |
-|---|---|
-| Content | Article semantics, authoring, validation, and user/developer-facing content operations. |
-| Persistence | Durable storage, retrieval, consistency, revisioning, and lifecycle of canonical platform state, including Git-backed filesystem state. |
-| Automation | Agent-assisted, scheduled, triggered, or background execution of platform workflows. |
-| Publishing | Validation, revision finalization, and preparation of canonical content for reproducible Site consumption and release. |
-| Presentation | Rendering, composition, navigation, and visual presentation of publishable content as a user-facing site. |
-| Delivery | Propagation, deployment, and verification of validated site output in the live environment. |
+- `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
+- `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
+- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 fallback Draft는 일반적으로 비운다.
+- `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
+- `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
+- Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
 
-예: canonical docs commit을 만들기 전 validation/Git revision flow를 바꾸면 Publishing. workspace layout/frontmatter 저장 계약을 바꾸면 Content + Persistence. 기존 build 결과를 배포하는 경로만 바꾸면 Delivery. 단순 수동 CLI 호출은 자동으로 Automation에 해당하지 않는다.
-
-Project #11의 Scope는 6개 옵션을 사용하는 다중 선택 field로 운영한다.
-
-## Objective
-
-Field description:
-> Select the Objective that best represents the primary product outcome advanced by this item, based on its Outcome and Acceptance Criteria rather than its implementation area or dependencies.
-
-사용자가 최신 메시지에서 실제 필드에 존재한다고 제시한 5개 옵션을 유지한다. 아래 description은 그 메시지에 대한 최신 제안이다.
-
-| Option | Description |
-|---|---|
-| Authoring Experience | Select when the item improves how authors create, edit, inspect, or validate content through tooling or user-facing authoring interactions. |
-| Canonical Content | Select when the item improves the authoritative content model, persistence, lifecycle, or rules governing canonical state. |
-| Publishable Projection | Select when the item improves how canonical content is validated, finalized as a reproducible revision, and made consumable by the Site/publishing path. The historical field name does not imply that docs must be a generated projection. |
-| Extensible Workflow | Select when the item adds or improves supported extension points, custom logic, components, or automation in the publishing workflow. |
-| Live Delivery | Select when the item improves how publishable artifacts are rendered, deployed, or propagated to the live user-facing site. |
-
-Authoring Experience는 CMS UI에 한정되지 않는다. Obsidian, Fumadocs Editor, CLI, IDE, form, agent-assisted authoring도 포함할 수 있다. Scope는 책임 영역, Objective는 개선된 제품 결과이므로 서로 일대일 대응하지 않는다.
+자동화는 확실한 invariant만 materialize한다. historical Iteration, Work Type, Assignee처럼 문맥 해석이 필요한 값은 현재 Project state와 Evidence를 확인해 보정한다.
 
 ## Work Type
 
-이름은 사용자가 `Category`에서 `Work Type`으로 정정했다. 옵션은 대화에 나온 5개를 보존한다. 아래 짧은 선택 설명은 이번 정리에서 편집한 요약이며 실제 필드 description의 복제본이 아니다.
+GitHub Project option description은 아래 문구를 사용한다.
 
-| Option | 선택 기준 |
+| Option | Field description |
 |---|---|
-| Feature | 사용 가능한 새로운 기능 또는 동작 개선을 제공한다. |
-| Experiment | 불확실한 가설을 검증하고 관찰 결과를 남긴다. |
-| Decision | 대안을 판단하고 선택한 방향과 이유를 확정한다. |
-| Documentation | 지속적으로 참조할 지식과 설명을 정리한다. |
-| Maintenance | 기존 시스템의 유지·정비를 수행한다. |
+| Feature | Adds or extends an intended behavior or rule within the owning repository. |
+| Fix | Restores behavior or rules that were already intended or defined. |
+| Refactor | Changes internal structure while preserving intended observable or normative behavior. |
+| Maintenance | Keeps the repository healthy without a meaningful behavior, rule, or structural redesign. |
+| Documentation | Improves communication of existing behavior, rules, or knowledge without changing the normative state. |
+| Investigation | Reduces uncertainty through conclusions and evidence rather than making a production change the outcome. |
 
-작업의 주된 결과를 기준으로 하나를 고른다. `Validation` 추가는 대화에서 보류된 제안이며 기본 옵션에 넣지 않는다.
-
-## Target Release
-
-`1.0.0`처럼 통합 버전만 사용한다. `1.0 / Canonical Content` 같은 버전+목표 결합 값은 사용하지 않는다. 하나의 릴리스에 여러 Objective가 포함되고 동일 Objective가 여러 릴리스에서 발전할 수 있다. 실제 릴리스 옵션과 Item별 할당은 Project에서 확인한다.
+Work Type은 commit type이나 기술 영역이 아니다. 상세 decision tree, Investigation 승격 정책, few-shot examples는 [Work Classification](work-classification.md)을 따른다.
