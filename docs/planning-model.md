@@ -62,6 +62,7 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. 상세 책임과 write cutover는 [Project Orchestration](project-orchestration.md#lifecycle-synchronization-boundary)을 따른다.
 
 ## 완료 판정
 
