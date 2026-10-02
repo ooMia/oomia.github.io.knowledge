@@ -2,7 +2,7 @@
 
 GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.
 Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
-상대 링크는 원본 레포 기준입니다. 템플릿은 별도로 참조합니다. 과거 상세 history는 archive/main-before-cleanup-20260921 branch에 보존됩니다.
+상대 링크는 원본 레포 기준입니다. 템플릿은 별도로 참조합니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.
 
 
 ---
@@ -959,8 +959,6 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 # Planning Model
 
-상태: 사용자 제시 규칙에 최신 필드 분리와 delta 모델을 반영. 출처: S2 `d7815342`, `4a49654f`; S3 `5a382a65`, `924e880a`.
-
 ## 계획 단위
 
 | 개념 | 정의 / 작성 규칙 |
@@ -1141,48 +1139,52 @@ Work Type은 commit type이나 기술 영역이 아니다. 상세 decision tree,
 
 # Git Workflow
 
-모든 repository가 공유하는 branch·PR·release 전략의 단일 원본이다. 각 레포에 같은 정책을 다시 작성하지 않는다.
+Publishing Platform repository가 공유하는 **변경 관리 invariant**의 단일 원본이다. 구체적인 branch 이름, integration topology, runner 선택, CI matrix, release trigger는 각 repository의 역할·보안·비용·platform 제약에 따라 owning repository가 정의한다.
 
-## Branch와 통합
+## 공통 통합 원칙
 
-- default branch는 `main`, 개발 통합 branch는 `develop`이다.
-- 한 번의 작은 변화가 아니라면 Issue별 작업 branch를 `develop`에서 만든다.
-- 작업 branch의 변경은 PR로 검토해 `develop`에 통합한다.
-- major/minor release마다 `develop`에서 `main`으로 PR을 열어 merge한다.
-- 작업 branch에서 `main`으로 직접 PR을 보내 공통 통합 단계를 생략하지 않는다.
-- repository에서 **Automatically delete head branches**를 사용하면 `develop → main` promotion PR의 head인 장기 `develop`까지 삭제될 수 있다. promotion 직후 `develop`이 사라졌다면 merged `main`에서 즉시 같은 이름의 `develop`을 복구한 뒤 다음 Issue activation을 진행한다. 장기 integration branch를 보호하는 repository 설정이 있다면 그 설정을 우선한다.
+- 각 repository는 durable/canonical branch와 필요한 integration path를 명확히 정의한다. `main`/`develop` 같은 이름을 모든 repository에 공통으로 강제하지 않는다.
+- 한 번의 작은 변화가 아닌 repository 작업은 해당 repository가 Issue orchestration 대상이면 Issue-linked branch에서 수행한다.
+- 변경은 owning repository가 정의한 PR/review/integration 경로를 거쳐 canonical state에 반영한다. repository가 정한 integration 단계나 release gate를 임의로 우회하지 않는다.
+- branch topology와 release promotion 방식은 repository 역할에 맞게 결정한다. 콘텐츠 remote, implementation repository, coordination repository가 동일한 topology를 가질 필요는 없다.
+- merge method는 공통 강제 정책으로 고정하지 않는다. 최종 diff와 history의 검토 가치에 따라 owning repository 또는 해당 PR에서 선택한다.
 
-작은 변경이라는 이유만으로 `main` 직접 쓰기를 허용한다고 해석하지 않는다. 작은 변경의 직접 반영 대상, patch/hotfix 경로, merge 방식은 아직 확정하지 않았으며 필요해질 때 사용자에게 확인한다. 일반 작업은 위 PR 경로로 진행할 수 있다.
+문서를 수정했다고 실제 branch protection, workflow, repository setting까지 변경된 것으로 간주하지 않는다. 현재 동작은 owning repository의 live workflow/settings를 확인한다.
 
 ## Issue branch와 PR
 
-Issue lifecycle은 Planning Model (`docs/planning-model.md`), branch 생성·연결·이름의 자동화 계약은 Project Orchestration (`docs/project-orchestration.md`)이 소유한다.
+Issue lifecycle은 Planning Model (`docs/planning-model.md`), 공통 activation semantics와 Project 연결은 Project Orchestration (`docs/project-orchestration.md`)이 소유한다. 실제 branch base, workflow file, script, token/permission 구성은 실행 repository가 소유한다.
 
 PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남은 제한을 적는다. 여러 commit을 사용한 작업도 최종 diff가 하나의 검토 가능한 변화로 읽혀야 한다. merge 완료 전에는 완료된 integration으로 보고하지 않는다.
 
-Merge method는 공통 강제 정책으로 고정하지 않는다. 다만 작업 과정의 중간·정리 commit이 많이 쌓였고 최종 diff가 하나의 응집된 변화로 읽히는 PR은 **squash merge를 우선 권장**한다. 의미 있는 commit history 자체가 검토·추적 가치가 있으면 rebase 또는 merge를 선택할 수 있다.
+## 검증과 runner
 
-## 단계별 CI 검증
+- repository는 자신의 역할과 trust boundary에 맞는 검증 단계를 정의한다.
+- 빠른 development feedback과 release/canonical integration 검증은 필요한 경우 서로 다른 강도로 운영할 수 있다.
+- formatting, static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
+- runner 선택은 security, cost, platform dependency, local capability를 고려한다. private repository나 local inference처럼 특정 trust/resource boundary가 필요한 작업은 self-hosted runner를 우선할 수 있고, GitHub-hosted runner는 필요한 검증에만 사용한다.
+- 동일한 고비용 검증을 여러 runner에서 중복 수행하는 것을 기본값으로 삼지 않는다. 추가 matrix는 실제 portability 또는 release risk를 검증할 때 사용한다.
+- 완료 Evidence는 문서에 적힌 기대가 아니라 실제 owning repository workflow run과 결과를 기준으로 한다.
 
-- 작업 branch → `develop` PR과 `develop` push는 해당 repository의 self-hosted develop gate가 실제 `check/test/build`를 실행한다. 개발 단계에서는 빠른 피드백을 위해 formatting gate를 생략할 수 있다.
-- Chat/Agent 세션에서 develop 대상 구현 완료를 판단할 때도 이 self-hosted run을 실제 실행 검증으로 사용한다. 동일 검증을 GitHub-hosted runner에 중복시키는 것을 기본값으로 삼지 않는다.
-- `develop → main` promotion PR은 self-hosted runner를 사용하지 않는다. GitHub-hosted Ubuntu에서 formatting을 포함한 전체 static check, tests, build, artifact verification을 수행한다.
-- `main` push는 self-hosted runner를 사용하지 않는다. GitHub-hosted Ubuntu, macOS, Windows에서 동일한 전체 검증을 수행해 최종 cross-platform regression을 확인한다.
-- 특정 app이 POSIX/Linux 전용이면 Windows self-hosted runner에 억지로 옮기지 않는다. 해당 app의 별도 platform gate를 보조 검증으로 유지하거나, 필요할 때 같은 신뢰 경계의 Linux self-hosted runner를 추가한다.
-- self-hosted runner의 이름은 routing 조건이 아니다. workflow의 `runs-on`은 실제 runner label만 사용한다.
-
-## Legacy refs와 archive
+## History와 archive
 
 - Git branch를 장기 지식 archive로 사용하지 않는다.
-- legacy/archive/backup branch의 지속 가치가 결정·설계 맥락 수준이면 현재 Knowledge 또는 owning repository의 migration 문서에 흡수한 뒤 ref를 제거한다.
-- 원본 commit graph 자체가 재현성·forensic Evidence로 필요한 경우에만 명시적 tag로 보존한다.
-- 일회성 migration safety ref는 대체 경로와 지속 문서가 확인되면 제거한다.
+- 과거 맥락은 Git history, immutable commit/permalink, 필요한 migration 문서와 revision-bound Evidence에서 추적한다.
+- legacy/archive/backup branch는 현재 운영 경로가 아니며, 지속 가치가 canonical 문서와 Git history에 흡수되면 별도 장기 보존 정책으로 간주하지 않는다.
+- forensic 재현을 위해 특정 ref를 고정할 필요가 있으면 owning repository가 명시적인 tag 또는 immutable Evidence를 선택할 수 있다.
 
-## 정책 적용과 기존 상태
+## 정책 적용 범위
 
-공통 전략은 목표 정책이다. 문서를 수정했다고 기존 branch, workflow, protection 설정까지 변경된 것으로 보고하지 않는다. 작업 대상 레포에서 실행에 필요한 차이를 확인하고, 수정할 수 있는 범위에서 적용한다. 전체 레포를 순회하는 동기화 검사를 작업의 필수 조건으로 추가하지 않는다.
+Knowledge는 공통 invariant만 소유한다. 다음은 owning repository가 구체화한다.
 
-Issue를 현재 할당하지 않는 콘텐츠 레포의 범위는 Project Orchestration이 소유한다. 이 운영 범위는 해당 레포의 디렉토리 scheme을 바꾸지 않는다.
+- canonical/integration branch 이름과 topology
+- issue branch의 실제 base ref
+- PR/release promotion 경로
+- runner 종류와 label
+- CI job 구성과 OS matrix
+- repository-specific hotfix/patch 경로
+
+공통 정책과 repository-local 운영이 충돌하면 먼저 repository 역할상 필요한 차이인지 확인한다. 반복되는 차이가 여러 repository에 공통 invariant로 승격될 때만 Knowledge 정책을 확장한다.
 
 <!-- END SOURCE: docs/git-workflow.md -->
 
@@ -1518,8 +1520,6 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 # Operating Rhythm
 
-상태: 활동 계획의 사용자 명시 사항 중심. 출처: S1 `e0a335ad`, `1f288b42`, `33b898b1`.
-
 ## 목표와 리듬
 
 Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버서더 활동과 포트폴리오 개발의 기록을 하나의 흐름으로 연결한다.
@@ -1598,7 +1598,6 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | ID | 항목 | 현재 처리 |
 |---|---|---|
 | Q003 | 1.0 final release gate | Site `develop → main` promotion 후 새 main build/deploy에서 canonical Docs revision + Site revision + delivery result를 연결해 확정 |
-| Q006 | 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
 | Q007 | Work Type Validation 추가 | 보류. 현재 기본값 유지 |
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
@@ -1642,7 +1641,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## Branch / PR workflow
 
-공통 Git Workflow (`docs/git-workflow.md`)를 따른다. Knowledge만의 별도 branch 전략이나 merge 규칙을 중복 정의하지 않는다.
+공통 Git Workflow (`docs/git-workflow.md`)의 invariant를 따른다. 실제 branch topology, runner, CI/release 세부 운용은 이 repository의 workflow/settings가 소유하며 공통 문서에 복제하지 않는다.
 
 ## Evidence
 
@@ -1658,10 +1657,10 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 ## 대화에서 변경을 가져올 때
 
-사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 `main`은 과거 대화 provenance를 별도 원장으로 유지하지 않는다. 과거 근거가 꼭 필요하면 `archive/main-before-cleanup-20260921` branch를 확인하고, 현재 문서에는 현재 유효한 결론만 반영한다.
+사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 문서에는 현재 유효한 결론만 반영하고, 과거 근거가 꼭 필요하면 Git history와 immutable Evidence를 확인한다.
 
 ## 공유
 
-이 레포의 현재 `main`은 raw conversation transcript나 source/turn provenance chronology를 보관하지 않는다. 과거 자료는 historical archive branch에 보존하며, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
+이 레포는 raw conversation transcript나 source/turn provenance chronology를 별도 원장으로 보관하지 않는다. Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`이며, 과거 변경 근거는 Git history와 연결된 Evidence에서 추적한다.
 
 <!-- END SOURCE: CONTRIBUTING.md -->
