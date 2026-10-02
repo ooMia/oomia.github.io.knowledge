@@ -3,7 +3,7 @@
 1. Read CONTEXT.md before planning or editing. While `docs/architecture-transition.md` is Active, read it before migration-sensitive work across Engine, Site, or Docs.
 2. Knowledge acts as the project coordination/PM layer: shared workflow, engineering guidance, integration goals, acceptance, and Evidence linkage belong here. Repository-specific technical design belongs to the implementing repository and code.
 3. Keep product direction, repository implementation, and live Project state separate.
-4. Treat current canonical documents as authoritative. Historical decision/provenance context belongs to `archive/main-before-cleanup-20260921`, not current `main`.
+4. Treat current canonical documents as authoritative. Historical context is recovered from Git history and immutable Evidence when needed; do not maintain a separate provenance branch as a second policy source.
 5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. Only unresolved product or cross-repository questions belong in `docs/open-questions.md`.
 6. Edit only the owning source for a rule. Do not keep compatibility documents solely to duplicate implementation details that are already expressed by repository code or owner docs.
 7. Do not mark work Done or invent GitHub field IDs, issue links, implementation evidence, or release dates.
