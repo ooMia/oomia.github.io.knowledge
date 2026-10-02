@@ -39,6 +39,6 @@
 - **Labels:** <registry의 실제 label만; 필요 없으면 비움>
 - **Milestone:** <repository milestone이 실제로 필요할 때만>
 - **Relationships:** <Parent / Blocked by / Blocking; 해당 없으면 비움>
-- **Development branch:** <활성화된 경우 실제 연결 branch; Draft이면 비움>
+- **Development branch:** <실제 작업 시작 후 연결된 branch; Backlog/Todo/Draft이면 비움>
 
 Work Type/Labels: [Work Classification](../docs/work-classification.md). Lifecycle/DoD: [Planning Model](../docs/planning-model.md). Seed 계약: [Project Orchestration](../docs/project-orchestration.md#project-seed).
