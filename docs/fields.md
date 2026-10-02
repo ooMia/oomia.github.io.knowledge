@@ -26,7 +26,7 @@ Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필
 
 - `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
 - `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
-- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 일반적으로 비운다.
+- `Iteration`: `Todo / In progress`에는 현재 commitment가 반드시 있어야 한다. 실제 수행된 historical work(`Done / Cancelled`)는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 비운다.
 - `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
 - `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
 - Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
