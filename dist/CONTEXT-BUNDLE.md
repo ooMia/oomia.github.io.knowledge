@@ -20,10 +20,10 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | Issue 생성·수정·활성화 | Issue 형식 (`templates/repository-issue.md`) → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
-| 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Issue-linked branch (`docs/project-orchestration.md`) → 해당 Issue |
+| 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | Git Workflow (`docs/git-workflow.md`) → 통합 목표 (`docs/release-1.0.md`) → 검수 연결 (`docs/implementation-map.md`) |
-| 새 레포 scaffolding·디렉토리 역할 | Repository Design (`docs/repository-design.md`) → JS/TS이면 Development Toolchain (`docs/development-toolchain.md`) |
+| 새 레포 scaffolding·디렉토리 역할 | Repository Design (`docs/repository-design.md`) → Node/JS/TS 또는 Python이면 Development Toolchain (`docs/development-toolchain.md`) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
 | Knowledge 문서 수정 | 소유권 (`docs/repository-design.md`) → 해당 원본 → CONTRIBUTING (`CONTRIBUTING.md`) |
 | 계획·분류·완료 검토 | Work Classification (`docs/work-classification.md`) → Planning (`docs/planning-model.md`) → Fields (`docs/fields.md`) → 실제 Item의 Outcome/AC/Evidence |
@@ -273,15 +273,18 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 
 <!-- BEGIN SOURCE: docs/development-toolchain.md -->
 
-# Development Toolchain — Vite+ First
+# Development Toolchain — Vite+ / uv First
 
 상태: 2026-09-21 project-wide engineering policy.
 
-이 문서는 Publishing Platform의 JavaScript/TypeScript repository에서 사용하는 **개발 도구의 전역 기본값**을 소유한다. 특정 repository가 다른 선택을 해야 한다면 그 이유와 차이를 해당 repository contract에 명시한다.
+이 문서는 Publishing Platform repository의 **개발 도구에 대한 project-wide 기본값**을 소유한다. 정확한 runtime/tool version, framework command, CI job 구성과 repository-specific 예외는 각 owning repository가 소유한다.
 
 핵심 원칙:
 
-> Vite+의 `vp`를 runtime, package management, static checks, tests, builds, workspace task orchestration, staged checks의 **기본 진입점**으로 사용한다. Vite+가 이미 제공하는 기능을 위해 별도의 wrapper/tool을 추가하지 않는다.
+- **Node.js / JavaScript / TypeScript:** Vite+의 `vp`를 runtime, package management, static checks, tests, builds, workspace task orchestration, staged checks의 기본 진입점으로 사용한다. Vite+가 이미 제공하는 기능을 위해 같은 역할의 wrapper/tool을 추가하지 않는다.
+- **Python:** `uv`를 project/dependency/environment/lock/run 관리의 기본 진입점으로 사용한다. 동일 역할을 위해 pip/Poetry/Pipenv 등을 중복 표준으로 두지 않는다.
+
+repository가 다른 도구를 사용해야 한다면 실제 기술적 필요와 차이를 해당 repository code/docs에서 설명한다.
 
 Vite+ official documentation:
 - https://viteplus.dev/guide/
@@ -602,8 +605,27 @@ vp config --no-agent
 - global latest Vite+ behavior에 기대고 project version을 pin하지 않기
 - troubleshooting을 위해 무조건 `vp migrate` 실행
 - repo-specific agent instructions를 `vp config`가 무검토로 덮어쓰게 두기
+- Python project에서 `uv`와 pip/Poetry/Pipenv를 같은 책임의 기본 project manager로 병행
 
-## 16. Current repository implications
+## 16. Python projects — uv first
+
+Python repository 또는 Python application/package가 생기면 `uv`를 기본 project manager로 사용한다.
+
+기본 원칙:
+
+- project metadata와 dependency declaration은 `pyproject.toml`을 중심으로 관리한다.
+- 재현 가능한 dependency state가 필요하면 `uv.lock`을 repository에 유지한다.
+- dependency install/synchronization은 `uv sync`를 우선한다.
+- dependency 추가·삭제는 `uv add` / `uv remove`를 우선한다.
+- repository command와 tool 실행은 `uv run <command>`을 우선해 project environment를 명시적으로 사용한다.
+- lock 갱신이 목적이면 `uv lock`을 사용한다.
+- system Python 또는 전역 site-packages가 우연히 맞는다고 가정하지 않는다.
+- Python runtime requirement와 exact version policy는 owning repository가 `pyproject.toml`, `.python-version` 등 실제 설정으로 선언한다.
+- CI/Agent는 repository가 선언한 Python/uv 환경을 재현하고, 별도 package manager bootstrap을 중복 기본값으로 만들지 않는다.
+
+`pip`, `pip-tools`, Poetry, Pipenv, Conda 등이 실제 runtime/distribution 제약 때문에 필요할 수는 있지만, 단순 선호나 기존 습관만으로 `uv`와 같은 책임을 중복 소유하게 하지 않는다. 예외가 필요하면 해당 repository가 이유와 검증 방법을 소유한다.
+
+## 17. Current repository implications
 
 공통 기준을 적용한 실제 구성은 각 레포의 문서와 설정이 소유한다. 현행 버전·명령·전환 상태를 이 공통 지침에 복제하지 않는다.
 
@@ -625,6 +647,7 @@ vp config --no-agent
 - Vite+ IDE Integration: https://viteplus.dev/guide/ide-integration
 - Vite+ Migrate: https://viteplus.dev/guide/migrate
 - Oxfmt language support: https://oxc.rs/docs/guide/usage/formatter/language-support
+- uv documentation: https://docs.astral.sh/uv/
 
 <!-- END SOURCE: docs/development-toolchain.md -->
 
@@ -866,7 +889,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 | 공통 개발 도구 지침 | Development Toolchain (`docs/development-toolchain.md`) |
 | 공통 branch·PR·release 전략 | Git Workflow (`docs/git-workflow.md`) |
 | Issue lifecycle·계획·완료 의미 | Planning Model (`docs/planning-model.md`) |
-| Project/Issue 공통 자동화 계약 | Project Orchestration (`docs/project-orchestration.md`) |
+| Project/Issue 공통 orchestration semantics | Project Orchestration (`docs/project-orchestration.md`) |
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
 | 작업별 읽기 경로 | CONTEXT (`CONTEXT.md`) |
 
@@ -886,7 +909,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 
 - Knowledge canonical link / transition guide
 - repository role
-- standard VP commands
+- standard Vite+ / uv commands
 - current verification gate
 - destructive migration safety
 - local code ownership rules
@@ -932,10 +955,11 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 새 tool을 추가하기 전에 묻는다.
 
-1. Vite+가 이미 제공하는가?
-2. pnpm/workspace 기능으로 충분한가?
-3. platform-native Git/GitHub 기능으로 충분한가?
-4. 기존 dependency를 재사용할 수 있는가?
+1. Node 계열이면 Vite+가 이미 제공하는가?
+2. Python이면 uv가 이미 제공하는가?
+3. package/workspace manager의 기존 기능으로 충분한가?
+4. platform-native Git/GitHub 기능으로 충분한가?
+5. 기존 dependency를 재사용할 수 있는가?
 
 비핵심 문제는 새 구현보다 기존 도구와 요구사항 조정을 우선한다.
 
@@ -1193,200 +1217,90 @@ Knowledge는 공통 invariant만 소유한다. 다음은 owning repository가 �
 
 <!-- BEGIN SOURCE: docs/project-orchestration.md -->
 
-# Project orchestration automation
+# Project Orchestration
 
-GitHub repository Issue가 활성화될 때 [Publishing Platform Project #11](https://github.com/users/ooMia/projects/11)의 Item과 Development branch를 자동으로 초기화한다.
+Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. 실제 workflow 파일, script, token/permission, runner, webhook process, branch base와 같은 실행 세부사항은 이를 구현하는 owning repository가 소유한다.
 
-## Authentication
+## Scope
 
-Project #11은 user-owned Project이므로 Actions의 repository-scoped `GITHUB_TOKEN`으로 접근할 수 없다. 각 Issue-owning repository에 classic PAT을 `PROJECT_TOKEN` secret으로 저장한다.
+- Repository Issue가 활성화되면 Project #11의 실행 상태와 연결될 수 있다.
+- activation 이후의 current state는 GitHub Project fields와 repository-native Issue/PR relation이 소유한다.
+- Docs처럼 Issue-driven implementation repository가 아닌 저장소는 동일한 orchestration을 강제하지 않는다.
+- 공통 branch/PR/change-management invariant는 Git Workflow (`docs/git-workflow.md`)를 따른다.
 
-현재 automation에 필요한 classic PAT scope는 다음 두 개다.
+## Issue activation semantics
 
-- `project`: Project #11 조회·Item 추가·custom field 수정
-- `repo`: private repository Issue를 Project item으로 조회하고 필요한 repository 리소스에 접근
+활성 Repository Issue는 다음 초기화를 요청할 수 있다.
 
-`workflow`, `admin:*`, `user`, `packages` scope는 현재 runtime automation에 필요하지 않다. PAT로 workflow 파일 자체를 생성·수정하는 self-modifying workflow는 구현하지 않는다.
+1. Project #11 Item 등록
+2. 초기 `Status / Iteration / Work Type` materialization
+3. 실제 개발 branch가 필요한 경우 Issue-linked Development relation 생성
 
-Repository 내부 Development branch 생성에는 PAT을 사용하지 않는다. 각 workflow의 `GITHUB_TOKEN`에 최소 권한만 부여한다.
+activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
 
-## 적용 범위
-
-공통 branch·PR·release 전략은 Git Workflow (`docs/git-workflow.md`)를 따른다. repository별로 같은 base branch 표를 반복 관리하지 않는다.
-
-현재 Issue 작업 대상은 Knowledge, Engine, Site다. `oomia.github.io.docs`는 editor가 작성하고 필요하면 후처리한 콘텐츠의 remote이며, 현재 이 레포 자체에 Issue를 할당하지 않는다. 해당 레포에 별도 Issue 운영 문서를 만들지 않는다.
-
-공통 생성 절차·Project seed·인증·자동화 계약은 이 문서가 소유한다. 실행되는 workflow/script와 적용된 권한 설정은 각 실행 레포가 소유하며 공통 설명을 복제하지 않는다. 실제 적용 여부는 작업 시 확인한다.
-
-## Workflow와 Node script의 역할
-
-GitHub Actions workflow 정의는 `.github/workflows/*.yml`이 소유한다. YAML은 trigger, runner, job permission, secret 전달을 정의한다.
-
-복잡한 GraphQL/JSON 처리는 repository script로 분리하고 YAML의 `run`에서 Node로 실행한다.
-
-```text
-issue-activated.yml
-├─ project job
-│  └─ node .github/scripts/sync-project.mjs
-└─ development job
-   └─ node .github/scripts/create-development-branch.mjs
-```
-
-이는 GitHub Actions의 별도 파일 형식이 아니라 workflow가 runner에서 repository script를 실행하는 일반적인 방식이다.
-
-## Issue activation
-
-workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
-
-자동 실행 조건:
-
-1. Issue가 open 상태다.
-2. 제목이 `draft:`로 시작하지 않는다.
-
-따라서 fallback draft가 생성 순간 잠시 open이어도 Project 등록과 branch 생성이 발생하지 않는다.
-
-### Project job
-
-- secret: `PROJECT_TOKEN`
-- Project: `ooMia/projects/11`
-- 역할: Item 추가 및 Status / Iteration / Work Type 초기화
-- field ID와 option ID는 runtime에 이름으로 조회
-- 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
-
-### Development job
-
-- token: repository `GITHUB_TOKEN`
-- permissions: `contents: write`, `issues: write`
-- 역할: GitHub GraphQL `createLinkedBranch`로 현재 repository에 Issue-linked Development branch 생성
-- `DEVELOPMENT_BASE`는 Git Workflow의 공통 개발 branch를 사용한다.
-- 콘텐츠 레포의 Issue 비대상 범위는 위 적용 범위를 따른다.
-- `project-seed.development === false`이면 생략
-
-Project PAT은 이 job에 전달하지 않는다.
-
-### Lifecycle synchronization boundary
-
-Issue activation workflow와 장기 lifecycle reconciliation은 서로 다른 책임을 가진다.
-
-- repository의 `issue-activated.yml`은 **activation 초기화**를 소유한다: Project Item 등록, 초기 `Status / Iteration / Work Type`, Issue-linked Development branch.
-- Engine의 `apps/github-automation` webhook runtime은 activation 이후 **Issue lifecycle과 Project Status invariant**를 reconcile한다.
-- `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
-- webhook runtime은 Work Type, Assignee, historical Iteration처럼 해석이 필요한 field를 추론해 채우지 않는다. 이런 값은 Issue Outcome/Evidence와 실제 수행 이력으로 확인 가능한 경우에만 baseline normalization에서 보정한다.
-
-현재 canonical lifecycle invariant는 다음과 같다.
-
-| Repository Issue / Project 상태 | Reconciliation |
-|---|---|
-| fallback Draft: `draft:` + `closed/not_planned` | automation 제외; 유효한 candidate이면 Project `Backlog` 유지 |
-| ordinary `closed/completed` | `Done` |
-| ordinary `closed/not_planned` 또는 `duplicate` | `Cancelled` |
-| open + Iteration 없음 | `Backlog` |
-| open + Iteration 있음 + Backlog/empty | `Todo` |
-| `Todo` / `In progress`에서 Iteration 제거 | `Backlog` |
-| cancelled Issue가 reopen됨 | `Backlog`, stale Iteration 제거 |
-| 새로운 Development PR link 관찰 | `In progress`; lifecycle event가 아닌 경우 필요한 recovery만 수행 |
-
-`Done` 상태의 open Issue는 자동으로 되돌리지 않는다. unknown Status/close reason 또는 concurrent Project change는 임의로 덮어쓰지 않고 실패로 남긴다.
-
-### Webhook write cutover
-
-Webhook runtime은 기본적으로 read-only이며 `GITHUB_AUTOMATION_APPLY=true`가 명시적 write switch다. write mode를 일반 개발 flow에 넣기 전에 다음 순서를 따른다.
-
-1. 현재 Project baseline의 명백한 field/status drift를 먼저 정리한다.
-2. 검증된 Engine revision 또는 그 merge descendant를 사용한다.
-3. `APPLY=false`에서 전체 reconciliation 결과가 예상 invariant와 일치하는지 확인한다.
-4. applying worker는 하나만 실행하고 `APPLY=true`로 canary를 수행한다.
-5. 첫 mutation 결과를 Project read로 재검증한 뒤 일반 `./dev` flow에 포함한다.
-6. 이상이 있으면 즉시 `GITHUB_AUTOMATION_APPLY=false`로 복귀하고 원인을 별도 Fix/Investigation으로 분리한다.
-
-현재 write-cutover의 선행 Evidence는 Engine #58 integration, #59 real read-only validation, #60 FSM alignment다. runtime 구현 상세와 실제 process/env 계약은 Engine repository가 소유한다.
-
-## Labels
-
-Issue/PR label은 Project field를 복제하지 않는 optional controlled tag다. orchestration 관련 작업에는 registry에 정의된 `orchestration` label을 사용한다. repository마다 필요한 label set은 다를 수 있다.
-
-상세 기준은 Work Classification (`docs/work-classification.md`)과 Labels (`docs/labels.md`)을 따른다.
+Draft 또는 아직 실행 범위가 확정되지 않은 Item은 Planning Model (`docs/planning-model.md`)의 lifecycle을 따른다. 활성화되지 않은 Draft 때문에 implementation branch를 만들지 않는다.
 
 ## Project seed
 
-새 Issue는 activation 초기값을 전달하는 hidden JSON을 가질 수 있다.
+Repository Issue는 activation 초기값을 전달하기 위해 machine-readable `project-seed`를 사용할 수 있다.
 
 ```md
 <!-- project-seed
 {
-  "iteration": "C1-W3",
+  "iteration": null,
   "workType": "Feature",
-  "status": "Todo"
+  "status": "Backlog"
 }
 -->
 ```
 
-지원 키:
+지원되는 공통 의미:
 
-- `status`
-- `iteration`
-- `workType`
-- `branch` — 기본 branch naming을 override할 때만 사용
-- `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
+- `status`: activation 시 요청할 초기 Project Status
+- `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
+- `workType`: Issue Outcome의 Work Type
+- `development: false`: branch가 필요하지 않은 coordination/document-only work임을 명시
+- `branch`: 특정 repository implementation이 explicit override를 지원할 때 사용할 수 있는 optional hint
 
-seed는 activation 초기값 전달용이다. 활성화 이후 Project field의 canonical state는 Project #11이다.
+`project-seed`는 초기화 요청일 뿐이다. activation 이후 Project field가 current state의 source of truth이며, seed를 장기 상태 원장으로 사용하지 않는다.
 
-## Development branch naming
+seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다. 예를 들어 Iteration commitment가 없는 작업은 일반적으로 `Backlog`이며, `Todo`는 실제 Iteration commitment가 있는 상태다.
 
-기본 형식:
+## Development relation
 
-```text
-<issue-number>-<conventional-type>-<title-slug>
-```
+- Issue-linked branch가 필요한지 여부는 작업 성격과 owning repository 운영 방식에 따라 결정한다.
+- `development: false`가 아니고 repository가 Issue-linked development를 사용하는 경우 activation 과정에서 branch relation을 생성한다.
+- 실제 branch 이름, base branch, 생성 API, branch protection은 owning repository가 소유한다.
+- 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
 
-예:
+## Lifecycle reconciliation
 
-```text
-13-feat-decouple-canonical-source-from-visual-editor-constraints
-```
+Status의 의미와 canonical lifecycle은 Planning Model (`docs/planning-model.md`)이 소유한다. orchestration automation은 그 의미를 materialize할 뿐 두 번째 lifecycle 원본이 아니다.
 
-branch는 Issue 활성화 전 미리 만들지 않는다. GitHub `createLinkedBranch`로 생성해야 Development 관계도 함께 만들어진다.
+공통적으로 자동화할 수 있는 것은 명확한 invariant에 한정한다.
 
-이미 같은 이름의 branch가 존재하지만 Issue와 연결되어 있지 않다면 automation은 이를 자동 재사용하지 않고 migration error를 낸다.
+- active candidate가 Iteration commitment를 얻으면 `Todo`로 진행할 수 있다.
+- `Todo / In progress` 상태에서 commitment가 제거되면 `Backlog`로 돌아갈 수 있다.
+- `closed / completed` 결과는 `Done`과 연결할 수 있다.
+- `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
+- Development PR relation은 실제 작업이 시작됐다는 Evidence가 될 수 있다.
 
-## Manual replay
+Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
-PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상태를 확인하려면 Actions UI에서 `Issue activation` workflow를 수동 실행하고 `issue_number`를 전달한다.
+## Ownership boundary
 
-Project field를 GitHub CLI로 직접 보정할 때 field type에 맞는 ID 기반 option을 사용한다. 특히 **Iteration은 이름으로 설정할 수 없으며 `--iteration-id`를 사용한다.** 현재 iteration title을 CLI 인자 값으로 추론하거나 `--field Iteration --value <title>` 형태를 만들지 않는다. 필요한 field/iteration ID는 Project metadata를 먼저 조회해 확인한다.
+| Concern | Owner |
+|---|---|
+| Status/Iteration/Work Type 의미와 DoD | Planning Model (`docs/planning-model.md`), Work Classification (`docs/work-classification.md`) |
+| activation 및 reconciliation의 공통 의미 | 이 문서 |
+| 실제 Project field 값 | GitHub Project #11 |
+| Issue/PR/Development relation | GitHub repository native state |
+| workflow/script/API/token/runner 구현 | 실행하는 owning repository |
+| 장기 webhook/runtime implementation | 해당 implementation repository의 code/docs |
+
+공통 구현 상세를 Knowledge에 복제하지 않는다. 여러 repository에서 반복되는 실행 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
 
 <!-- END SOURCE: docs/project-orchestration.md -->
-
-
----
-
-<!-- BEGIN SOURCE: docs/labels.md -->
-
-# GitHub labels
-
-Labels는 Project Work Type을 보조하는 **optional controlled tags**다.
-
-- Repository: 어디의 작업인가
-- Work Type: 왜 이 Issue가 존재하는가
-- Labels: 무엇에 관한 작업인가
-
-따라서 Feature/Fix/Refactor/Maintenance/Documentation/Investigation을 label로 복제하지 않는다. `experimental`도 현재는 만들지 않는다. 실험적인 구현 방식과 Investigation Outcome을 구분하고, 제품 maturity가 실제 contract/workflow를 바꾸는 시점에만 별도 정책을 검토한다.
-
-## Registry
-
-label의 이름·적용 repository·의미는 config/labels.json (`config/labels.json`)을 canonical source로 사용한다. label은 repository-specific일 수 있으며 모든 repository가 같은 label set을 가질 필요가 없다.
-
-새 label 생성 기준, granularity, negative examples는 Work Classification (`docs/work-classification.md`)을 따른다.
-
-## Usage
-
-- label은 0개여도 정상이다.
-- 실제 반복 검색/filtering 가치가 있을 때만 붙인다.
-- 보통 domain/component 1개 + cross-cutting concern 0–2개면 충분하다.
-- registry에 없는 keyword를 Agent가 즉석에서 label로 만들지 않는다.
-- 기존 label이 Work Type이나 제거된 Project field를 복제하면 migration 시 제거한다.
-
-<!-- END SOURCE: docs/labels.md -->
 
 
 ---
