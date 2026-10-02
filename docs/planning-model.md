@@ -15,7 +15,7 @@
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 [Work Classification](work-classification.md)을 따른다. Project Item 초안에는 [Project Item template](../templates/project-item.md)을 사용할 수 있다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 [Work Classification](work-classification.md)을 따른다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -96,7 +96,7 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
 | 구현·테스트·구체적인 계약 | 책임을 소유한 구현 레포 |
 
-Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 [Architecture Transition](architecture-transition.md)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다. 형식 기준은 [Project README template](../templates/project-readme.md)을 사용한다.
+Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 [Architecture Transition](architecture-transition.md)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다.
 
 ## 릴리스와 시간
 
