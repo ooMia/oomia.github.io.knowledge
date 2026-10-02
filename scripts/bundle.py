@@ -4,7 +4,6 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-# handoff/current.md is intentionally excluded: the bundle carries durable context, not live session state.
 ORDER = [
     'CONTEXT.md', 'docs/architecture-transition.md', 'docs/architecture.md',
     'docs/development-toolchain.md', 'docs/repository-design.md',
