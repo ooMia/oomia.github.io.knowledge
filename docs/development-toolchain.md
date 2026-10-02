@@ -1,12 +1,15 @@
-# Development Toolchain — Vite+ First
+# Development Toolchain — Vite+ / uv First
 
 상태: 2026-09-21 project-wide engineering policy.
 
-이 문서는 Publishing Platform의 JavaScript/TypeScript repository에서 사용하는 **개발 도구의 전역 기본값**을 소유한다. 특정 repository가 다른 선택을 해야 한다면 그 이유와 차이를 해당 repository contract에 명시한다.
+이 문서는 Publishing Platform repository의 **개발 도구에 대한 project-wide 기본값**을 소유한다. 정확한 runtime/tool version, framework command, CI job 구성과 repository-specific 예외는 각 owning repository가 소유한다.
 
 핵심 원칙:
 
-> Vite+의 `vp`를 runtime, package management, static checks, tests, builds, workspace task orchestration, staged checks의 **기본 진입점**으로 사용한다. Vite+가 이미 제공하는 기능을 위해 별도의 wrapper/tool을 추가하지 않는다.
+- **Node.js / JavaScript / TypeScript:** Vite+의 `vp`를 runtime, package management, static checks, tests, builds, workspace task orchestration, staged checks의 기본 진입점으로 사용한다. Vite+가 이미 제공하는 기능을 위해 같은 역할의 wrapper/tool을 추가하지 않는다.
+- **Python:** `uv`를 project/dependency/environment/lock/run 관리의 기본 진입점으로 사용한다. 동일 역할을 위해 pip/Poetry/Pipenv 등을 중복 표준으로 두지 않는다.
+
+repository가 다른 도구를 사용해야 한다면 실제 기술적 필요와 차이를 해당 repository code/docs에서 설명한다.
 
 Vite+ official documentation:
 - https://viteplus.dev/guide/
@@ -327,8 +330,27 @@ vp config --no-agent
 - global latest Vite+ behavior에 기대고 project version을 pin하지 않기
 - troubleshooting을 위해 무조건 `vp migrate` 실행
 - repo-specific agent instructions를 `vp config`가 무검토로 덮어쓰게 두기
+- Python project에서 `uv`와 pip/Poetry/Pipenv를 같은 책임의 기본 project manager로 병행
 
-## 16. Current repository implications
+## 16. Python projects — uv first
+
+Python repository 또는 Python application/package가 생기면 `uv`를 기본 project manager로 사용한다.
+
+기본 원칙:
+
+- project metadata와 dependency declaration은 `pyproject.toml`을 중심으로 관리한다.
+- 재현 가능한 dependency state가 필요하면 `uv.lock`을 repository에 유지한다.
+- dependency install/synchronization은 `uv sync`를 우선한다.
+- dependency 추가·삭제는 `uv add` / `uv remove`를 우선한다.
+- repository command와 tool 실행은 `uv run <command>`을 우선해 project environment를 명시적으로 사용한다.
+- lock 갱신이 목적이면 `uv lock`을 사용한다.
+- system Python 또는 전역 site-packages가 우연히 맞는다고 가정하지 않는다.
+- Python runtime requirement와 exact version policy는 owning repository가 `pyproject.toml`, `.python-version` 등 실제 설정으로 선언한다.
+- CI/Agent는 repository가 선언한 Python/uv 환경을 재현하고, 별도 package manager bootstrap을 중복 기본값으로 만들지 않는다.
+
+`pip`, `pip-tools`, Poetry, Pipenv, Conda 등이 실제 runtime/distribution 제약 때문에 필요할 수는 있지만, 단순 선호나 기존 습관만으로 `uv`와 같은 책임을 중복 소유하게 하지 않는다. 예외가 필요하면 해당 repository가 이유와 검증 방법을 소유한다.
+
+## 17. Current repository implications
 
 공통 기준을 적용한 실제 구성은 각 레포의 문서와 설정이 소유한다. 현행 버전·명령·전환 상태를 이 공통 지침에 복제하지 않는다.
 
@@ -350,3 +372,4 @@ vp config --no-agent
 - Vite+ IDE Integration: https://viteplus.dev/guide/ide-integration
 - Vite+ Migrate: https://viteplus.dev/guide/migrate
 - Oxfmt language support: https://oxc.rs/docs/guide/usage/formatter/language-support
+- uv documentation: https://docs.astral.sh/uv/
