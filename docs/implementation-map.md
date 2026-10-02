@@ -1,75 +1,67 @@
 # Implementation Map
 
-검증 기준일: 2026-09-21. Knowledge가 소유하는 통합 검수 연결이다. 아래 상태 판정과 immutable Evidence는 당시 snapshot이며, 이번 문서 소유권 정리에서 구현·배포를 재검증하거나 최신 상태로 갱신하지 않았다.
+Publishing Platform 1.0의 **현재 검증 snapshot**과 cross-repository Evidence 연결을 소유한다. live branch 상태나 작업 로그를 복제하지 않으며, 판정은 아래에 고정한 revision/Evidence 범위에서만 유효하다.
 
-2026-09-21 target architecture가 Payload/PostgreSQL 기반 CMS에서 **Git-backed filesystem document workspace + repository-owned consumer/mutation implementation**으로 변경되었다. 아래 기존 구현 revision은 역사적/재사용 가능 Evidence이며 새 target을 자동 충족하지 않는다.
+새 Evidence가 기존 판정을 대체할 만큼 충분하면 날짜별 checkpoint를 추가하지 않고 이 snapshot의 기준 revision과 capability 판정을 갱신한다. 과거 판정은 Git history와 연결된 Issue/PR/run Evidence에서 추적한다.
 
-## Post-snapshot checkpoint — 2026-09-27
+## 현재 검증 범위
 
-2026-09-21 판정표 자체는 immutable snapshot으로 유지한다. 이후 다음 새 Evidence가 생겼다.
+| 역할 | Repository / revision | 검증 의미 |
+|---|---|---|
+| canonical content | [`ooMia/oomia.github.io.docs@c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c) | 현재 article corpus layout을 Site가 직접 소비한 canonical Docs revision |
+| Site direct consumption | [`ooMia/oomia.github.io@f50ba57b`](https://github.com/ooMia/oomia.github.io/commit/f50ba57b9d1e270b286794cb9a7998f7df780648) | Site #12 / PR #13에서 canonical Docs Article corpus 직접 소비 |
+| Site release boundary | [`ooMia/oomia.github.io@6d8cc03f`](https://github.com/ooMia/oomia.github.io/commit/6d8cc03f2f28df28e31a97a38b31b06fd8148b25) | Site #14 / PR #15의 release-only live mutation boundary |
+| Engine optional mutation | [`ooMia/oomia.github.io.engine#23`](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30) | model-assisted metadata enrichment의 선택적 mutation Evidence |
+| portable Engine artifact | [Engine PR #34](https://github.com/ooMia/oomia.github.io.engine/pull/34) / [run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854) | portable CLI artifact verification |
+| Docs trusted consumer | [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694) | Engine artifact를 사용한 Docs-side trusted workflow Evidence |
 
-- Engine model-assisted metadata enrichment: [Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23), [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30).
-- portable Engine artifact verification: [PR #34](https://github.com/ooMia/oomia.github.io.engine/pull/34), [Engine run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854).
-- Docs trusted consumer E2E: [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694).
-- resulting canonical Docs revision: [`bf93bb5`](https://github.com/ooMia/oomia.github.io.docs/commit/bf93bb536b8a4e3a7149737b15723514ce1bdfd8).
+Site build/render Evidence는 [run 36406348962](https://github.com/ooMia/oomia.github.io/actions/runs/36406348962)에서 canonical Docs revision으로 11 Article pages가 생성된 것으로 연결된다. release-only gate 이후 PR 검증은 [run 36418285983](https://github.com/ooMia/oomia.github.io/actions/runs/36418285983)에서 `build=success`, `deploy=skipped`로 확인됐다.
 
-이는 **Automation과 Canonical Content 경로의 새로운 Evidence**지만, 현재 Docs layout을 Site가 직접 소비해 build/render/deploy했다는 증거는 아니다. 따라서 아래 2026-09-21 capability 판정을 여기서 소급 변경하지 않고, 다음 Site vertical slice에서 current Docs revision → Site revision → delivery result가 연결된 뒤 새 기준 revision으로 재평가한다.
-
-## Post-snapshot checkpoint — 2026-09-28
-
-2026-09-27 checkpoint 이후 canonical Docs의 현재 layout을 Site가 직접 소비하는 Evidence가 확보됐다.
-
-- canonical Docs revision: [`c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c)
-- direct Article corpus consumption: [Site #12](https://github.com/ooMia/oomia.github.io/issues/12) / [PR #13](https://github.com/ooMia/oomia.github.io/pull/13), integrated develop revision [`f50ba57b`](https://github.com/ooMia/oomia.github.io/commit/f50ba57b9d1e270b286794cb9a7998f7df780648)
-- current Docs → Site build/render Evidence: [Site run 36406348962](https://github.com/ooMia/oomia.github.io/actions/runs/36406348962). 11 Article pages were built from the canonical corpus.
-- release-only live mutation boundary: [Site #14](https://github.com/ooMia/oomia.github.io/issues/14) / [PR #15](https://github.com/ooMia/oomia.github.io/pull/15), integrated develop revision [`6d8cc03f`](https://github.com/ooMia/oomia.github.io/commit/6d8cc03f2f28df28e31a97a38b31b06fd8148b25)
-- PR gate Evidence: [Site run 36418285983](https://github.com/ooMia/oomia.github.io/actions/runs/36418285983), `build=success`, `deploy=skipped`.
-
-Run 36406348962 occurred before the release-only deployment gate and therefore proves direct consumption/build/render but is not treated as final release-boundary Evidence. Phase B의 direct Docs consumption은 integration state에서 검증됐고, Phase C의 최종 release Evidence는 Site `develop → main` promotion 후 새 `main` build/deploy로 Docs revision + Site revision + delivery result를 다시 연결해야 한다.
-
-## 기준 revision
-
-| 역할 | Repository | Revision | 의미 |
-|---|---|---|---|
-| legacy authoring / publishing | [`ooMia/oomia.github.io.engine`](https://github.com/ooMia/oomia.github.io.engine) | [`6ba2f950a78eef18c2efa305b96a1c8d0443252e`](https://github.com/ooMia/oomia.github.io.engine/commit/6ba2f950a78eef18c2efa305b96a1c8d0443252e) | Payload/PostgreSQL CMS와 DB→docs publish Evidence |
-| content repository snapshot | [`ooMia/oomia.github.io.docs`](https://github.com/ooMia/oomia.github.io.docs) | [`50d89a4cb1c5d6476444e29454e12b523e99231b`](https://github.com/ooMia/oomia.github.io.docs/commit/50d89a4cb1c5d6476444e29454e12b523e99231b) | 해당 revision은 당시 generated snapshot; 현재 레포 전체 상태에 대한 판정은 아님 |
-| presentation / delivery | [`ooMia/oomia.github.io`](https://github.com/ooMia/oomia.github.io) | [`a3b2e182563458636b7b8186a4cd2201894b2a65`](https://github.com/ooMia/oomia.github.io/commit/a3b2e182563458636b7b8186a4cd2201894b2a65) | docs content를 Site에서 실제 build/deploy한 Evidence |
-
-`oomia.github.io`의 package name은 `oomia.github.io.mono`이고 일부 engine 문서에서는 이를 `mono`라고 부른다. 별도 원격 `oomia.github.io.mono`가 있다는 뜻은 아니다.
+위 Evidence는 Phase B의 direct Docs consumption과 integration-level release boundary를 검증하지만 **최종 1.0 release Evidence는 아니다.** 최종 gate는 Site `develop → main` promotion 후 새 `main` build/deploy에서 canonical Docs revision + Site revision + delivery result를 다시 연결해야 한다.
 
 ## Architecture transition
 
-기술 전환 상세는 [전환 guide](architecture-transition.md), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md), [Site integration 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다. 이 문서는 구현 순서·코드 이관 계획을 별도로 소유하지 않는다.
+장기 제품 경계는 [Architecture](architecture.md), 전환 순서와 safety rule은 [Architecture Transition](architecture-transition.md), release acceptance는 [Release 1.0](release-1.0.md)이 소유한다.
+
+이 Map은 구현 순서·package 구조·workflow 운영을 별도로 정의하지 않는다. 각 capability의 **검증된 결과와 남은 release gap**만 연결한다.
 
 ## 1.0 capability 상태
 
 상태는 **미검증 / 미충족 / 부분 충족 / 충족**만 사용한다.
 
-| Capability | 당시 판정 | 기준 revision의 Evidence | 다음 통합 검수 연결 |
+| Capability | 현재 판정 | 검증된 Evidence | 다음 통합 검수 |
 |---|---|---|---|
-| Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 실제 md-like source를 호환 authoring tool로 수정·보존하고 Site가 소비하는 Evidence. editor 종류 자체는 판정 대상이 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md). |
-| Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | 동일 component implementation/package를 사용하는 실제 Site consumer와 필요한 authoring integration Evidence. 지원 catalog는 Knowledge가 별도로 판정하지 않는다. |
-| Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 실제 후처리·발행 workflow에 automation이 참여한다는 책임 repository의 Issue·PR·workflow Evidence. |
-| Publishing | **부분 충족** | legacy workflow는 DB snapshot을 docs repo에 materialize하고 실제 Site sync/lint/test/typecheck/build를 통과시켰다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | 현재 콘텐츠 revision의 소비 검증과 결과 재현성. [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#publishing). |
-| Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | 현재 콘텐츠 revision에 대한 실제 렌더링 Evidence를 확보해 재평가. |
-| Delivery | **충족** | docs SHA를 소비하는 Site revision의 GitHub Pages build/deploy가 성공했다. [run 35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484) / [artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312) | 새 콘텐츠 revision → Site revision → 배포 결과의 연결을 검증해 재평가. |
+| Authoring | **미충족** | legacy Payload visual authoring Evidence는 있으나 현재 Git-backed md-like source를 호환 authoring tool로 수정·보존하는 target Evidence로 재검증되지 않았다. | 실제 canonical source 수정·보존 → Site 소비 Evidence |
+| Canonical Content | **부분 충족** | Docs Git revision이 canonical corpus를 식별하고 Site가 `c5826802` corpus를 직접 소비했다. 선택적 Engine enrichment도 Docs-side workflow에서 검증됐다. | 현재 authoring/source-preservation path와 final release revision 연결 |
+| Extensibility | **부분 충족** | 과거 custom component opt-in Evidence는 존재하나 현재 Site/package source of truth 기준의 end-to-end authoring/consumer Evidence는 아직 release snapshot에 연결되지 않았다. | 실제 component implementation/package + consumer + 필요한 authoring integration Evidence |
+| Automation | **부분 충족** | Engine enrichment, portable CLI artifact, Docs trusted consumer workflow가 실제 자동화 경로로 검증됐다. | 현재 publishing/delivery path에 필요한 automation Evidence를 final release revision에 연결 |
+| Publishing | **부분 충족** | canonical Docs revision → Site direct consumption/build/render는 검증됐다. release-only live mutation boundary도 integration state에서 검증됐다. | Site `main` promotion 후 canonical Docs SHA + Site SHA + deploy result 연결 |
+| Presentation | **충족** | Site run 36406348962에서 canonical corpus로 11 Article pages build/render 성공. | final release revision에서 재확인 |
+| Delivery | **부분 충족** | 과거 live delivery Evidence는 있으나 현재 Git-backed target의 release-only gate 이후 새 `main` deploy Evidence는 아직 없다. | Site `develop → main` 후 새 GitHub Pages delivery Evidence |
 
-## 폐기 또는 재사용 판단
+## 다음 release gap
 
-책임 레포의 [Engine 전환 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md) 및 [Site integration 설계](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)를 참조한다. 구현 상세의 상태 원장을 이 문서에 복제하지 않는다.
+현재 Map에서 가장 중요한 통합 gap은 하나다.
 
-## 1.0 구현 delta
+```text
+canonical Docs revision
+        ↓
+Site develop → main promotion
+        ↓
+new main build/render
+        ↓
+GitHub Pages delivery
+        ↓
+Docs SHA + Site SHA + delivery result 연결
+```
 
-위 표의 통합 검수 gap을 해당 레포 Issue의 Outcome/AC/Evidence에 연결한다. 개별 명령·코드 구조·package 선택과 실행 우선순위는 소유 Issue에서 관리한다. 각 capability 판정은 연결된 Evidence를 실제로 재검증한 뒤 변경한다.
-
-## Issue #13 / #14 영향
-
-[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
+이 Evidence가 확보되면 Publishing / Presentation / Delivery 판정을 새 release snapshot으로 다시 평가한다. 별도 checkpoint section을 추가하지 않는다.
 
 ## 갱신 규칙
 
-- 이 문서는 live branch 상태가 아니라 immutable Evidence 기반 snapshot이다.
-- architecture가 변경되면 같은 코드 revision도 새 Product Boundary에 대해 다시 평가할 수 있다.
-- legacy implementation 성공을 현재 target 완료로 간주하지 않는다.
-- 새 Engine/docs/Site integration이 main에 들어간 뒤 기준 revision과 capability 상태를 다시 갱신한다.
+- 이 문서는 **한 개의 현재 검증 snapshot**만 유지한다.
+- 판정은 명시된 revision과 immutable Evidence에만 적용한다.
+- 새 Evidence가 생겼다고 즉시 로그를 추가하지 않는다. capability 판정을 바꿀 만큼 충분할 때 revision/Evidence/판정을 함께 갱신한다.
+- historical snapshot과 판정 변화는 Git history에서 추적한다.
+- live Project/Issue/PR status는 이 문서에 복제하지 않는다.
+- 문서 정리만으로 runtime/build/deployment 완료를 판정하지 않는다.
