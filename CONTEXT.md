@@ -14,7 +14,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
 | 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → Node/JS/TS 또는 Python이면 [Development Toolchain](docs/development-toolchain.md) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
-| Knowledge 문서 수정 | [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 → [CONTRIBUTING](CONTRIBUTING.md) |
+| Knowledge 문서 수정 | [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 → 변경 후 bundle/link 검증 |
 | 계획·분류·완료 검토 | [Work Classification](docs/work-classification.md) → [Planning](docs/planning-model.md) → [Fields](docs/fields.md) → 실제 Item의 Outcome/AC/Evidence |
 | 기록·발표·주간 회고 | [Operating Rhythm](docs/operating-rhythm.md) → 실제 Project Status Update·Evidence |
 | 제품/cross-repository 미결 사항 | [Open Questions](docs/open-questions.md) |
