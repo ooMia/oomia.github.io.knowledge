@@ -31,6 +31,19 @@ assignees: "ooMia"
 - Parent Item: <실제 링크 또는 None>
 - Contract / decision: <관련 원본 문서>
 
+## Impact
+
+의미 있는 영향이 있는 항목만 적고, 해당 없으면 생략한다.
+
+- **Ownership:** <primary owner와 실제 수정 repository>
+- **Contract surfaces:** <영향 받는 canonical contract/schema>
+- **Persistent state:** <새로 생기거나 변경되는 durable state>
+- **External effects:** <network / paid call / remote mutation / credential boundary>
+- **Cross-repository dependency:** <producer/consumer 또는 shared semantics>
+- **Open questions:** <Knowledge Open Question 링크>
+
+상세 routing은 [Feature Change Protocol](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/change-protocol.md)을 따른다.
+
 ## Evidence
 
 - <PR, 테스트, 실행 결과와 재현 방법>
