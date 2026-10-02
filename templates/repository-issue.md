@@ -4,7 +4,7 @@
 {
   "iteration": null,
   "workType": null,
-  "status": "Todo"
+  "status": "Backlog"
 }
 -->
 
@@ -33,7 +33,7 @@
 
 - **Assignee:** <GitHub login>
 - **Project:** `Publishing Platform` (#11)
-- **Status:** `Todo`
+- **Status:** `Backlog`
 - **Iteration:** <예: `C1-W3`; Backlog이면 비움>
 - **Work Type:** <Feature | Fix | Refactor | Maintenance | Documentation | Investigation>
 - **Labels:** <registry의 실제 label만; 필요 없으면 비움>
