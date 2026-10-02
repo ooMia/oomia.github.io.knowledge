@@ -13,7 +13,7 @@ Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷�
 
 Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 **canonical entry point**다. 먼저 현재 작업 유형을 식별하고 아래 routing에서 필요한 최소 원본만 읽는다. 구현 상세는 책임 repository의 문서와 코드가 소유한다.
 
-이전 작업을 실제로 이어받거나 최근 checkpoint가 필요한 경우에만 Current Handoff (`handoff/current.md`)를 읽는다. handoff는 정책이나 최신 구현 완료의 증거가 아니다.
+작업을 이어받을 때는 이 문서에서 필요한 원본을 확인한 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
 
 ## 자주 하는 작업
 
@@ -59,9 +59,11 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 2. 이미 확정된 정책의 문서 반영·참조 정리·검증은 주도적으로 수행한다. 새로운 제품 정책 선택이나 실제 cross-repository ownership이 불확실한 경우만 질문한다.
 3. GitHub 관련 핵심 객체의 주소를 알고 있다면 처음 소개할 때 클릭 가능한 링크로 제시한다.
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 blocker로 만들지 않는다.
-5. 세션별 임시 상태는 `handoff/current.md`에 두고, 지속할 규칙은 owning canonical source에 둔다.
+5. 다음 세션에서도 이어져야 하는 작업 상태는 Project Item, Issue, PR 또는 owning repository Evidence에 남긴다. Chat 세션 전용 handoff를 별도 원장으로 만들지 않는다.
 
 ## 문서 사용
+
+Repository/Agent 진입점은 README (`README.md`)와 AGENTS (`AGENTS.md`)이며, 둘 모두 이 문서로 수렴한다.
 
 원본 문서를 수정하고 `python3 scripts/bundle.py`로 Chat 첨부물을 재생성한다. 생성된 `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다.
 
@@ -678,7 +680,6 @@ Python repository 또는 Python application/package가 생기면 `uv`를 기본 
 | `.github/` | GitHub automation 및 GitHub용 설정 |
 | `.vite-hooks/` | repository가 관리하는 Vite+ Git hook |
 | `dist/` | 원본에서 재생성하는 build·배포 산출물 |
-| `handoff/` | 현재 작업을 이어받기 위한 일시적 checkpoint |
 
 동일한 scheme은 사용하지 않는 빈 디렉토리를 모두 만들라는 의미가 아니다. 필요한 경로를 사용할 때 위 역할을 유지한다. 새로운 공통 경로가 필요하면 여기서 의미를 먼저 정의한다. framework가 요구하는 하위 경로와 실제 package 구성은 구현 레포가 설명한다.
 
@@ -898,7 +899,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 - copy-pasted entire Knowledge
 - 이미 존재하지 않는 service/DB commands
 
-repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. live stale-file 여부는 `handoff/current.md`에서 추적한다.
+repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. 현재 실행 상태는 live Project/Issue/PR와 owning repository Evidence에서 확인한다.
 
 ## 13. Generated and local state
 
@@ -975,7 +976,7 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다. Project Item 초안에는 Project Item template (`templates/project-item.md`)을 사용할 수 있다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -1056,7 +1057,7 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
 | 구현·테스트·구체적인 계약 | 책임을 소유한 구현 레포 |
 
-Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 Architecture Transition (`docs/architecture-transition.md`)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다.
+Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 Architecture Transition (`docs/architecture-transition.md`)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다. 형식 기준은 Project README template (`templates/project-readme.md`)을 사용한다.
 
 ## 릴리스와 시간
 
@@ -1386,6 +1387,8 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## 갱신 규칙
 
+새 기준 revision을 조사할 때는 Implementation Map 조사 템플릿 (`templates/implementation-map.md`)을 초안으로 사용할 수 있다. 조사 결과의 canonical snapshot은 별도 Map으로 분산하지 않고 이 문서에 반영한다.
+
 - 이 문서는 live branch 상태가 아니라 immutable Evidence 기반 snapshot이다.
 - architecture가 변경되면 같은 코드 revision도 새 Product Boundary에 대해 다시 평가할 수 있다.
 - legacy implementation 성공을 현재 target 완료로 간주하지 않는다.
@@ -1415,6 +1418,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 매일 목표, 실제 결과, screenshot/GIF/video/voice/commit 등 Evidence, 배운 점, 다음 행동을 남긴다. 미디어는 GitHub에 업로드해 링크로 연결하는 방향을 선호했다. 구체적인 공개 범위와 저장 위치는 확정되지 않았다.
 
 주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그를 중심으로 하고 LinkedIn을 초기 후보로 둔다. 자체 블로그가 준비되기 전 발행 채널은 미결이다.
+
+기록 형식이 필요하면 Daily Evidence (`templates/daily-evidence.md`)와 Weekly Review (`templates/weekly-review.md`) 템플릿을 사용한다.
 
 ## 기능 실험 참조
 
