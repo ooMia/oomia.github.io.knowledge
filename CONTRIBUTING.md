@@ -19,11 +19,11 @@
 
 기능 구현, 성능·신뢰성 검증, 실제 publishing/deployment 완료에는 설계 링크를 대체 Evidence로 사용하지 않는다. 책임 레포의 코드·테스트·실행 결과·commit/PR·deployment처럼 재현 가능한 자료가 필요하다.
 
-## 세션 인계
+## 작업 재개와 세션 종료
 
-의미 있는 작업 세션을 종료할 때 장기적으로 남아야 할 규칙·결정은 먼저 owning canonical 문서에 반영한다. 아직 진행 중인 branch/Issue/Project 상태, 재검증 항목, 다음 안전한 행동은 `handoff/current.md`에 기록한다.
+의미 있는 작업 세션을 종료할 때 장기적으로 남아야 할 규칙·결정은 owning canonical 문서에 반영한다. 아직 끝나지 않은 작업, 다음 행동, 재검증 필요성은 Project Item, Issue, PR 또는 owning repository Evidence에 남긴다.
 
-`handoff/current.md`는 세션 로그나 의사결정 원장이 아니다. 매번 최신 checkpoint로 overwrite하고, 과거 상태는 Git history에 맡긴다. 구현 수준은 handoff가 아니라 revision-bound [Implementation Map](docs/implementation-map.md)과 책임 레포 Evidence로 판정한다.
+다음 세션은 [CONTEXT](CONTEXT.md)에서 필요한 원본을 찾고 live Project #11과 관련 Issue/PR를 조회해 현재 상태를 복구한다. 세션별 handoff 파일을 별도 상태 원장으로 유지하지 않는다. 구현 수준은 revision-bound [Implementation Map](docs/implementation-map.md)과 책임 레포 Evidence로 판정한다.
 
 ## 대화에서 변경을 가져올 때
 
