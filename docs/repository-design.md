@@ -1,4 +1,4 @@
-# Repository Design & Maintenance
+# Repository Design
 
 상태: 공통 repository scheme과 문서 소유권의 원본. Engine/Site 고유 설계 절은 책임 레포의 원본을 참조한다.
 
