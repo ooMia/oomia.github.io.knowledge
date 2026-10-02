@@ -47,7 +47,7 @@ optional Engine mutation → same Docs workspace
 
 ## 4. Repository별 migration source
 
-- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
+- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 - Site: [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
 - Docs: canonical content remote와 history
 - Knowledge: 통합 목표, 전환 순서, acceptance, Evidence linkage

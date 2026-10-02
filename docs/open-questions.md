@@ -5,11 +5,10 @@
 | ID | 항목 | 현재 처리 |
 |---|---|---|
 | Q003 | 1.0 final release gate | Site `develop → main` promotion 후 새 main build/deploy에서 canonical Docs revision + Site revision + delivery result를 연결해 확정 |
-| Q006 | 계획 Item의 Objective/Target Release 빈 값 허용 규칙 | Project 운영상 실제 불편이 확인될 때 확정 |
-| Q007 | Work Type Validation 추가 | 보류. 현재 기본값 유지 |
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
 | Q025 | stable document identity / sidecar linkage | path-independent identity가 제품 수준 요구가 될 때 결정 |
+| Q026 | Wiki / public reference graph layer | 불변에 가까운 공개 설명을 GitHub Wiki 등으로 분리할 가치가 생기면 source/docs와의 ownership·linking·local clone 정책을 결정 |
 
 ## Knowledge-level Open Question이 아닌 것
 

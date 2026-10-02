@@ -4,13 +4,14 @@ Project #11에서 repository는 작업의 1차 영역을 이미 제공한다. �
 
 ## Classification axes
 
+이 문서는 두 가지 분류만 소유한다.
+
 | Axis | Question | Cardinality |
 |---|---|---|
-| Repository | 어디의 작업인가? | GitHub native, exactly one |
 | Work Type | 왜 이 Issue가 존재하는가? 주된 delta는 무엇인가? | exactly one |
 | Labels | 무엇에 관한 작업인가? 반복해서 찾을 가치가 있는 관심사는 무엇인가? | zero or more |
-| Status | 지금 어떤 실행 상태인가? | exactly one |
-| Iteration | 언제 수행했는가? | committed / historical work only |
+
+Repository는 GitHub native state, Status/Iteration의 schema와 completeness는 [Project Fields](fields.md), lifecycle 의미는 [Planning Model](planning-model.md)이 소유한다.
 
 Work Type은 Issue 전체 Outcome을 분류한다. 개별 commit의 conventional type, 사용 기술, 구현 방법, 실험성, CI 여부를 나타내지 않는다.
 
@@ -69,15 +70,17 @@ Labels는 optional controlled tags다. Work Type을 반복하지 않고, reposit
 
 보통 domain/component label 1개와 필요한 cross-cutting label 0–2개면 충분하다. 3개를 넘어가면 Issue 범위 또는 label granularity를 다시 검토한다.
 
-## Initial controlled tags
+## Label registry
 
-Canonical registry는 [config/labels.json](../config/labels.json)이다. registry에 없는 label은 필요성이 반복적으로 확인된 뒤 추가한다.
+실제 허용 label의 canonical registry는 [config/labels.json](../config/labels.json)이다. 정책과 registry의 역할을 분리한다.
 
-| Repository | Initial labels |
-|---|---|
-| Engine | `mcp`, `inference`, `filesystem`, `ci`, `dependencies`, `orchestration` |
-| Site | `content-loading`, `deployment`, `ci`, `orchestration` |
-| Knowledge | `orchestration`, `planning` |
+- 이 문서: label을 **언제 만들고 선택하는지**에 대한 의미·granularity·negative examples
+- `config/labels.json`: 실제 label 이름, 적용 repository, 권장 색상, GitHub description
+- GitHub repository labels: registry를 materialize한 operational state
+
+`labels.json`은 처음 파일만 열어도 용도를 이해할 수 있도록 `description`, `policy`, `fields`, `labels`를 포함한다. registry에 없는 label을 Agent가 즉석에서 만들지 않는다.
+
+label을 추가·변경할 때는 먼저 반복 검색/filtering 가치가 위 기준을 만족하는지 확인한 뒤 registry를 수정한다. 실제 GitHub label 생성·수정 방법은 이를 수행하는 owning repository automation 또는 운영 절차가 소유한다.
 
 ## Few-shot examples
 
@@ -95,13 +98,3 @@ Canonical registry는 [config/labels.json](../config/labels.json)이다. registr
 | Knowledge | 기존 정책의 의미를 바꾸지 않고 설명을 정리 | Documentation | `planning` |
 | Knowledge | Project field 대안을 비교하고 결론/Evidence를 확보 | Investigation | `planning` |
 | Knowledge | Issue activation automation의 중복 실행 버그 수정 | Fix | `orchestration` |
-
-## Completeness
-
-- Work Type: 활성 Project Item이면 반드시 하나.
-- Labels: 0개 이상. 비어 있어도 정상이다.
-- Iteration: committed work 또는 실제 수행된 historical work에 둔다. Backlog는 일반적으로 비운다.
-- Linked pull requests: 구현 PR이 존재하면 GitHub native Development relation으로 연결한다.
-- Parent/Sub-issues: 실제 작업 구조가 있을 때만 사용한다.
-
-과거 `Experiment` option을 `Investigation`으로 이름만 바꾼 결과는 자동으로 올바른 분류가 된 것으로 간주하지 않는다. Migration 시 모든 기존 Item을 Outcome 기준으로 다시 판정한다.

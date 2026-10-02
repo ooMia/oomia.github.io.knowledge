@@ -4,14 +4,13 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-# handoff/current.md is intentionally excluded: the bundle carries durable context, not live session state.
 ORDER = [
     'CONTEXT.md', 'docs/architecture-transition.md', 'docs/architecture.md',
-    'docs/development-toolchain.md', 'docs/repository-design.md',
+    'docs/development-toolchain.md', 'docs/repository-design.md', 'docs/maintenance.md',
     'docs/planning-model.md', 'docs/fields.md', 'docs/git-workflow.md',
-    'docs/project-orchestration.md', 'docs/labels.md', 'docs/release-1.0.md',
+    'docs/project-orchestration.md', 'docs/release-1.0.md',
     'docs/implementation-map.md', 'docs/operating-rhythm.md',
-    'docs/decisions.md', 'docs/open-questions.md', 'CONTRIBUTING.md',
+    'docs/open-questions.md',
 ]
 
 def main():
@@ -32,7 +31,7 @@ def main():
     parts = ['# Publishing Platform — Chat Context Bundle\n\n'
              'GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.\n'
              'Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
-             '상대 링크는 원본 레포 기준입니다. 템플릿은 별도로 참조합니다. 과거 상세 history는 archive/main-before-cleanup-20260921 branch에 보존됩니다.\n']
+             '상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.\n']
     for name in ORDER:
         content = (ROOT / name).read_text()
         def rewrite(match):
