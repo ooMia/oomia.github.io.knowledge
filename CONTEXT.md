@@ -2,7 +2,7 @@
 
 Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 **canonical entry point**다. 먼저 현재 작업 유형을 식별하고 아래 routing에서 필요한 최소 원본만 읽는다. 구현 상세는 책임 repository의 문서와 코드가 소유한다.
 
-이전 작업을 실제로 이어받거나 최근 checkpoint가 필요한 경우에만 [Current Handoff](handoff/current.md)를 읽는다. handoff는 정책이나 최신 구현 완료의 증거가 아니다.
+작업을 이어받을 때는 이 문서에서 필요한 원본을 확인한 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
 
 ## 자주 하는 작업
 
@@ -48,7 +48,7 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 2. 이미 확정된 정책의 문서 반영·참조 정리·검증은 주도적으로 수행한다. 새로운 제품 정책 선택이나 실제 cross-repository ownership이 불확실한 경우만 질문한다.
 3. GitHub 관련 핵심 객체의 주소를 알고 있다면 처음 소개할 때 클릭 가능한 링크로 제시한다.
 4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 blocker로 만들지 않는다.
-5. 세션별 임시 상태는 `handoff/current.md`에 두고, 지속할 규칙은 owning canonical source에 둔다.
+5. 다음 세션에서도 이어져야 하는 작업 상태는 Project Item, Issue, PR 또는 owning repository Evidence에 남긴다. Chat 세션 전용 handoff를 별도 원장으로 만들지 않는다.
 
 ## 문서 사용
 
