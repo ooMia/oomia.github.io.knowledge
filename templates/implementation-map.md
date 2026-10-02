@@ -12,4 +12,4 @@
 | Presentation | 미검증 | — | — |
 | Delivery | 미검증 | — | — |
 
-상태: 미검증 / 미충족 / 부분 충족 / 충족. 충족 판정에는 재현 방법과 실제 결과를 기록한다. 운영 중인 Map의 소유 위치는 관련 Project Item에서 연결한다.
+상태: 미검증 / 미충족 / 부분 충족 / 충족. 충족 판정에는 재현 방법과 실제 결과를 기록한다. 이 템플릿은 조사 초안이며, 1.0 capability의 canonical snapshot은 [Knowledge Implementation Map](../docs/implementation-map.md)에 반영한다.
