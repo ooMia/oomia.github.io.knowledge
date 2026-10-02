@@ -27,8 +27,8 @@
 
 ## 대화에서 변경을 가져올 때
 
-사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 `main`은 과거 대화 provenance를 별도 원장으로 유지하지 않는다. 과거 근거가 꼭 필요하면 `archive/main-before-cleanup-20260921` branch를 확인하고, 현재 문서에는 현재 유효한 결론만 반영한다.
+사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 문서에는 현재 유효한 결론만 반영하고, 과거 근거가 꼭 필요하면 Git history와 immutable Evidence를 확인한다.
 
 ## 공유
 
-이 레포의 현재 `main`은 raw conversation transcript나 source/turn provenance chronology를 보관하지 않는다. 과거 자료는 historical archive branch에 보존하며, Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`다.
+이 레포는 raw conversation transcript나 source/turn provenance chronology를 별도 원장으로 보관하지 않는다. Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`이며, 과거 변경 근거는 Git history와 연결된 Evidence에서 추적한다.
