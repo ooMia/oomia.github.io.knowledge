@@ -2,7 +2,7 @@
 
 GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.
 Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.
-상대 링크는 원본 레포 기준입니다. 템플릿은 별도로 참조합니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.
+상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.
 
 
 ---
@@ -19,13 +19,13 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 
 | 작업 | 참조 순서 |
 |---|---|
-| Issue 생성·수정·활성화 | Issue 형식 (`templates/repository-issue.md`) → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
+| Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 작업 성격에 맞는 template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | Git Workflow (`docs/git-workflow.md`) → 통합 목표 (`docs/release-1.0.md`) → 검수 연결 (`docs/implementation-map.md`) |
 | 새 레포 scaffolding·디렉토리 역할 | Repository Design (`docs/repository-design.md`) → Node/JS/TS 또는 Python이면 Development Toolchain (`docs/development-toolchain.md`) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
-| Knowledge 문서 수정 | 소유권 (`docs/repository-design.md`) → 해당 원본 → CONTRIBUTING (`CONTRIBUTING.md`) |
+| Knowledge 문서 수정 | Knowledge Maintenance (`docs/maintenance.md`) → 소유권 (`docs/repository-design.md`) → 해당 원본 |
 | 계획·분류·완료 검토 | Work Classification (`docs/work-classification.md`) → Planning (`docs/planning-model.md`) → Fields (`docs/fields.md`) → 실제 Item의 Outcome/AC/Evidence |
 | 기록·발표·주간 회고 | Operating Rhythm (`docs/operating-rhythm.md`) → 실제 Project Status Update·Evidence |
 | 제품/cross-repository 미결 사항 | Open Questions (`docs/open-questions.md`) |
@@ -277,7 +277,7 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 
 # Development Toolchain — Vite+ / uv First
 
-상태: 2026-09-21 project-wide engineering policy.
+상태: project-wide engineering policy.
 
 이 문서는 Publishing Platform repository의 **개발 도구에 대한 project-wide 기본값**을 소유한다. 정확한 runtime/tool version, framework command, CI job 구성과 repository-specific 예외는 각 owning repository가 소유한다.
 
@@ -560,7 +560,7 @@ Vite+ official image는 build/CI/devcontainer에 사용할 수 있지만 product
 
 runtime image를 제공하는 repository는 build toolchain과 production runtime surface를 분리한다. multi-stage build는 기본 후보이며, 실제 stage 구성·artifact·runtime dependency·mount/credential 계약은 해당 구현 repository가 소유한다.
 
-Engine의 현재 container/runtime 설계는 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)과 [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)를 참조한다.
+Engine의 현재 container/runtime 설계는 [Engine 원본](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)과 [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)를 참조한다.
 
 ## 13. IDE
 
@@ -627,11 +627,11 @@ Python repository 또는 Python application/package가 생기면 `uv`를 기본 
 
 `pip`, `pip-tools`, Poetry, Pipenv, Conda 등이 실제 runtime/distribution 제약 때문에 필요할 수는 있지만, 단순 선호나 기존 습관만으로 `uv`와 같은 책임을 중복 소유하게 하지 않는다. 예외가 필요하면 해당 repository가 이유와 검증 방법을 소유한다.
 
-## 17. Current repository implications
+## 17. Repository-local application
 
 공통 기준을 적용한 실제 구성은 각 레포의 문서와 설정이 소유한다. 현행 버전·명령·전환 상태를 이 공통 지침에 복제하지 않는다.
 
-- Engine: [개발 명령과 버전](https://github.com/ooMia/oomia.github.io.engine/blob/develop/README.md#development), [독립 이력 전환](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md). legacy의 `db:*` / `cms:*` task 설명을 현재 Engine 상태로 사용하지 않는다.
+- Engine: [개발 명령과 버전](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md#development), [독립 이력 전환](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md). legacy의 `db:*` / `cms:*` task 설명을 현재 Engine 상태로 사용하지 않는다.
 - Site: [consumer integration / Turbo 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#toolchain-전환).
 
 ## External references reviewed
@@ -957,6 +957,44 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 ---
 
+<!-- BEGIN SOURCE: docs/maintenance.md -->
+
+# Knowledge Maintenance
+
+이 문서는 `ooMia/oomia.github.io.knowledge` **자체를 수정·유지하는 방법**을 설명하는 repository-local guide다. 외부 contributor를 위한 기여 정책이 아니며, 프로젝트 전체의 공통 정책을 새로 정의하지 않는다.
+
+## 수정 절차
+
+1. CONTEXT (`CONTEXT.md`)에서 현재 작업에 필요한 canonical source를 찾는다.
+2. 규칙을 바꿀 때는 실제 owner 문서만 수정한다. 같은 정책을 다른 문서에 복제하지 않는다.
+3. 아직 확정되지 않은 제품/cross-repository 판단은 Open Questions (`docs/open-questions.md`)에 남긴다.
+4. 구현 상태나 완료 Evidence를 바꾸려면 owning repository의 live code, Issue, PR, workflow/deployment 결과를 확인한다.
+5. Knowledge 수정 후 `python3 scripts/bundle.py`를 실행해 내부 링크를 검증하고 `dist/CONTEXT-BUNDLE.md`를 재생성한다.
+6. 최종 diff가 하나의 명확한 정책/문서 변화로 읽히는지 확인한다.
+
+## 작업 상태
+
+- 다음 세션까지 이어져야 하는 실행 상태는 GitHub Project #11, Issue, PR 또는 owning repository Evidence에 남긴다.
+- 별도 handoff 파일이나 세션 로그를 현재 상태의 원장으로 유지하지 않는다.
+- 과거 변경 근거가 필요하면 Git history와 immutable Evidence를 사용한다.
+
+## Issue / PR
+
+- Repository Issue를 생성하거나 크게 수정할 때는 `.github/ISSUE_TEMPLATE/`에서 작업 성격에 맞는 template을 먼저 선택한다.
+- Issue의 operational metadata는 GitHub Project/native fields가 소유하며 body에 현재값을 중복 기록하지 않는다.
+- branch/PR/lifecycle 의미는 Planning Model (`docs/planning-model.md`), Project Orchestration (`docs/project-orchestration.md`), Git Workflow (`docs/git-workflow.md`)을 따른다.
+
+## 문서 경계
+
+- Knowledge는 공통 semantics와 project-wide invariant를 소유한다.
+- repository-specific runtime, workflow, API, token, runner, branch topology와 구현 상세는 owning repository가 소유한다.
+- 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약 문서는 canonical source를 대체하지 않는다.
+
+<!-- END SOURCE: docs/maintenance.md -->
+
+
+---
+
 <!-- BEGIN SOURCE: docs/planning-model.md -->
 
 # Planning Model
@@ -976,7 +1014,7 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 ## Item / Issue 작성
 
-Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다. Project Item 초안에는 Project Item template (`templates/project-item.md`)을 사용할 수 있다.
+Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다.
 
 불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
@@ -1057,7 +1095,7 @@ Evidence는 **Item의 Outcome이 실제로 달성되었음을 재현 가능하�
 | durable shared content revision | `ooMia/oomia.github.io.docs` Git commit |
 | 구현·테스트·구체적인 계약 | 책임을 소유한 구현 레포 |
 
-Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 Architecture Transition (`docs/architecture-transition.md`)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다. 형식 기준은 Project README template (`templates/project-readme.md`)을 사용한다.
+Architecture migration이 Active인 동안 Engine/Site/Docs 관련 Item은 Architecture Transition (`docs/architecture-transition.md`)의 phase와 safety rule을 위반하지 않는지 먼저 확인한다. GitHub Project README는 위 정보를 복제하는 원본이 아니라 **탐색용 인덱스**다. 장기 정의는 소유 문서에 두고 Project README에는 원본 링크와 Project 운영 진입점만 남긴다.
 
 ## 릴리스와 시간
 
@@ -1387,8 +1425,6 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## 갱신 규칙
 
-새 기준 revision을 조사할 때는 Implementation Map 조사 템플릿 (`templates/implementation-map.md`)을 초안으로 사용할 수 있다. 조사 결과의 canonical snapshot은 별도 Map으로 분산하지 않고 이 문서에 반영한다.
-
 - 이 문서는 live branch 상태가 아니라 immutable Evidence 기반 snapshot이다.
 - architecture가 변경되면 같은 코드 revision도 새 Product Boundary에 대해 다시 평가할 수 있다.
 - legacy implementation 성공을 현재 target 완료로 간주하지 않는다.
@@ -1407,19 +1443,15 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버서더 활동과 포트폴리오 개발의 기록을 하나의 흐름으로 연결한다.
 
-- 매주 작은 발표, 매 4주 큰 발표 또는 working system review.
-- 가용 시간은 대화 당시 주 50시간, 첫 주 25시간의 계획 가정. 현재 주의 실시간 예산이 아니다.
-- Daily 기록은 20–30분 버퍼를 둔다. 주말 정리는 초기 60분을 잡고 실제 소요 시간을 기록해 조정한다.
-- 주말 이전에 발표 일정을 잡는다. 통상 토요일 밤 또는 일요일 낮이며 확정 일정은 아니다.
-- Daily는 비공개, 주말 정리 결과를 공개하는 방향에 사용자가 동의했다.
+- 매주 작은 발표, 매 4주 큰 발표 또는 working system review를 기본 cadence로 둔다.
+- Daily는 짧은 Evidence capture에 집중하고, 주말 review에서 한 주의 결과를 재구성한다.
+- Daily 기록은 비공개 작업 기록으로 두고, 공개할 가치가 있는 결과는 주간 review에서 별도 산출물로 만든다.
 
 ## Evidence → Story
 
-매일 목표, 실제 결과, screenshot/GIF/video/voice/commit 등 Evidence, 배운 점, 다음 행동을 남긴다. 미디어는 GitHub에 업로드해 링크로 연결하는 방향을 선호했다. 구체적인 공개 범위와 저장 위치는 확정되지 않았다.
+매일 목표, 실제 결과, screenshot/GIF/video/voice/commit 등 Evidence, 배운 점, 다음 행동을 남긴다. Evidence는 나중에 다시 열 수 있는 durable link나 immutable revision에 연결한다.
 
-주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그를 중심으로 하고 LinkedIn을 초기 후보로 둔다. 자체 블로그가 준비되기 전 발행 채널은 미결이다.
-
-기록 형식이 필요하면 Daily Evidence (`templates/daily-evidence.md`)와 Weekly Review (`templates/weekly-review.md`) 템플릿을 사용한다.
+주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그 등 목적에 맞는 채널로 발행하되, 특정 플랫폼 선택을 이 공통 리듬의 정책으로 고정하지 않는다.
 
 ## 기능 실험 참조
 
@@ -1508,45 +1540,3 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 구현 과정에서 반복되는 제약이 실제 제품 또는 cross-repository coordination 문제로 승격될 때만 새 Knowledge decision을 만든다.
 
 <!-- END SOURCE: docs/open-questions.md -->
-
-
----
-
-<!-- BEGIN SOURCE: CONTRIBUTING.md -->
-
-# 수정 방법
-
-1. CONTEXT.md (`CONTEXT.md`)에서 해당 규칙을 소유하는 파일을 찾는다.
-2. 원본 Markdown을 수정한다. 새로운 제안은 확정된 규칙으로 섞지 말고 open-questions.md (`docs/open-questions.md`)에 기록한다.
-3. 원본의 위치나 탐색 경로가 바뀌면 Current Decisions (`docs/decisions.md`)의 링크를 갱신한다. 정책 본문은 소유 문서에만 반영하고 인덱스에 요약 복제하지 않는다.
-4. 구현 상태를 변경하려면 Implementation Map (`docs/implementation-map.md`)의 기준 revision보다 구현 레포가 진행되었는지 확인하고 실제 코드·테스트·commit/deployment Evidence를 다시 조사한다.
-5. `python3 scripts/bundle.py`를 실행해 context bundle을 갱신한다.
-6. 변경 내용을 Git diff로 검토하고 커밋한다.
-
-규칙의 중복 복사는 피한다. GitHub Project README와 필드 description은 이 레포의 canonical 정의를 가리키는 탐색 계층으로 유지한다. 별도 레포의 코드와 계약을 함께 바꾸는 경우 관련 PR/commit을 서로 연결한다.
-
-## Branch / PR workflow
-
-공통 Git Workflow (`docs/git-workflow.md`)의 invariant를 따른다. 실제 branch topology, runner, CI/release 세부 운용은 이 repository의 workflow/settings가 소유하며 공통 문서에 복제하지 않는다.
-
-## Evidence
-
-설계·계획 정의 자체가 Outcome이면 관련 canonical 문서의 immutable commit/permalink를 완료 Evidence로 사용할 수 있다. `main` 링크는 최신 정의를 찾는 reference로 사용한다.
-
-기능 구현, 성능·신뢰성 검증, 실제 publishing/deployment 완료에는 설계 링크를 대체 Evidence로 사용하지 않는다. 책임 레포의 코드·테스트·실행 결과·commit/PR·deployment처럼 재현 가능한 자료가 필요하다.
-
-## 세션 인계
-
-의미 있는 작업 세션을 종료할 때 장기적으로 남아야 할 규칙·결정은 먼저 owning canonical 문서에 반영한다. 아직 진행 중인 branch/Issue/Project 상태, 재검증 항목, 다음 안전한 행동은 `handoff/current.md`에 기록한다.
-
-`handoff/current.md`는 세션 로그나 의사결정 원장이 아니다. 매번 최신 checkpoint로 overwrite하고, 과거 상태는 Git history에 맡긴다. 구현 수준은 handoff가 아니라 revision-bound Implementation Map (`docs/implementation-map.md`)과 책임 레포 Evidence로 판정한다.
-
-## 대화에서 변경을 가져올 때
-
-사용자의 명시적 정정 → 이후 사용자 메시지에 반영된 규칙 → 최신 assistant 제안 → 오래된 초안 순으로 근거를 판단한다. 시간상 최신이라는 이유만으로 제안을 사용자 승인으로 바꾸지 않는다. 현재 문서에는 현재 유효한 결론만 반영하고, 과거 근거가 꼭 필요하면 Git history와 immutable Evidence를 확인한다.
-
-## 공유
-
-이 레포는 raw conversation transcript나 source/turn provenance chronology를 별도 원장으로 보관하지 않는다. Chat에 필요한 기본 첨부물은 `dist/CONTEXT-BUNDLE.md`이며, 과거 변경 근거는 Git history와 연결된 Evidence에서 추적한다.
-
-<!-- END SOURCE: CONTRIBUTING.md -->
