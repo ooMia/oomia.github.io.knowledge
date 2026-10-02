@@ -65,7 +65,6 @@ async function fetchProject(token, owner, number) {
               __typename
               ... on ProjectV2FieldCommon { id name dataType }
               ... on ProjectV2SingleSelectField { options { id name } }
-              ... on ProjectV2MultiSelectField { multiSelectOptions { id name } }
               ... on ProjectV2IterationField {
                 configuration {
                   iterations { id title }
@@ -109,19 +108,10 @@ function makeFieldValue(field, wanted) {
     return { singleSelectOptionId: optionId(field.options, value, field.name) };
   }
 
-  if (field.__typename === "ProjectV2MultiSelectField") {
-    const values = Array.isArray(wanted) ? wanted : [wanted];
-    return { multiSelectOptionIds: values.map((value) => optionId(field.multiSelectOptions, value, field.name)) };
-  }
-
   if (field.__typename === "ProjectV2IterationField") {
     const iterations = [...field.configuration.iterations, ...field.configuration.completedIterations]
       .map(({ id, title }) => ({ id, name: title }));
     return { iterationId: optionId(iterations, wanted, field.name) };
-  }
-
-  if (field.__typename === "ProjectV2Field" && field.dataType === "TEXT") {
-    return { text: Array.isArray(wanted) ? wanted.join(", ") : String(wanted) };
   }
 
   throw new Error(`Unsupported field type for "${field.name}": ${field.__typename}/${field.dataType}`);
@@ -166,9 +156,6 @@ async function main() {
     ["Status", seed.status ?? "Todo"],
     ["Iteration", seed.iteration],
     ["Work Type", seed.workType],
-    ["Scope", seed.scope],
-    ["Objective", seed.objective],
-    ["Target Release", seed.targetRelease],
   ]);
 
   for (const [fieldName, wanted] of desired) {

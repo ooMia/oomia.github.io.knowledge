@@ -1,7 +1,5 @@
 # Planning Model
 
-상태: 사용자 제시 규칙에 최신 필드 분리와 delta 모델을 반영. 출처: S2 `d7815342`, `4a49654f`; S3 `5a382a65`, `924e880a`.
-
 ## 계획 단위
 
 | 개념 | 정의 / 작성 규칙 |
@@ -33,17 +31,19 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 ### Draft와 활성화
 
-- 가능한 경우 GitHub Project의 native Draft Issue를 사용한다. 현재 사용하는 connector가 이를 지원하지 않으면 repository issue를 `draft:` prefix + `closed / not_planned` 상태로 보관하는 fallback을 사용할 수 있으며, 이를 native Draft와 혼동하지 않는다.
+- 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
-- 사용자가 Draft Issue를 명시적으로 발행/활성화하면 **같은 작업에서 Development branch를 반드시 생성·연결한다.** branch 생성은 별도 사용자 요청을 기다리지 않는다.
-- 활성화 시 제목의 draft 표기를 제거하고 Project Status를 `Todo`로 전환한 뒤, 실제 구현 착수 시 `In Progress`로 이동한다.
+- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 Development branch를 즉시 만들지 않는다.
+- 아직 Iteration commitment가 없으면 `Backlog`다. 실행 주차가 정해지면 Iteration을 설정하고 `Todo`로 전환한다.
+- `Todo`는 실행 가능하지만 아직 실제 작업이 시작되지 않은 상태다.
+- 실제 구현을 시작하며 Development branch를 생성·연결하는 순간 `In progress`로 전환한다.
+- linked PR이 등록되면 branch 생성 여부와 무관하게 실제 작업이 시작된 것으로 보고 `In progress`로 전환한다.
+- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다. 실제 작업이 진행 중이면 필요에 따라 `In progress`로 명시한다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
-- 코드 변경을 직접 소유하지 않는 cross-repo coordination Item은 branch를 만들지 않을 수 있다. 대신 연결된 각 repository implementation issue가 활성화되는 순간 각각의 branch를 생성한다.
 
-- Project orchestration Action이 설치된 repository에서는 Issue 활성화 이벤트가 Project #11 등록·field 초기화·Development linked branch 생성을 수행한다. 사용자는 별도 branch 생성 요청을 반복할 필요가 없다.
-- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둔다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
-- Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
-- 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
+- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. Development relation은 activation이 아니라 실제 작업 시작을 표현한다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- activation과 lifecycle materialization의 공통 의미는 [Project Orchestration](project-orchestration.md)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
 
@@ -51,17 +51,20 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 
 | Status | 의미 |
 |---|---|
-| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 일반적으로 Iteration을 비운다. |
-| Todo | Iteration에 commit되었고 착수 가능한 상태다. |
-| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. Iteration과 Development relation을 두지 않는다. |
+| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. Development branch/PR은 없다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. Development branch 생성 또는 linked PR 등록은 이 상태의 명시적 신호다. |
 | Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
-- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리한다. 이 repository state는 draft storage fallback일 뿐 cancellation을 뜻하지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
+- Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
+- Development branch나 linked PR이 존재하는 open Item은 `Backlog`나 `Todo`에 머물지 않는다.
+- branch/PR 없이 수행되는 작업도 실제 실행 전에 Iteration commitment를 가져야 하며, Backlog 상태에서 작업하지 않는다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
+- activation/reconciliation automation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. automation ownership boundary는 [Project Orchestration](project-orchestration.md#ownership-boundary)을 따른다.
 
 ## 완료 판정
 

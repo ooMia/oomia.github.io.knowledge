@@ -1,130 +1,89 @@
-# Project orchestration automation
+# Project Orchestration
 
-GitHub repository Issue가 활성화될 때 [Publishing Platform Project #11](https://github.com/users/ooMia/projects/11)의 Item과 Development branch를 자동으로 초기화한다.
+Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. 실제 workflow 파일, script, token/permission, runner, webhook process, branch base와 같은 실행 세부사항은 이를 구현하는 owning repository가 소유한다.
 
-## Authentication
+## Scope
 
-Project #11은 user-owned Project이므로 Actions의 repository-scoped `GITHUB_TOKEN`으로 접근할 수 없다. 각 Issue-owning repository에 classic PAT을 `PROJECT_TOKEN` secret으로 저장한다.
+- Repository Issue가 활성화되면 Project #11의 실행 상태와 연결될 수 있다.
+- activation 이후의 current state는 GitHub Project fields와 repository-native Issue/PR relation이 소유한다.
+- Docs처럼 Issue-driven implementation repository가 아닌 저장소는 동일한 orchestration을 강제하지 않는다.
+- 공통 branch/PR/change-management invariant는 [Git Workflow](git-workflow.md)를 따른다.
 
-현재 automation에 필요한 classic PAT scope는 다음 두 개다.
+## Issue activation semantics
 
-- `project`: Project #11 조회·Item 추가·custom field 수정
-- `repo`: private repository Issue를 Project item으로 조회하고 필요한 repository 리소스에 접근
+활성 Repository Issue는 다음 초기화를 요청할 수 있다.
 
-`workflow`, `admin:*`, `user`, `packages` scope는 현재 runtime automation에 필요하지 않다. PAT로 workflow 파일 자체를 생성·수정하는 self-modifying workflow는 구현하지 않는다.
+1. Project #11 Item 등록
+2. 초기 `Status / Iteration / Work Type` materialization
 
-Repository 내부 Development branch 생성에는 PAT을 사용하지 않는다. 각 workflow의 `GITHUB_TOKEN`에 최소 권한만 부여한다.
+Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
-## 적용 범위
+activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
 
-공통 branch·PR·release 전략은 [Git Workflow](git-workflow.md)를 따른다. repository별로 같은 base branch 표를 반복 관리하지 않는다.
-
-현재 Issue 작업 대상은 Knowledge, Engine, Site다. `oomia.github.io.docs`는 editor가 작성하고 필요하면 후처리한 콘텐츠의 remote이며, 현재 이 레포 자체에 Issue를 할당하지 않는다. 해당 레포에 별도 Issue 운영 문서를 만들지 않는다.
-
-공통 생성 절차·Project seed·인증·자동화 계약은 이 문서가 소유한다. 실행되는 workflow/script와 적용된 권한 설정은 각 실행 레포가 소유하며 공통 설명을 복제하지 않는다. 실제 적용 여부는 작업 시 확인한다.
-
-## Workflow와 Node script의 역할
-
-GitHub Actions workflow 정의는 `.github/workflows/*.yml`이 소유한다. YAML은 trigger, runner, job permission, secret 전달을 정의한다.
-
-복잡한 GraphQL/JSON 처리는 repository script로 분리하고 YAML의 `run`에서 Node로 실행한다.
-
-```text
-issue-activated.yml
-├─ project job
-│  └─ node .github/scripts/sync-project.mjs
-└─ development job
-   └─ node .github/scripts/create-development-branch.mjs
-```
-
-이는 GitHub Actions의 별도 파일 형식이 아니라 workflow가 runner에서 repository script를 실행하는 일반적인 방식이다.
-
-## Issue activation
-
-workflow는 `opened`, `reopened` 및 수동 `workflow_dispatch`를 지원한다.
-
-자동 실행 조건:
-
-1. Issue가 open 상태다.
-2. 제목이 `draft:`로 시작하지 않는다.
-
-따라서 fallback draft가 생성 순간 잠시 open이어도 Project 등록과 branch 생성이 발생하지 않는다.
-
-### Project job
-
-- secret: `PROJECT_TOKEN`
-- Project: `ooMia/projects/11`
-- 역할: Item 추가 및 Status / Iteration / Work Type 초기화
-- field ID와 option ID는 runtime에 이름으로 조회
-- 동일 Item을 다시 추가하면 GitHub가 기존 Item ID를 반환하므로 replay 가능
-
-### Development job
-
-- token: repository `GITHUB_TOKEN`
-- permissions: `contents: write`, `issues: write`
-- 역할: GitHub GraphQL `createLinkedBranch`로 현재 repository에 Issue-linked Development branch 생성
-- `DEVELOPMENT_BASE`는 Git Workflow의 공통 개발 branch를 사용한다.
-- 콘텐츠 레포의 Issue 비대상 범위는 위 적용 범위를 따른다.
-- `project-seed.development === false`이면 생략
-
-Project PAT은 이 job에 전달하지 않는다.
-
-### Lifecycle synchronization boundary
-
-현재 automation은 **activation 초기화**만 소유한다. trigger는 `opened`, `reopened`, manual `workflow_dispatch`이며 Issue `closed` 이벤트를 Project Status에 반영하지 않는다.
-
-따라서 Issue 종료 후 `Status=Done` 또는 다른 종료 상태가 필요하면 Project #11에서 직접 reconcile한다. `project-seed`는 활성화 초기값일 뿐이므로 닫힌 Issue body의 과거 `Todo` / `In Progress` 값으로 현재 Project 상태를 추론하지 않는다.
-
-close/reopen 양방향 동기화는 실제 반복 비용이 확인될 때 별도 Maintenance 작업으로 추가한다. 현재 문서는 자동화되지 않은 lifecycle을 자동화된 것처럼 설명하지 않는다.
-
-## Labels
-
-Issue/PR label은 Project field를 복제하지 않는 optional controlled tag다. orchestration 관련 작업에는 registry에 정의된 `orchestration` label을 사용한다. repository마다 필요한 label set은 다를 수 있다.
-
-상세 기준은 [Work Classification](work-classification.md)과 [Labels](labels.md)을 따른다.
+Draft 또는 아직 실행 범위가 확정되지 않은 Item은 [Planning Model](planning-model.md)의 lifecycle을 따른다. 활성화되지 않은 Draft 때문에 implementation branch를 만들지 않는다.
 
 ## Project seed
 
-새 Issue는 activation 초기값을 전달하는 hidden JSON을 가질 수 있다.
+Repository Issue는 activation 초기값을 전달하기 위해 machine-readable `project-seed`를 사용할 수 있다.
 
 ```md
 <!-- project-seed
 {
-  "iteration": "C1-W3",
+  "iteration": null,
   "workType": "Feature",
-  "status": "Todo"
+  "status": "Backlog"
 }
 -->
 ```
 
-지원 키:
+지원되는 공통 의미:
 
-- `status`
-- `iteration`
-- `workType`
-- `branch` — 기본 branch naming을 override할 때만 사용
-- `development: false` — coordination/document-only Item 등 branch가 필요하지 않을 때
+- `status`: activation 시 요청할 초기 Project Status
+- `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
+- `workType`: Issue Outcome의 Work Type
+- `development: false`: branch가 필요하지 않은 coordination/document-only work임을 명시
+- `branch`: 특정 repository implementation이 explicit override를 지원할 때 사용할 수 있는 optional hint
 
-seed는 activation 초기값 전달용이다. 활성화 이후 Project field의 canonical state는 Project #11이다.
+`project-seed`는 초기화 요청일 뿐이다. activation 이후 Project field가 current state의 source of truth이며, seed를 장기 상태 원장으로 사용하지 않는다.
 
-## Development branch naming
+seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-classification.md)을 위반하지 않아야 한다. 예를 들어 Iteration commitment가 없는 작업은 일반적으로 `Backlog`이며, `Todo`는 실제 Iteration commitment가 있는 상태다.
 
-기본 형식:
+## Development relation
 
-```text
-<issue-number>-<conventional-type>-<title-slug>
-```
+Development relation은 **실제 작업 시작의 signal**이다.
 
-예:
+- `Backlog`: Iteration commitment와 Development branch/linked PR이 없다.
+- `Todo`: Iteration commitment는 있지만 Development branch/linked PR은 아직 없다.
+- Development branch를 생성·연결하면 `In progress`로 전환한다.
+- linked PR이 등록되면 branch 생성 경로와 무관하게 `In progress`로 전환한다.
+- branch/PR 없이 수행하는 작업은 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다.
+- Development relation이 생겼는데 Iteration이 없다면 automation이 임의의 Iteration을 추론하지 않는다. 불일치로 드러내고 commitment를 먼저 정한다.
+- 실제 branch 이름, base branch, 생성 API, branch protection과 Status mutation 구현은 owning repository가 소유한다.
+- 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
 
-```text
-13-feat-decouple-canonical-source-from-visual-editor-constraints
-```
+## Lifecycle reconciliation
 
-branch는 Issue 활성화 전 미리 만들지 않는다. GitHub `createLinkedBranch`로 생성해야 Development 관계도 함께 만들어진다.
+Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)이 소유한다. orchestration automation은 그 의미를 materialize할 뿐 두 번째 lifecycle 원본이 아니다.
 
-이미 같은 이름의 branch가 존재하지만 Issue와 연결되어 있지 않다면 automation은 이를 자동 재사용하지 않고 migration error를 낸다.
+공통적으로 자동화할 수 있는 것은 명확한 invariant에 한정한다.
 
-## Manual replay
+- active candidate가 Iteration commitment를 얻으면 `Todo`로 진행할 수 있다.
+- Development branch 생성 또는 linked PR 등록은 `In progress`를 의미한다.
+- `Todo / In progress` 상태에서 commitment가 제거되면 실행 상태와 Development relation을 함께 재검토한다. active Development relation이 있는 상태를 자동으로 `Backlog`로 낮추지 않는다.
+- `closed / completed` 결과는 `Done`과 연결할 수 있다.
+- `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
 
-PAT 주입 후 기존 Issue를 다시 Project에 동기화하거나 branch 상태를 확인하려면 Actions UI에서 `Issue activation` workflow를 수동 실행하고 `issue_number`를 전달한다.
+Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
+
+## Ownership boundary
+
+| Concern | Owner |
+|---|---|
+| Status/Iteration/Work Type 의미와 DoD | [Planning Model](planning-model.md), [Work Classification](work-classification.md) |
+| activation 및 reconciliation의 공통 의미 | 이 문서 |
+| 실제 Project field 값 | GitHub Project #11 |
+| Issue/PR/Development relation | GitHub repository native state |
+| workflow/script/API/token/runner 구현 | 실행하는 owning repository |
+| 장기 webhook/runtime implementation | 해당 implementation repository의 code/docs |
+
+공통 구현 상세를 Knowledge에 복제하지 않는다. 여러 repository에서 반복되는 실행 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.

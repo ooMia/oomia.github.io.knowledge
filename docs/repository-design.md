@@ -1,4 +1,4 @@
-# Repository Design & Maintenance
+# Repository Design
 
 상태: 공통 repository scheme과 문서 소유권의 원본. Engine/Site 고유 설계 절은 책임 레포의 원본을 참조한다.
 
@@ -20,7 +20,6 @@
 | `.github/` | GitHub automation 및 GitHub용 설정 |
 | `.vite-hooks/` | repository가 관리하는 Vite+ Git hook |
 | `dist/` | 원본에서 재생성하는 build·배포 산출물 |
-| `handoff/` | 현재 작업을 이어받기 위한 일시적 checkpoint |
 
 동일한 scheme은 사용하지 않는 빈 디렉토리를 모두 만들라는 의미가 아니다. 필요한 경로를 사용할 때 위 역할을 유지한다. 새로운 공통 경로가 필요하면 여기서 의미를 먼저 정의한다. framework가 요구하는 하위 경로와 실제 package 구성은 구현 레포가 설명한다.
 
@@ -98,68 +97,45 @@ scratch repository는 처음부터 workspace를 사용할 수 있지만 package 
 
 ## 4. Dependency direction
 
-workspace dependency는 `package.json`의 실제 dependency로 표현한다.
+dependency는 실제 consumer → provider 관계가 source/config에서 명시적으로 드러나야 한다.
 
-pnpm workspace 내부 dependency는 가능한 한:
-
-```json
-{
-  "dependencies": {
-    "@oomia/example": "workspace:*"
-  }
-}
-```
-
-처럼 local-only intent를 명시한다.
-
-이 dependency graph가 Vite+ task ordering에도 사용되므로 별도의 task-runner 전용 graph를 만들지 않는다.
-
-순환 dependency가 생기면 task runner 설정으로 감추지 않고 package boundary를 다시 검토한다.
+- workspace 내부 의존성은 package/project manager가 이해할 수 있는 정식 dependency로 표현한다.
+- task ordering만을 위해 별도의 가상 dependency graph를 만들지 않는다.
+- 순환 dependency가 생기면 task runner 설정으로 감추지 않고 package boundary를 다시 검토한다.
+- Node/JS/TS workspace의 구체적인 package-manager 표기와 실행 방식은 [Development Toolchain](development-toolchain.md)을 따른다.
 
 ## 5. Dependency versions
 
-여러 workspace package가 공유하는 third-party dependency는 root `pnpm-workspace.yaml` catalog에 둘 수 있다.
+여러 package가 같은 compatibility/version policy를 공유하면 한 곳에서 관리하는 것을 우선한다.
 
-catalog를 사용할 기준:
-
-- 여러 package가 같은 version policy를 공유함
-- upgrade를 한 곳에서 관리하는 것이 유리함
-- peer/runtime mismatch를 피해야 함
-
-한 package에서만 쓰는 작은 dependency까지 무조건 catalog에 넣어 catalog를 dependency dump로 만들 필요는 없다.
-
-Vite+, TypeScript, common runtime/framework처럼 **workspace-wide toolchain/compatibility version**은 catalog에 두는 편을 우선한다.
+- 같은 version constraint를 여러 package에 반복해 drift를 만들지 않는다.
+- 한 consumer에만 필요한 dependency까지 공통 registry로 끌어올리지 않는다.
+- 실제 catalog/lockfile/version pinning 방식은 [Development Toolchain](development-toolchain.md)과 owning repository 설정이 소유한다.
 
 ## 6. Root package responsibility
 
-root package는 private orchestration package다.
-
-root에는 제품 business logic을 두지 않는다.
+workspace root는 orchestration/configuration boundary이며 제품 business logic의 기본 owner가 아니다.
 
 root가 소유할 수 있는 것:
 
-- workspace metadata
-- Vite+ config
-- TypeScript base config
-- package-manager policy
+- workspace/project metadata
+- shared compiler/tool configuration
 - repository-wide tasks
+- package/project-manager policy
 - CI/hook integration
 
-root `package.json` scripts는 최소화한다.
-
-Vite+ built-in 또는 `vp run` task를 단순히 다시 alias하는 script를 무분별하게 추가하지 않는다.
+정확한 command surface와 tool-specific config는 [Development Toolchain](development-toolchain.md)이 소유한다.
 
 ## 7. Configuration ownership
 
-가능하면 config source를 하나로 만든다.
+같은 concern의 config source를 가능한 한 하나로 만든다.
 
-- lint/fmt/check/staged → root Vite+ config
-- package manager/workspace/catalog → `pnpm-workspace.yaml`
-- TS shared compiler policy → root/base tsconfig
-- framework runtime config → owning app/package
+- repository-wide development/tool policy → root 또는 명시된 shared config
+- framework/runtime config → owning app/package
 - CI → `.github/workflows`
+- repository-local 예외 → 해당 repository code/docs
 
-동일 설정을 root와 package에 복사해 “어느 것이 적용되는지” Agent가 추론하게 만들지 않는다.
+동일 설정을 여러 위치에 복사해 Agent나 개발자가 적용 우선순위를 추론하게 만들지 않는다. Vite+/uv/package manager 등 구체 도구 선택과 명령은 [Development Toolchain](development-toolchain.md)을 따른다.
 
 ## 8. Co-location
 
@@ -229,15 +205,15 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 |---|---|
 | 공통 디렉토리 scheme·scaffolding 기준 | 이 문서 |
 | 공통 개발 도구 지침 | [Development Toolchain](development-toolchain.md) |
-| 공통 branch·PR·release 전략 | [Git Workflow](git-workflow.md) |
+| 공통 change-management invariant | [Git Workflow](git-workflow.md) |
 | Issue lifecycle·계획·완료 의미 | [Planning Model](planning-model.md) |
-| Project/Issue 공통 자동화 계약 | [Project Orchestration](project-orchestration.md) |
+| Project/Issue 공통 orchestration semantics | [Project Orchestration](project-orchestration.md) |
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
 | 작업별 읽기 경로 | [CONTEXT](../CONTEXT.md) |
 
 기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. Engine의 파일 수정 계약과 Site의 소비 계약은 각 레포가 소유하고 서로의 원본을 참조한다. 그 밖의 producer/consumer 계약에서 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
 
-공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 Git flow나 디렉토리 역할을 반복 복사할 필요는 없다.
+공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 change-management invariant나 디렉토리 역할을 반복 복사할 필요는 없다.
 
 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
@@ -251,7 +227,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 
 - Knowledge canonical link / transition guide
 - repository role
-- standard VP commands
+- standard Vite+ / uv commands
 - current verification gate
 - destructive migration safety
 - local code ownership rules
@@ -263,7 +239,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 - copy-pasted entire Knowledge
 - 이미 존재하지 않는 service/DB commands
 
-repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. live stale-file 여부는 `handoff/current.md`에서 추적한다.
+repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. 현재 실행 상태는 live Project/Issue/PR와 owning repository Evidence에서 확인한다.
 
 ## 13. Generated and local state
 
@@ -283,7 +259,7 @@ generated/local state를 source tree와 섞지 않는다.
 canonical content 자체는 Engine repository 내부 generated directory가 아니라 external/mounted docs workspace로 취급한다.
 
 
-## 17. Maintenance checklist
+## 14. Maintenance checklist
 
 새 directory/package/tool을 추가하기 전에 묻는다.
 
@@ -297,10 +273,11 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 새 tool을 추가하기 전에 묻는다.
 
-1. Vite+가 이미 제공하는가?
-2. pnpm/workspace 기능으로 충분한가?
-3. platform-native Git/GitHub 기능으로 충분한가?
-4. 기존 dependency를 재사용할 수 있는가?
+1. Node 계열이면 Vite+가 이미 제공하는가?
+2. Python이면 uv가 이미 제공하는가?
+3. package/workspace manager의 기존 기능으로 충분한가?
+4. platform-native Git/GitHub 기능으로 충분한가?
+5. 기존 dependency를 재사용할 수 있는가?
 
 비핵심 문제는 새 구현보다 기존 도구와 요구사항 조정을 우선한다.
 
