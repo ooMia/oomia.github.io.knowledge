@@ -5,6 +5,7 @@
 ## Knowledge
 
 - [제품 경계와 repository 역할](architecture.md)
+- [새 기능·동작 변경 routing](change-protocol.md)
 - [전환 coordination](architecture-transition.md)
 - [Release 1.0 목표·acceptance](release-1.0.md)
 - [Evidence linkage](implementation-map.md)
