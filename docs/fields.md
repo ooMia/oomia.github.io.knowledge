@@ -14,18 +14,11 @@ Repository, Labels, Linked pull requests, Parent issue, Sub-issues progress, Ass
 
 Objective, Scope, Target Release, Deadline, Estimate custom field는 repository와 중복되거나 일관된 판정·운영 사용이 부족하여 Project taxonomy에서 제거한다.
 
-## Status
+## Field ownership
 
-| Option | Description |
-|---|---|
-| Backlog | Valid candidate not yet committed to an Iteration. |
-| Todo | Committed to an Iteration and ready to start. |
-| In progress | Actively being worked on. |
-| Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
-| Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
-
-Lifecycle 의미는 [Planning Model](planning-model.md)을 따른다.
-
+- `Status` option의 의미와 lifecycle은 [Planning Model](planning-model.md)이 소유한다.
+- `Work Type` option의 의미와 판정은 [Work Classification](work-classification.md)이 소유한다.
+- 이 문서는 Project #11에 어떤 field가 존재하고 언제 값이 필요한지에 대한 schema/cardinality/completeness만 소유한다.
 
 ## Completeness
 
@@ -39,18 +32,3 @@ Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필
 - Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
 
 자동화는 확실한 invariant만 materialize한다. historical Iteration, Work Type, Assignee처럼 문맥 해석이 필요한 값은 현재 Project state와 Evidence를 확인해 보정한다.
-
-## Work Type
-
-GitHub Project option description은 아래 문구를 사용한다.
-
-| Option | Field description |
-|---|---|
-| Feature | Adds or extends an intended behavior or rule within the owning repository. |
-| Fix | Restores behavior or rules that were already intended or defined. |
-| Refactor | Changes internal structure while preserving intended observable or normative behavior. |
-| Maintenance | Keeps the repository healthy without a meaningful behavior, rule, or structural redesign. |
-| Documentation | Improves communication of existing behavior, rules, or knowledge without changing the normative state. |
-| Investigation | Reduces uncertainty through conclusions and evidence rather than making a production change the outcome. |
-
-Work Type은 commit type이나 기술 영역이 아니다. 상세 decision tree, Investigation 승격 정책, few-shot examples는 [Work Classification](work-classification.md)을 따른다.
