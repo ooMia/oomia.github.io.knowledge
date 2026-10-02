@@ -25,6 +25,17 @@
 - Parent Item: <실제 링크>
 - Contract / decision: <관련 원본 문서>
 
+## Impact
+
+- **Ownership:** <primary owner와 실제 수정 repository>
+- **Contract surfaces:** <영향 받는 canonical contract/schema; 없으면 None>
+- **Persistent state:** <새로 생기거나 변경되는 durable state; 없으면 None>
+- **External effects:** <network / paid call / remote mutation / credential boundary; 없으면 None>
+- **Cross-repository dependency:** <producer/consumer 또는 shared semantics; 없으면 None>
+- **Open questions:** <Knowledge OQ 링크; 없으면 None>
+
+적용되는 항목만 간결하게 적고, 상세 규칙은 [Feature Change Protocol](../docs/change-protocol.md)과 실제 owner의 canonical source를 참조한다.
+
 ## Evidence
 
 - <PR, 테스트, 실행 결과와 재현 방법>
