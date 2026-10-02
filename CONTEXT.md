@@ -9,10 +9,10 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | Issue 생성·수정·활성화 | [Issue 형식](templates/repository-issue.md) → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
-| 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Issue-linked branch](docs/project-orchestration.md#development-branch-naming) → 해당 Issue |
+| 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-relation) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
-| 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → JS/TS이면 [Development Toolchain](docs/development-toolchain.md) |
+| 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → Node/JS/TS 또는 Python이면 [Development Toolchain](docs/development-toolchain.md) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
 | Knowledge 문서 수정 | [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 → [CONTRIBUTING](CONTRIBUTING.md) |
 | 계획·분류·완료 검토 | [Work Classification](docs/work-classification.md) → [Planning](docs/planning-model.md) → [Fields](docs/fields.md) → 실제 Item의 Outcome/AC/Evidence |
