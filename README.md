@@ -6,7 +6,7 @@ Publishing Platform의 **PM/coordination repository**다. 공통 workflow·개�
 
 ## 사용과 수정
 
-- 작업 이어받기: [Current Handoff](handoff/current.md)
+- 작업 이어받기: [CONTEXT](CONTEXT.md) → live Project #11 → 관련 Issue/PR
 - 제품 경계: [Architecture](docs/architecture.md)
 - 통합 목표: [Release 1.0](docs/release-1.0.md)
 - 검수 연결: [Implementation Map](docs/implementation-map.md)
