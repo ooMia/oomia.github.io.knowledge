@@ -31,7 +31,7 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 ### Draft와 활성화
 
-- 가능한 경우 GitHub Project의 native Draft Issue를 사용한다. 현재 사용하는 connector가 이를 지원하지 않으면 repository issue를 `draft:` prefix + `closed / not_planned` 상태로 보관하는 fallback을 사용할 수 있으며, 이를 native Draft와 혼동하지 않는다.
+- 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
 - 사용자가 Draft Issue를 명시적으로 발행/활성화하면 **같은 작업에서 Development branch를 반드시 생성·연결한다.** branch 생성은 별도 사용자 요청을 기다리지 않는다.
 - 활성화 시 제목의 draft 표기를 제거하고 Project Status를 `Todo`로 전환한 뒤, 실제 구현 착수 시 `In Progress`로 이동한다.
@@ -55,7 +55,7 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
-- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리한다. 이 repository state는 draft storage fallback일 뿐 cancellation을 뜻하지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
+- Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
