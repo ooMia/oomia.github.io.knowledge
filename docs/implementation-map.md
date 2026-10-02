@@ -39,7 +39,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## Architecture transition
 
-기술 전환 상세는 [전환 guide](architecture-transition.md), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md), [Site integration 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다. 이 문서는 구현 순서·코드 이관 계획을 별도로 소유하지 않는다.
+기술 전환 상세는 [전환 guide](architecture-transition.md), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md), [Site integration 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다. 이 문서는 구현 순서·코드 이관 계획을 별도로 소유하지 않는다.
 
 ## 1.0 capability 상태
 
@@ -48,7 +48,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 | Capability | 당시 판정 | 기준 revision의 Evidence | 다음 통합 검수 연결 |
 |---|---|---|---|
 | Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 실제 md-like source를 호환 authoring tool로 수정·보존하고 Site가 소비하는 Evidence. editor 종류 자체는 판정 대상이 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md). |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md). |
 | Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | 동일 component implementation/package를 사용하는 실제 Site consumer와 필요한 authoring integration Evidence. 지원 catalog는 Knowledge가 별도로 판정하지 않는다. |
 | Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 실제 후처리·발행 workflow에 automation이 참여한다는 책임 repository의 Issue·PR·workflow Evidence. |
 | Publishing | **부분 충족** | legacy workflow는 DB snapshot을 docs repo에 materialize하고 실제 Site sync/lint/test/typecheck/build를 통과시켰다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | 현재 콘텐츠 revision의 소비 검증과 결과 재현성. [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#publishing). |
@@ -57,7 +57,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## 폐기 또는 재사용 판단
 
-책임 레포의 [Engine 전환 기록](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md) 및 [Site integration 설계](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)를 참조한다. 구현 상세의 상태 원장을 이 문서에 복제하지 않는다.
+책임 레포의 [Engine 전환 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md) 및 [Site integration 설계](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)를 참조한다. 구현 상세의 상태 원장을 이 문서에 복제하지 않는다.
 
 ## 1.0 구현 delta
 
@@ -65,7 +65,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## Issue #13 / #14 영향
 
-[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
+[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
 
 ## 갱신 규칙
 
