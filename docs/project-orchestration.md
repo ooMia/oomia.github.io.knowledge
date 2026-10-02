@@ -15,7 +15,8 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 
 1. Project #11 Item 등록
 2. 초기 `Status / Iteration / Work Type` materialization
-3. 실제 개발 branch가 필요한 경우 Issue-linked Development relation 생성
+
+Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
 activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
 
@@ -49,9 +50,15 @@ seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-cl
 
 ## Development relation
 
-- Issue-linked branch가 필요한지 여부는 작업 성격과 owning repository 운영 방식에 따라 결정한다.
-- `development: false`가 아니고 repository가 Issue-linked development를 사용하는 경우 activation 과정에서 branch relation을 생성한다.
-- 실제 branch 이름, base branch, 생성 API, branch protection은 owning repository가 소유한다.
+Development relation은 **실제 작업 시작의 signal**이다.
+
+- `Backlog`: Iteration commitment와 Development branch/linked PR이 없다.
+- `Todo`: Iteration commitment는 있지만 Development branch/linked PR은 아직 없다.
+- Development branch를 생성·연결하면 `In progress`로 전환한다.
+- linked PR이 등록되면 branch 생성 경로와 무관하게 `In progress`로 전환한다.
+- branch/PR 없이 수행하는 작업은 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다.
+- Development relation이 생겼는데 Iteration이 없다면 automation이 임의의 Iteration을 추론하지 않는다. 불일치로 드러내고 commitment를 먼저 정한다.
+- 실제 branch 이름, base branch, 생성 API, branch protection과 Status mutation 구현은 owning repository가 소유한다.
 - 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
 
 ## Lifecycle reconciliation
@@ -61,10 +68,10 @@ Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)�
 공통적으로 자동화할 수 있는 것은 명확한 invariant에 한정한다.
 
 - active candidate가 Iteration commitment를 얻으면 `Todo`로 진행할 수 있다.
-- `Todo / In progress` 상태에서 commitment가 제거되면 `Backlog`로 돌아갈 수 있다.
+- Development branch 생성 또는 linked PR 등록은 `In progress`를 의미한다.
+- `Todo / In progress` 상태에서 commitment가 제거되면 실행 상태와 Development relation을 함께 재검토한다. active Development relation이 있는 상태를 자동으로 `Backlog`로 낮추지 않는다.
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
-- Development PR relation은 실제 작업이 시작됐다는 Evidence가 될 수 있다.
 
 Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
