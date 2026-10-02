@@ -11,7 +11,6 @@ Publishing Platform의 **PM/coordination repository**다. 공통 workflow·개�
 - 통합 목표: [Release 1.0](docs/release-1.0.md)
 - 검수 연결: [Implementation Map](docs/implementation-map.md)
 - 공통 change-management invariant: [Git Workflow](docs/git-workflow.md)
-- 문서 수정·검증: [CONTRIBUTING](CONTRIBUTING.md)
 - 실제 제품/coordination 미결: [Open Questions](docs/open-questions.md)
 - Chat 첨부물: `python3 scripts/bundle.py`로 생성하는 [CONTEXT-BUNDLE.md](dist/CONTEXT-BUNDLE.md)
 
