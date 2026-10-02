@@ -6,7 +6,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 # handoff/current.md is intentionally excluded: the bundle carries durable context, not live session state.
 ORDER = [
-    'CONTEXT.md', 'docs/architecture-transition.md', 'docs/architecture.md',
+    'CONTEXT.md', 'docs/change-protocol.md', 'docs/architecture-transition.md', 'docs/architecture.md',
     'docs/development-toolchain.md', 'docs/repository-design.md',
     'docs/planning-model.md', 'docs/fields.md', 'docs/git-workflow.md',
     'docs/project-orchestration.md', 'docs/labels.md', 'docs/release-1.0.md',
