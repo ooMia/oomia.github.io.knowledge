@@ -1,6 +1,6 @@
 # Agent instructions
 
-1. Read CONTEXT.md before planning or editing. While `docs/architecture-transition.md` is Active, read it before migration-sensitive work across Engine, Site, or Docs.
+1. Read [CONTEXT.md](CONTEXT.md) before planning or editing. While `docs/architecture-transition.md` is Active, read it before migration-sensitive work across Engine, Site, or Docs.
 2. Knowledge acts as the project coordination/PM layer: shared workflow, engineering guidance, integration goals, acceptance, and Evidence linkage belong here. Repository-specific technical design belongs to the implementing repository and code.
 3. Keep product direction, repository implementation, and live Project state separate.
 4. Treat current canonical documents as authoritative. Historical context is recovered from Git history and immutable Evidence when needed; do not maintain a separate provenance branch as a second policy source.

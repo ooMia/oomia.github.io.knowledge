@@ -16,6 +16,8 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그를 중심으로 하고 LinkedIn을 초기 후보로 둔다. 자체 블로그가 준비되기 전 발행 채널은 미결이다.
 
+기록 형식이 필요하면 [Daily Evidence](../templates/daily-evidence.md)와 [Weekly Review](../templates/weekly-review.md) 템플릿을 사용한다.
+
 ## 기능 실험 참조
 
 기능 실험의 활성/폐기 상태와 AC는 책임 구현 repository의 live Issue/Project에서 관리한다. 완료되거나 `not_planned`로 종료된 실험 목록을 이 문서에 별도 catalog로 복제하지 않는다.
