@@ -11,7 +11,7 @@
 
 ## Branch / PR workflow
 
-[공통 Git Workflow](docs/git-workflow.md)를 따른다. Knowledge만의 별도 branch 전략이나 merge 규칙을 중복 정의하지 않는다.
+[공통 Git Workflow](docs/git-workflow.md)의 invariant를 따른다. 실제 branch topology, runner, CI/release 세부 운용은 이 repository의 workflow/settings가 소유하며 공통 문서에 복제하지 않는다.
 
 ## Evidence
 
