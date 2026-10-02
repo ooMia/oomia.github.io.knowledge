@@ -69,8 +69,6 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## 갱신 규칙
 
-새 기준 revision을 조사할 때는 [Implementation Map 조사 템플릿](../templates/implementation-map.md)을 초안으로 사용할 수 있다. 조사 결과의 canonical snapshot은 별도 Map으로 분산하지 않고 이 문서에 반영한다.
-
 - 이 문서는 live branch 상태가 아니라 immutable Evidence 기반 snapshot이다.
 - architecture가 변경되면 같은 코드 revision도 새 Product Boundary에 대해 다시 평가할 수 있다.
 - legacy implementation 성공을 현재 target 완료로 간주하지 않는다.
