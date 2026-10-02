@@ -229,7 +229,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 |---|---|
 | 공통 디렉토리 scheme·scaffolding 기준 | 이 문서 |
 | 공통 개발 도구 지침 | [Development Toolchain](development-toolchain.md) |
-| 공통 branch·PR·release 전략 | [Git Workflow](git-workflow.md) |
+| 공통 change-management invariant | [Git Workflow](git-workflow.md) |
 | Issue lifecycle·계획·완료 의미 | [Planning Model](planning-model.md) |
 | Project/Issue 공통 orchestration semantics | [Project Orchestration](project-orchestration.md) |
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
@@ -237,7 +237,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 
 기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. Engine의 파일 수정 계약과 Site의 소비 계약은 각 레포가 소유하고 서로의 원본을 참조한다. 그 밖의 producer/consumer 계약에서 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
 
-공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 Git flow나 디렉토리 역할을 반복 복사할 필요는 없다.
+공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 change-management invariant나 디렉토리 역할을 반복 복사할 필요는 없다.
 
 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
