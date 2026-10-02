@@ -121,7 +121,7 @@ optional Engine mutation → same Docs workspace
 
 ## 4. Repository별 migration source
 
-- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)
+- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
 - Site: [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
 - Docs: canonical content remote와 history
 - Knowledge: 통합 목표, 전환 순서, acceptance, Evidence linkage
@@ -242,7 +242,7 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 
 ## Engine boundary
 
-문서 mutation의 기술 설계는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md)이 소유한다. Agent 후처리를 포함한 선택 기능은 Docs commit이나 Site 소비의 필수 단계가 아니다.
+문서 mutation의 기술 설계는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md)이 소유한다. Agent 후처리를 포함한 선택 기능은 Docs commit이나 Site 소비의 필수 단계가 아니다.
 
 ## Publishing boundary
 
@@ -887,7 +887,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 |---|---|
 | 공통 디렉토리 scheme·scaffolding 기준 | 이 문서 |
 | 공통 개발 도구 지침 | Development Toolchain (`docs/development-toolchain.md`) |
-| 공통 branch·PR·release 전략 | Git Workflow (`docs/git-workflow.md`) |
+| 공통 change-management invariant | Git Workflow (`docs/git-workflow.md`) |
 | Issue lifecycle·계획·완료 의미 | Planning Model (`docs/planning-model.md`) |
 | Project/Issue 공통 orchestration semantics | Project Orchestration (`docs/project-orchestration.md`) |
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
@@ -895,7 +895,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 
 기술 설계는 구현되는 레포에 두고 Knowledge는 해당 문서를 링크로 참조한다. 두 레포가 함께 소비한다는 이유만으로 기술 계약 전체를 Knowledge 소유로 정하지 않는다. Engine의 파일 수정 계약과 Site의 소비 계약은 각 레포가 소유하고 서로의 원본을 참조한다. 그 밖의 producer/consumer 계약에서 원본 소유자가 불분명하면 사용자에게 질문하고 이동을 보류한다.
 
-공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 Git flow나 디렉토리 역할을 반복 복사할 필요는 없다.
+공통 규칙은 각 레포에 다시 작성하지 않는다. scaffolding 시 공통 개발 지침을 참조해 해당 레포에 적용한 설정·명령·제약을 명시할 수는 있다. 이 문서는 적용 결과이며 공통 기준의 별도 원본이 아니다. 공통 change-management invariant나 디렉토리 역할을 반복 복사할 필요는 없다.
 
 새 문서는 새로운 정보 소유권이 필요할 때만 만든다. 편의를 위한 요약·템플릿은 정책을 복제하지 않고 원본을 참조한다. 참조 경로는 작업 진입점 → 소유 문서 → 구현 근거 순으로 구성하고, 서로를 읽어야 정의를 이해할 수 있는 순환 의존을 만들지 않는다.
 
@@ -1014,17 +1014,16 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 ### Draft와 활성화
 
-- 가능한 경우 GitHub Project의 native Draft Issue를 사용한다. 현재 사용하는 connector가 이를 지원하지 않으면 repository issue를 `draft:` prefix + `closed / not_planned` 상태로 보관하는 fallback을 사용할 수 있으며, 이를 native Draft와 혼동하지 않는다.
+- 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
 - 사용자가 Draft Issue를 명시적으로 발행/활성화하면 **같은 작업에서 Development branch를 반드시 생성·연결한다.** branch 생성은 별도 사용자 요청을 기다리지 않는다.
 - 활성화 시 제목의 draft 표기를 제거하고 Project Status를 `Todo`로 전환한 뒤, 실제 구현 착수 시 `In Progress`로 이동한다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
 - 코드 변경을 직접 소유하지 않는 cross-repo coordination Item은 branch를 만들지 않을 수 있다. 대신 연결된 각 repository implementation issue가 활성화되는 순간 각각의 branch를 생성한다.
 
-- Project orchestration Action이 설치된 repository에서는 Issue 활성화 이벤트가 Project #11 등록·field 초기화·Development linked branch 생성을 수행한다. 사용자는 별도 branch 생성 요청을 반복할 필요가 없다.
-- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둔다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
-- Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
-- 상세 동작과 PAT 설정은 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
+- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록·field 초기화와 필요한 Development relation을 materialize할 수 있다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- activation과 lifecycle materialization의 공통 의미는 Project Orchestration (`docs/project-orchestration.md`)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
 
@@ -1039,11 +1038,11 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
-- connector 제약 때문에 fallback Draft를 `draft:` + `closed / not_planned`로 보관하더라도 아직 유효한 candidate라면 Project에서는 `Backlog`로 관리한다. 이 repository state는 draft storage fallback일 뿐 cancellation을 뜻하지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
+- Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
-- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. 상세 책임과 write cutover는 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
+- activation/reconciliation automation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. automation ownership boundary는 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
 
 ## 완료 판정
 
@@ -1113,18 +1112,11 @@ Repository, Labels, Linked pull requests, Parent issue, Sub-issues progress, Ass
 
 Objective, Scope, Target Release, Deadline, Estimate custom field는 repository와 중복되거나 일관된 판정·운영 사용이 부족하여 Project taxonomy에서 제거한다.
 
-## Status
+## Field ownership
 
-| Option | Description |
-|---|---|
-| Backlog | Valid candidate not yet committed to an Iteration. |
-| Todo | Committed to an Iteration and ready to start. |
-| In progress | Actively being worked on. |
-| Done | Outcome and acceptance criteria are satisfied with reproducible evidence. |
-| Cancelled | Intentionally not pursued; superseded, rejected, or invalidated. |
-
-Lifecycle 의미는 Planning Model (`docs/planning-model.md`)을 따른다.
-
+- `Status` option의 의미와 lifecycle은 Planning Model (`docs/planning-model.md`)이 소유한다.
+- `Work Type` option의 의미와 판정은 Work Classification (`docs/work-classification.md`)이 소유한다.
+- 이 문서는 Project #11에 어떤 field가 존재하고 언제 값이 필요한지에 대한 schema/cardinality/completeness만 소유한다.
 
 ## Completeness
 
@@ -1132,27 +1124,12 @@ Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필
 
 - `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
 - `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
-- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 fallback Draft는 일반적으로 비운다.
+- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 일반적으로 비운다.
 - `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
 - `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
 - Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
 
 자동화는 확실한 invariant만 materialize한다. historical Iteration, Work Type, Assignee처럼 문맥 해석이 필요한 값은 현재 Project state와 Evidence를 확인해 보정한다.
-
-## Work Type
-
-GitHub Project option description은 아래 문구를 사용한다.
-
-| Option | Field description |
-|---|---|
-| Feature | Adds or extends an intended behavior or rule within the owning repository. |
-| Fix | Restores behavior or rules that were already intended or defined. |
-| Refactor | Changes internal structure while preserving intended observable or normative behavior. |
-| Maintenance | Keeps the repository healthy without a meaningful behavior, rule, or structural redesign. |
-| Documentation | Improves communication of existing behavior, rules, or knowledge without changing the normative state. |
-| Investigation | Reduces uncertainty through conclusions and evidence rather than making a production change the outcome. |
-
-Work Type은 commit type이나 기술 영역이 아니다. 상세 decision tree, Investigation 승격 정책, few-shot examples는 Work Classification (`docs/work-classification.md`)을 따른다.
 
 <!-- END SOURCE: docs/fields.md -->
 
@@ -1390,7 +1367,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## Architecture transition
 
-기술 전환 상세는 전환 guide (`docs/architecture-transition.md`), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md), [Site integration 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다. 이 문서는 구현 순서·코드 이관 계획을 별도로 소유하지 않는다.
+기술 전환 상세는 전환 guide (`docs/architecture-transition.md`), [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md), [Site integration 전환](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)을 참조한다. 이 문서는 구현 순서·코드 이관 계획을 별도로 소유하지 않는다.
 
 ## 1.0 capability 상태
 
@@ -1399,16 +1376,16 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 | Capability | 당시 판정 | 기준 revision의 Evidence | 다음 통합 검수 연결 |
 |---|---|---|---|
 | Authoring | **미충족** | Payload Admin에서 visual create/edit/save가 E2E로 검증된 legacy implementation은 존재한다. [e2e.ts](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/e2e.ts) | 실제 md-like source를 호환 authoring tool로 수정·보존하고 Site가 소비하는 Evidence. editor 종류 자체는 판정 대상이 아니다. |
-| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/content-modification-contract.md). |
+| Canonical Content | **부분 충족** | docs repository에는 실제 Markdown/MDX files와 Git history가 있고 Site가 이를 소비할 수 있다. 기존 Engine DB에도 raw body string 보존 Evidence가 있다. | 사용자 작성 파일의 보존과 Git revision 관계. 선택적 후처리는 별도 기능으로 검수한다. [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md). |
 | Extensibility | **부분 충족** | 기존 custom `Callout`이 engine/site 양쪽에서 opt-in되고 consumer build를 통과한 Evidence가 있다. | 동일 component implementation/package를 사용하는 실제 Site consumer와 필요한 authoring integration Evidence. 지원 catalog는 Knowledge가 별도로 판정하지 않는다. |
-| Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 실제 후처리·발행 workflow에 automation이 참여한다는 Evidence. 기능별 이슈 (`docs/operating-rhythm.md`). |
+| Automation | **부분 충족** | legacy Payload publish action과 docs workflow가 explicit trigger, failure propagation, idempotent no-op을 검증했다. [Issue #8](https://github.com/ooMia/oomia.github.io.engine/issues/8) | 실제 후처리·발행 workflow에 automation이 참여한다는 책임 repository의 Issue·PR·workflow Evidence. |
 | Publishing | **부분 충족** | legacy workflow는 DB snapshot을 docs repo에 materialize하고 실제 Site sync/lint/test/typecheck/build를 통과시켰다. [docs workflow](https://github.com/ooMia/oomia.github.io.engine/blob/6ba2f950a78eef18c2efa305b96a1c8d0443252e/apps/cms-lab/scripts/docs-workflow.ts) | 현재 콘텐츠 revision의 소비 검증과 결과 재현성. [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#publishing). |
 | Presentation | **충족** | Site가 docs repository의 Markdown/MDX를 Astro content collection으로 읽어 렌더한다. [content config](https://github.com/ooMia/oomia.github.io/blob/a3b2e182563458636b7b8186a4cd2201894b2a65/apps/web/src/content.config.ts) | 현재 콘텐츠 revision에 대한 실제 렌더링 Evidence를 확보해 재평가. |
 | Delivery | **충족** | docs SHA를 소비하는 Site revision의 GitHub Pages build/deploy가 성공했다. [run 35472028484](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484) / [artifact 10593195312](https://github.com/ooMia/oomia.github.io/actions/runs/35472028484/artifacts/10593195312) | 새 콘텐츠 revision → Site revision → 배포 결과의 연결을 검증해 재평가. |
 
 ## 폐기 또는 재사용 판단
 
-책임 레포의 [Engine 전환 기록](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md) 및 [Site integration 설계](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)를 참조한다. 구현 상세의 상태 원장을 이 문서에 복제하지 않는다.
+책임 레포의 [Engine 전환 기록](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md) 및 [Site integration 설계](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#consumer-integration-전환)를 참조한다. 구현 상세의 상태 원장을 이 문서에 복제하지 않는다.
 
 ## 1.0 구현 delta
 
@@ -1416,7 +1393,7 @@ Run 36406348962 occurred before the release-only deployment gate and therefore p
 
 ## Issue #13 / #14 영향
 
-[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/develop/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
+[Engine #13](https://github.com/ooMia/oomia.github.io.engine/issues/13), [Engine #14](https://github.com/ooMia/oomia.github.io.engine/issues/14)의 과거 구현 범위를 여기서 재정의하지 않는다. [Engine migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)와 책임 레포의 현재 Issue를 확인하고, Knowledge에서는 통합 Evidence에 영향을 주는 결과만 연결한다.
 
 ## 갱신 규칙
 
@@ -1516,6 +1493,7 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
 | Q025 | stable document identity / sidecar linkage | path-independent identity가 제품 수준 요구가 될 때 결정 |
+| Q026 | Wiki / public reference graph layer | 불변에 가까운 공개 설명을 GitHub Wiki 등으로 분리할 가치가 생기면 source/docs와의 ownership·linking·local clone 정책을 결정 |
 
 ## Knowledge-level Open Question이 아닌 것
 
