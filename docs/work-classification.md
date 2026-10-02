@@ -69,15 +69,17 @@ Labels는 optional controlled tags다. Work Type을 반복하지 않고, reposit
 
 보통 domain/component label 1개와 필요한 cross-cutting label 0–2개면 충분하다. 3개를 넘어가면 Issue 범위 또는 label granularity를 다시 검토한다.
 
-## Initial controlled tags
+## Label registry
 
-Canonical registry는 [config/labels.json](../config/labels.json)이다. registry에 없는 label은 필요성이 반복적으로 확인된 뒤 추가한다.
+실제 허용 label의 canonical registry는 [config/labels.json](../config/labels.json)이다. 정책과 registry의 역할을 분리한다.
 
-| Repository | Initial labels |
-|---|---|
-| Engine | `mcp`, `inference`, `filesystem`, `ci`, `dependencies`, `orchestration` |
-| Site | `content-loading`, `deployment`, `ci`, `orchestration` |
-| Knowledge | `orchestration`, `planning` |
+- 이 문서: label을 **언제 만들고 선택하는지**에 대한 의미·granularity·negative examples
+- `config/labels.json`: 실제 label 이름, 적용 repository, 권장 색상, GitHub description
+- GitHub repository labels: registry를 materialize한 operational state
+
+`labels.json`은 처음 파일만 열어도 용도를 이해할 수 있도록 `description`, `policy`, `fields`, `labels`를 포함한다. registry에 없는 label을 Agent가 즉석에서 만들지 않는다.
+
+label을 추가·변경할 때는 먼저 반복 검색/filtering 가치가 위 기준을 만족하는지 확인한 뒤 registry를 수정한다. 실제 GitHub label 생성·수정 방법은 이를 수행하는 owning repository automation 또는 운영 절차가 소유한다.
 
 ## Few-shot examples
 
