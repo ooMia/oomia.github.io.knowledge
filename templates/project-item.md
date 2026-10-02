@@ -12,4 +12,4 @@
 
 - <검증 방법, 실제 결과 및 링크. 없으면 미검증으로 표기>
 
-<!-- Status / Iteration / Work Type / Scope / Target Release / Objective의 실제 값은 Project fields에 둔다. -->
+<!-- Status / Iteration / Work Type의 실제 값은 Project fields에 둔다. -->
