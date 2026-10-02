@@ -231,7 +231,7 @@ Knowledge는 Chat/Agent의 일관된 작업을 위한 공통 지침과 참조 �
 | 공통 개발 도구 지침 | [Development Toolchain](development-toolchain.md) |
 | 공통 branch·PR·release 전략 | [Git Workflow](git-workflow.md) |
 | Issue lifecycle·계획·완료 의미 | [Planning Model](planning-model.md) |
-| Project/Issue 공통 자동화 계약 | [Project Orchestration](project-orchestration.md) |
+| Project/Issue 공통 orchestration semantics | [Project Orchestration](project-orchestration.md) |
 | 구현되는 기술 설계·API·동작 계약·실행·재현 방법 | 책임 구현 repository의 `docs/` 및 코드 |
 | 작업별 읽기 경로 | [CONTEXT](../CONTEXT.md) |
 
@@ -251,7 +251,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 
 - Knowledge canonical link / transition guide
 - repository role
-- standard VP commands
+- standard Vite+ / uv commands
 - current verification gate
 - destructive migration safety
 - local code ownership rules
@@ -297,10 +297,11 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 새 tool을 추가하기 전에 묻는다.
 
-1. Vite+가 이미 제공하는가?
-2. pnpm/workspace 기능으로 충분한가?
-3. platform-native Git/GitHub 기능으로 충분한가?
-4. 기존 dependency를 재사용할 수 있는가?
+1. Node 계열이면 Vite+가 이미 제공하는가?
+2. Python이면 uv가 이미 제공하는가?
+3. package/workspace manager의 기존 기능으로 충분한가?
+4. platform-native Git/GitHub 기능으로 충분한가?
+5. 기존 dependency를 재사용할 수 있는가?
 
 비핵심 문제는 새 구현보다 기존 도구와 요구사항 조정을 우선한다.
 
