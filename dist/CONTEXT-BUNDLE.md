@@ -19,6 +19,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 
 | 작업 | 참조 순서 |
 |---|---|
+| 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 Open Questions (`docs/open-questions.md`) |
 | Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 작업 성격에 맞는 template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
@@ -35,14 +36,15 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
 | Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
-| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약은 검증된 runtime과 함께 `main`에 승격되었다. Site 소비 계약은 현재 `develop` integration state를 가리키며, 다음 Site vertical slice에서 현재 Docs layout과 함께 재검증한다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약과 Site 소비 계약은 검증된 canonical `main` state를 가리킨다. Site `main@b46b4af`는 canonical Docs `c5826802`를 소비해 build와 GitHub Pages delivery까지 검증됐다.
 
 ## PM-level 원본
 
 - Architecture (`docs/architecture.md`): repository 역할과 제품 경계
+- Feature Change Protocol (`docs/change-protocol.md`): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
 - Architecture Transition (`docs/architecture-transition.md`): cross-repository 전환 순서·안전 규칙
 - Release 1.0 (`docs/release-1.0.md`): 통합 목표·수용 기준
 - Implementation Map (`docs/implementation-map.md`): revision-bound Evidence와 통합 검수 연결
@@ -67,6 +69,93 @@ Repository/Agent 진입점은 README (`README.md`)와 AGENTS (`AGENTS.md`)이며
 원본 문서를 수정하고 `python3 scripts/bundle.py`로 Chat 첨부물을 재생성한다. 생성된 `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다.
 
 <!-- END SOURCE: CONTEXT.md -->
+
+
+---
+
+<!-- BEGIN SOURCE: docs/change-protocol.md -->
+
+# Feature Change Protocol
+
+새 기능이나 의미 있는 동작 변경을 시작할 때 적용되는 정책·계약·소유권을 빠르게 식별하기 위한 routing protocol이다.
+
+이 문서는 기존 정책을 다시 정의하지 않는다. 실제 규칙은 각 canonical source와 owning repository가 소유하며, 이 문서는 **무엇을 확인하고 어디에 기록할지**만 정한다.
+
+## 1. 시작점
+
+새 기능 제안이나 기존 동작 변경은 먼저 다음을 짧게 정리한다.
+
+1. **Outcome** — 사용자가 관찰할 수 있는 변화는 무엇인가?
+2. **Primary owner** — 어느 repository가 그 결과의 1차 구현 책임을 가지는가?
+3. **Affected surfaces** — 기존 contract, persistent state, build/publish boundary, external side effect 중 무엇을 건드리는가?
+4. **Cross-repository impact** — producer/consumer 또는 shared semantics가 생기는가?
+5. **Open decision** — 구현 전에 제품 또는 coordination 수준에서 결정해야 할 것이 남았는가?
+
+구현 세부사항을 모두 미리 설계하려는 체크리스트가 아니다. 적용되는 surface만 식별하고 해당 원본으로 이동한다.
+
+## 2. Routing
+
+| 변화 | 확인할 원본 |
+|---|---|
+| repository 역할·제품 경계가 바뀜 | Architecture (`docs/architecture.md`) |
+| canonical Markdown/document를 수정하는 기능 | Engine의 현재 modification contract와 code/tests |
+| Docs에 지속 데이터를 추가하거나 content identity에 영향을 줌 | Docs의 owning source; cross-repository 의미가 생기면 Architecture 확인 |
+| Site rendering·component·consumer semantics가 바뀜 | Site의 current consumption contract와 code/tests |
+| external network, paid API, remote mutation 등 side effect가 생김 | owning repository의 기술 계약·trigger policy·tests |
+| build/publish 재현성이나 release boundary가 바뀜 | owning repository 검증 + Git Workflow (`docs/git-workflow.md`) + 필요한 경우 Implementation Map (`docs/implementation-map.md`) |
+| 둘 이상의 repository가 같은 semantics를 소비함 | semantics의 단일 owner를 정하고 다른 repository는 원본을 참조 |
+| 제품/cross-repository 결정이 아직 남음 | Open Questions (`docs/open-questions.md`) |
+| package/module/API 내부 선택처럼 owner 안에서 결정 가능한 구현 세부사항 | Knowledge에 복제하지 않고 owning repository code/docs에서 결정 |
+
+소유권이 불분명하면 구현 전에 먼저 owner를 정한다. 단순히 여러 repository가 관련된다는 이유만으로 Knowledge가 기술 계약의 owner가 되지는 않는다.
+
+## 3. Change impact note
+
+Repository Issue를 만들 때 의미 있는 영향이 있는 항목만 짧게 기록한다.
+
+- **Ownership:** primary owner와 실제로 수정되는 repository
+- **Contract surfaces:** 영향을 받는 canonical contract/schema
+- **Persistent state:** 새로 생기거나 변경되는 durable state
+- **External effects:** network, paid call, remote mutation, credential boundary 등
+- **Cross-repository dependency:** producer/consumer 또는 shared semantics
+- **Open questions:** 구현 전에 남아 있는 Knowledge-level OQ
+
+해당 없는 항목을 억지로 채우지 않는다. 이 note 자체가 새로운 정책 원본이 되어서는 안 되며, 결정된 규칙은 실제 owner 문서를 참조한다.
+
+## 4. 기록 위치
+
+변경 중 발견한 정보는 성격에 따라 한 곳에만 둔다.
+
+| 성격 | 원본 |
+|---|---|
+| 오래 유지되는 공통 invariant·coordination rule | Knowledge의 해당 canonical 문서 |
+| repository가 외부에 보장하는 기술 contract | owning repository docs/schema/tests |
+| 현재 구현 방식 | owning repository code/tests |
+| 아직 결정하지 않았거나 Evidence가 부족한 제품/cross-repo 문제 | Open Questions (`docs/open-questions.md`) |
+| 작업 결과·AC·Evidence | 실제 Project Item / Repository Issue / PR |
+
+결정이 끝난 Open Question은 실제 canonical source로 이동하고, Open Question 자체를 두 번째 원본으로 유지하지 않는다.
+
+## 5. 구현 진입 기준
+
+구현에 들어가기 전에 최소한 다음이 분명해야 한다.
+
+- Outcome과 primary owner
+- 변경되는 contract surface 또는 변경 없음
+- 비용·network·remote mutation 같은 external effect의 trigger boundary
+- 지속 데이터가 있다면 owner와 재현 가능한 저장 위치
+- cross-repository semantics가 있다면 단일 원본
+- 사용자 결정이 필요한 Open Question이 있다면 구현 가능한 범위와 분리
+
+나머지는 owning repository에서 작은 검증 가능한 integration slice와 실제 Evidence를 통해 구체화한다. 이 protocol 때문에 불필요한 선행 설계나 문서 작성을 blocker로 만들지 않는다.
+
+## 6. 완료
+
+완료 판정은 Planning Model (`docs/planning-model.md`)을 따른다.
+
+기능 구현은 설계 문서 존재만으로 완료되지 않는다. 적용되는 contract와 code/tests가 일치하고, Acceptance Criteria와 Quality Requirements를 실제 Evidence로 검증해야 한다.
+
+<!-- END SOURCE: docs/change-protocol.md -->
 
 
 ---
@@ -1001,9 +1090,9 @@ Deliver a usable workflow for authoring Git-backed md-like content and publishin
 |---|---|---|
 | Authoring | frontmatter를 포함한 md-like document를 호환되는 authoring tool로 작성·수정하고 source 의미를 보존할 수 있다. 특정 editor 종류는 acceptance가 아니다. | Architecture (`docs/architecture.md`) |
 | Canonical Content | 사용자가 작성하거나 선택한 도구로 수정한 source를 Git commit으로 공유·재현 가능한 revision으로 식별한다. | Architecture (`docs/architecture.md`) |
-| Extensibility | 실제 Site implementation/package가 지원하는 콘텐츠 표현을 동일 codebase와 검증으로 확장할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md) |
+| Extensibility | 실제 Site implementation/package가 지원하는 콘텐츠 표현을 동일 codebase와 검증으로 확장할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md) |
 | Automation | 최소 하나의 automated 또는 agent-assisted workflow가 validation, Git revision finalization, publish 또는 delivery process에 참여한다. | 책임 구현 Issue/Evidence |
-| Publishing | canonical revision이 실제 Site consumer 검증을 통과하고 발행 입력과 결과의 관계를 재현할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md#publishing) |
+| Publishing | canonical revision이 실제 Site consumer 검증을 통과하고 발행 입력과 결과의 관계를 재현할 수 있다. | [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md#publishing) |
 | Presentation | Site가 해당 콘텐츠 revision을 사용자에게 렌더링한다. | Site code/tests |
 | Delivery | Docs revision과 Site revision이 연결되어 GitHub Pages에 배포되고 성공 Evidence가 남는다. | Implementation Map (`docs/implementation-map.md`) |
 
@@ -1020,7 +1109,7 @@ Deliver a usable workflow for authoring Git-backed md-like content and publishin
 
 각 capability의 요구 결과를 책임 repository의 재현 가능한 Evidence와 연결한다. 문서나 planning schema가 구현 완료 Evidence를 대신하지 않는다.
 
-Implementation Map (`docs/implementation-map.md`)은 기준 revision과 capability별 검수 연결을 소유한다. 실제 final release gate의 남은 결정은 Q003으로 추적한다.
+Implementation Map (`docs/implementation-map.md`)은 기준 revision과 capability별 검수 연결을 소유한다. Site canonical release gate는 Implementation Map (`docs/implementation-map.md`)에 연결된 `main` build/deploy Evidence로 검증한다.
 
 <!-- END SOURCE: docs/release-1.0.md -->
 
@@ -1039,16 +1128,15 @@ Publishing Platform 1.0의 **현재 검증 snapshot**과 cross-repository Eviden
 
 | 역할 | Repository / revision | 검증 의미 |
 |---|---|---|
-| canonical content | [`ooMia/oomia.github.io.docs@c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c) | 현재 article corpus layout을 Site가 직접 소비한 canonical Docs revision |
-| Site direct consumption | [`ooMia/oomia.github.io@f50ba57b`](https://github.com/ooMia/oomia.github.io/commit/f50ba57b9d1e270b286794cb9a7998f7df780648) | Site #12 / PR #13에서 canonical Docs Article corpus 직접 소비 |
-| Site release boundary | [`ooMia/oomia.github.io@6d8cc03f`](https://github.com/ooMia/oomia.github.io/commit/6d8cc03f2f28df28e31a97a38b31b06fd8148b25) | Site #14 / PR #15의 release-only live mutation boundary |
-| Engine optional mutation | [`ooMia/oomia.github.io.engine#23`](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30) | model-assisted metadata enrichment의 선택적 mutation Evidence |
-| portable Engine artifact | [Engine PR #34](https://github.com/ooMia/oomia.github.io.engine/pull/34) / [run 36257543854](https://github.com/ooMia/oomia.github.io.engine/actions/runs/36257543854) | portable CLI artifact verification |
+| canonical content | [`ooMia/oomia.github.io.docs@c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c) | Site canonical release가 직접 소비한 Docs revision |
+| Site canonical release | [`ooMia/oomia.github.io@b46b4af`](https://github.com/ooMia/oomia.github.io/commit/b46b4af031a1be668ebc2b6ebe6a619e9f4111f7) / [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332) | Docs `c5826802`를 포함한 Site `main` build와 GitHub Pages delivery가 모두 성공한 final delivery Evidence |
+| Engine canonical integration | [`ooMia/oomia.github.io.engine@0484358`](https://github.com/ooMia/oomia.github.io.engine/commit/0484358d9118ecc8dfdb803b64909827e205ddf1) / [run 37049044873](https://github.com/ooMia/oomia.github.io.engine/actions/runs/37049044873) | Linux/macOS/Windows full validation과 packaged Engine artifact verification이 통과한 canonical Engine revision |
+| Engine optional mutation | [Engine Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30) | model-assisted metadata enrichment의 선택적 mutation Evidence |
 | Docs trusted consumer | [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694) | Engine artifact를 사용한 Docs-side trusted workflow Evidence |
 
-Site build/render Evidence는 [run 36406348962](https://github.com/ooMia/oomia.github.io/actions/runs/36406348962)에서 canonical Docs revision으로 11 Article pages가 생성된 것으로 연결된다. release-only gate 이후 PR 검증은 [run 36418285983](https://github.com/ooMia/oomia.github.io/actions/runs/36418285983)에서 `build=success`, `deploy=skipped`로 확인됐다.
+Site release PR [#24](https://github.com/ooMia/oomia.github.io/pull/24)의 promotion validation은 [run 37049239677](https://github.com/ooMia/oomia.github.io/actions/runs/37049239677)에서 `astro sync → vp check → vp test → workspace build`를 통과했고, PR 단계에서는 Pages deployment가 실행되지 않았다. merge 후 `main@b46b4af`의 [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332)에서 `build=success`, `deploy=success`가 확인됐다.
 
-위 Evidence는 Phase B의 direct Docs consumption과 integration-level release boundary를 검증하지만 **최종 1.0 release Evidence는 아니다.** 최종 gate는 Site `develop → main` promotion 후 새 `main` build/deploy에서 canonical Docs revision + Site revision + delivery result를 다시 연결해야 한다.
+따라서 이전 Q003의 final release gate인 **canonical Docs revision + Site revision + delivery result 연결**은 이 snapshot에서 충족됐다.
 
 ## Architecture transition
 
@@ -1063,30 +1151,22 @@ Site build/render Evidence는 [run 36406348962](https://github.com/ooMia/oomia.g
 | Capability | 현재 판정 | 검증된 Evidence | 다음 통합 검수 |
 |---|---|---|---|
 | Authoring | **미충족** | legacy Payload visual authoring Evidence는 있으나 현재 Git-backed md-like source를 호환 authoring tool로 수정·보존하는 target Evidence로 재검증되지 않았다. | 실제 canonical source 수정·보존 → Site 소비 Evidence |
-| Canonical Content | **부분 충족** | Docs Git revision이 canonical corpus를 식별하고 Site가 `c5826802` corpus를 직접 소비했다. 선택적 Engine enrichment도 Docs-side workflow에서 검증됐다. | 현재 authoring/source-preservation path와 final release revision 연결 |
+| Canonical Content | **부분 충족** | Docs Git revision `c5826802`가 canonical corpus를 식별하고 Site canonical release가 동일 revision을 직접 소비했다. 선택적 Engine enrichment도 Docs-side workflow에서 검증됐다. | 현재 authoring/source-preservation path와 canonical content revision 연결 |
 | Extensibility | **부분 충족** | 과거 custom component opt-in Evidence는 존재하나 현재 Site/package source of truth 기준의 end-to-end authoring/consumer Evidence는 아직 release snapshot에 연결되지 않았다. | 실제 component implementation/package + consumer + 필요한 authoring integration Evidence |
-| Automation | **부분 충족** | Engine enrichment, portable CLI artifact, Docs trusted consumer workflow가 실제 자동화 경로로 검증됐다. | 현재 publishing/delivery path에 필요한 automation Evidence를 final release revision에 연결 |
-| Publishing | **부분 충족** | canonical Docs revision → Site direct consumption/build/render는 검증됐다. release-only live mutation boundary도 integration state에서 검증됐다. | Site `main` promotion 후 canonical Docs SHA + Site SHA + deploy result 연결 |
-| Presentation | **충족** | Site run 36406348962에서 canonical corpus로 11 Article pages build/render 성공. | final release revision에서 재확인 |
-| Delivery | **부분 충족** | 과거 live delivery Evidence는 있으나 현재 Git-backed target의 release-only gate 이후 새 `main` deploy Evidence는 아직 없다. | Site `develop → main` 후 새 GitHub Pages delivery Evidence |
+| Automation | **충족** | Engine/Docs automation Evidence와 Site `main` build/deploy automation이 실제 canonical revision 검증·delivery에 참여했다. | 현재 Evidence 유지 |
+| Publishing | **충족** | Docs `c5826802` → Site `b46b4af` 소비 관계와 final `main` build/deploy가 재현 가능한 revision/run으로 연결됐다. | 현재 Evidence 유지 |
+| Presentation | **충족** | Site canonical release build가 성공했고 동일 revision이 GitHub Pages delivery로 이어졌다. | 현재 Evidence 유지 |
+| Delivery | **충족** | Docs `c5826802` + Site `b46b4af` + run 37049335332의 GitHub Pages deploy success가 연결됐다. | 현재 Evidence 유지 |
 
-## 다음 release gap
+## 현재 남은 1.0 gap
 
-현재 Map에서 가장 중요한 통합 gap은 하나다.
+final delivery gate는 닫혔다. 현재 1.0 제품 acceptance에서 남은 핵심 gap은 다음과 같다.
 
-```text
-canonical Docs revision
-        ↓
-Site develop → main promotion
-        ↓
-new main build/render
-        ↓
-GitHub Pages delivery
-        ↓
-Docs SHA + Site SHA + delivery result 연결
-```
+- **Authoring:** 현재 Git-backed md-like source를 실제 호환 authoring tool로 수정하고 의미 보존을 검증한 Evidence
+- **Extensibility:** 현재 Site/package source of truth 기준의 실제 확장 표현을 authoring/consumer 경로와 연결한 Evidence
+- **Canonical Content:** 위 authoring/source-preservation Evidence를 canonical Git revision과 연결
 
-이 Evidence가 확보되면 Publishing / Presentation / Delivery 판정을 새 release snapshot으로 다시 평가한다. 별도 checkpoint section을 추가하지 않는다.
+새 구현은 이 gap을 실제 owning repository의 Issue/PR/Evidence로 닫는다. 별도 날짜별 checkpoint section은 만들지 않는다.
 
 ## 갱신 규칙
 
@@ -1141,7 +1221,6 @@ Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버�
 
 | ID | 항목 | 현재 처리 |
 |---|---|---|
-| Q003 | 1.0 final release gate | Site `develop → main` promotion 후 새 main build/deploy에서 canonical Docs revision + Site revision + delivery result를 연결해 확정 |
 | Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
 | Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
 | Q025 | stable document identity / sidecar linkage | path-independent identity가 제품 수준 요구가 될 때 결정 |

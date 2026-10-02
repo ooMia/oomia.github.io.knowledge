@@ -8,6 +8,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 
 | 작업 | 참조 순서 |
 |---|---|
+| 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
 | Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 작업 성격에 맞는 template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-relation) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
@@ -24,14 +25,15 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 대상 | 현재 확인 가능한 참조 |
 |---|---|
 | Engine | [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [Issues](https://github.com/ooMia/oomia.github.io.engine/issues) |
-| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
+| Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약은 검증된 runtime과 함께 `main`에 승격되었다. Site 소비 계약은 현재 `develop` integration state를 가리키며, 다음 Site vertical slice에서 현재 Docs layout과 함께 재검증한다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약과 Site 소비 계약은 검증된 canonical `main` state를 가리킨다. Site `main@b46b4af`는 canonical Docs `c5826802`를 소비해 build와 GitHub Pages delivery까지 검증됐다.
 
 ## PM-level 원본
 
 - [Architecture](docs/architecture.md): repository 역할과 제품 경계
+- [Feature Change Protocol](docs/change-protocol.md): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
 - [Architecture Transition](docs/architecture-transition.md): cross-repository 전환 순서·안전 규칙
 - [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
 - [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
