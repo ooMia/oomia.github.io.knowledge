@@ -37,4 +37,4 @@ assignees: "ooMia"
 
 Operational metadata (`Status`, `Iteration`, `Work Type`, Labels, Assignees, Relationships, Development)는 GitHub Project/native fields가 소유한다. Issue body에 현재값을 복제하지 않는다.
 
-Policy: [Work Classification](https://github.com/ooMia/oomia.github.io.knowledge/blob/develop/docs/work-classification.md) · [Planning Model](https://github.com/ooMia/oomia.github.io.knowledge/blob/develop/docs/planning-model.md) · [Project Orchestration](https://github.com/ooMia/oomia.github.io.knowledge/blob/develop/docs/project-orchestration.md#project-seed)
+Policy: [Work Classification](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/work-classification.md) · [Planning Model](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/planning-model.md) · [Project Orchestration](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/docs/project-orchestration.md#project-seed)
