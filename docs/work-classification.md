@@ -4,13 +4,14 @@ Project #11에서 repository는 작업의 1차 영역을 이미 제공한다. �
 
 ## Classification axes
 
+이 문서는 두 가지 분류만 소유한다.
+
 | Axis | Question | Cardinality |
 |---|---|---|
-| Repository | 어디의 작업인가? | GitHub native, exactly one |
 | Work Type | 왜 이 Issue가 존재하는가? 주된 delta는 무엇인가? | exactly one |
 | Labels | 무엇에 관한 작업인가? 반복해서 찾을 가치가 있는 관심사는 무엇인가? | zero or more |
-| Status | 지금 어떤 실행 상태인가? | exactly one |
-| Iteration | 언제 수행했는가? | committed / historical work only |
+
+Repository는 GitHub native state, Status/Iteration의 schema와 completeness는 [Project Fields](fields.md), lifecycle 의미는 [Planning Model](planning-model.md)이 소유한다.
 
 Work Type은 Issue 전체 Outcome을 분류한다. 개별 commit의 conventional type, 사용 기술, 구현 방법, 실험성, CI 여부를 나타내지 않는다.
 
@@ -97,13 +98,3 @@ label을 추가·변경할 때는 먼저 반복 검색/filtering 가치가 위 �
 | Knowledge | 기존 정책의 의미를 바꾸지 않고 설명을 정리 | Documentation | `planning` |
 | Knowledge | Project field 대안을 비교하고 결론/Evidence를 확보 | Investigation | `planning` |
 | Knowledge | Issue activation automation의 중복 실행 버그 수정 | Fix | `orchestration` |
-
-## Completeness
-
-- Work Type: 활성 Project Item이면 반드시 하나.
-- Labels: 0개 이상. 비어 있어도 정상이다.
-- Iteration: committed work 또는 실제 수행된 historical work에 둔다. Backlog는 일반적으로 비운다.
-- Linked pull requests: 구현 PR이 존재하면 GitHub native Development relation으로 연결한다.
-- Parent/Sub-issues: 실제 작업 구조가 있을 때만 사용한다.
-
-과거 `Experiment` option을 `Investigation`으로 이름만 바꾼 결과는 자동으로 올바른 분류가 된 것으로 간주하지 않는다. Migration 시 모든 기존 Item을 Outcome 기준으로 다시 판정한다.
