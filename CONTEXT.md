@@ -52,4 +52,6 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 
 ## 문서 사용
 
+Repository/Agent 진입점은 [README](README.md)와 [AGENTS](AGENTS.md)이며, 둘 모두 이 문서로 수렴한다.
+
 원본 문서를 수정하고 `python3 scripts/bundle.py`로 Chat 첨부물을 재생성한다. 생성된 `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다.
