@@ -8,6 +8,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 
 | 작업 | 참조 순서 |
 |---|---|
+| 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
 | Issue 생성·수정·활성화 | [Issue 형식](templates/repository-issue.md) → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Issue-linked branch](docs/project-orchestration.md#development-branch-naming) → 해당 Issue |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
@@ -32,6 +33,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 ## PM-level 원본
 
 - [Architecture](docs/architecture.md): repository 역할과 제품 경계
+- [Feature Change Protocol](docs/change-protocol.md): 새 기능·동작 변경 시 ownership·contract·side-effect·OQ routing
 - [Architecture Transition](docs/architecture-transition.md): cross-repository 전환 순서·안전 규칙
 - [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
 - [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
