@@ -29,16 +29,6 @@
 
 - <PR, 테스트, 실행 결과와 재현 방법>
 
-## Work Metadata
-
-- **Assignee:** <GitHub login>
-- **Project:** `Publishing Platform` (#11)
-- **Status:** `Backlog`
-- **Iteration:** <예: `C1-W3`; Backlog이면 비움>
-- **Work Type:** <Feature | Fix | Refactor | Maintenance | Documentation | Investigation>
-- **Labels:** <registry의 실제 label만; 필요 없으면 비움>
-- **Milestone:** <repository milestone이 실제로 필요할 때만>
-- **Relationships:** <Parent / Blocked by / Blocking; 해당 없으면 비움>
-- **Development branch:** <실제 작업 시작 후 연결된 branch; Backlog/Todo/Draft이면 비움>
+Operational metadata (`Status`, `Iteration`, `Work Type`, Labels, Assignees, Relationships, Development)는 GitHub Project/native fields가 소유한다. Issue body에 현재값을 복제하지 않는다.
 
 Work Type/Labels: [Work Classification](../docs/work-classification.md). Lifecycle/DoD: [Planning Model](../docs/planning-model.md). Seed 계약: [Project Orchestration](../docs/project-orchestration.md#project-seed).
