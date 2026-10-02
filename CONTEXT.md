@@ -35,7 +35,6 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 - [Architecture Transition](docs/architecture-transition.md): cross-repository 전환 순서·안전 규칙
 - [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
 - [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
-- [Current Decisions](docs/decisions.md): 원본 탐색 인덱스
 - [Open Questions](docs/open-questions.md): 아직 실제 제품/coordination 결정이 필요한 항목
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 문서를 만들지 않는다.
