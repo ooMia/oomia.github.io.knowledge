@@ -20,7 +20,6 @@
 | `.github/` | GitHub automation 및 GitHub용 설정 |
 | `.vite-hooks/` | repository가 관리하는 Vite+ Git hook |
 | `dist/` | 원본에서 재생성하는 build·배포 산출물 |
-| `handoff/` | 현재 작업을 이어받기 위한 일시적 checkpoint |
 
 동일한 scheme은 사용하지 않는 빈 디렉토리를 모두 만들라는 의미가 아니다. 필요한 경로를 사용할 때 위 역할을 유지한다. 새로운 공통 경로가 필요하면 여기서 의미를 먼저 정의한다. framework가 요구하는 하위 경로와 실제 package 구성은 구현 레포가 설명한다.
 
@@ -240,7 +239,7 @@ Agent용 root instruction은 짧고 실행 가능해야 한다.
 - copy-pasted entire Knowledge
 - 이미 존재하지 않는 service/DB commands
 
-repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. live stale-file 여부는 `handoff/current.md`에서 추적한다.
+repository-local Agent 지침에 superseded architecture나 존재하지 않는 service/task가 남아 있으면 scratch/migration 구현 전에 먼저 교체한다. 현재 실행 상태는 live Project/Issue/PR와 owning repository Evidence에서 확인한다.
 
 ## 13. Generated and local state
 
