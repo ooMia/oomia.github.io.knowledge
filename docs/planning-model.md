@@ -41,7 +41,7 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Project orchestration Action이 설치된 repository에서는 Issue 활성화 이벤트가 Project #11 등록·field 초기화·Development linked branch 생성을 수행한다. 사용자는 별도 branch 생성 요청을 반복할 필요가 없다.
 - 새 Repository Issue에는 machine-readable `project-seed`를 함께 둔다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
 - Project field/option ID는 Issue나 문서에 저장하지 않고 Action이 이름으로 조회한다. schema drift가 있으면 자동화 실패로 드러내고 임의 값을 추론하지 않는다.
-- 상세 동작과 PAT 설정은 [Project Orchestration](project-orchestration.md)을 따른다.
+- activation과 lifecycle materialization의 공통 의미는 [Project Orchestration](project-orchestration.md)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
 
@@ -60,7 +60,7 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
-- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. 상세 책임과 write cutover는 [Project Orchestration](project-orchestration.md#lifecycle-synchronization-boundary)을 따른다.
+- activation workflow와 webhook reconciliation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. automation ownership boundary는 [Project Orchestration](project-orchestration.md#ownership-boundary)을 따른다.
 
 ## 완료 판정
 
