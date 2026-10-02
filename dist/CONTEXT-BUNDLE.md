@@ -756,68 +756,45 @@ scratch repository는 처음부터 workspace를 사용할 수 있지만 package 
 
 ## 4. Dependency direction
 
-workspace dependency는 `package.json`의 실제 dependency로 표현한다.
+dependency는 실제 consumer → provider 관계가 source/config에서 명시적으로 드러나야 한다.
 
-pnpm workspace 내부 dependency는 가능한 한:
-
-```json
-{
-  "dependencies": {
-    "@oomia/example": "workspace:*"
-  }
-}
-```
-
-처럼 local-only intent를 명시한다.
-
-이 dependency graph가 Vite+ task ordering에도 사용되므로 별도의 task-runner 전용 graph를 만들지 않는다.
-
-순환 dependency가 생기면 task runner 설정으로 감추지 않고 package boundary를 다시 검토한다.
+- workspace 내부 의존성은 package/project manager가 이해할 수 있는 정식 dependency로 표현한다.
+- task ordering만을 위해 별도의 가상 dependency graph를 만들지 않는다.
+- 순환 dependency가 생기면 task runner 설정으로 감추지 않고 package boundary를 다시 검토한다.
+- Node/JS/TS workspace의 구체적인 package-manager 표기와 실행 방식은 Development Toolchain (`docs/development-toolchain.md`)을 따른다.
 
 ## 5. Dependency versions
 
-여러 workspace package가 공유하는 third-party dependency는 root `pnpm-workspace.yaml` catalog에 둘 수 있다.
+여러 package가 같은 compatibility/version policy를 공유하면 한 곳에서 관리하는 것을 우선한다.
 
-catalog를 사용할 기준:
-
-- 여러 package가 같은 version policy를 공유함
-- upgrade를 한 곳에서 관리하는 것이 유리함
-- peer/runtime mismatch를 피해야 함
-
-한 package에서만 쓰는 작은 dependency까지 무조건 catalog에 넣어 catalog를 dependency dump로 만들 필요는 없다.
-
-Vite+, TypeScript, common runtime/framework처럼 **workspace-wide toolchain/compatibility version**은 catalog에 두는 편을 우선한다.
+- 같은 version constraint를 여러 package에 반복해 drift를 만들지 않는다.
+- 한 consumer에만 필요한 dependency까지 공통 registry로 끌어올리지 않는다.
+- 실제 catalog/lockfile/version pinning 방식은 Development Toolchain (`docs/development-toolchain.md`)과 owning repository 설정이 소유한다.
 
 ## 6. Root package responsibility
 
-root package는 private orchestration package다.
-
-root에는 제품 business logic을 두지 않는다.
+workspace root는 orchestration/configuration boundary이며 제품 business logic의 기본 owner가 아니다.
 
 root가 소유할 수 있는 것:
 
-- workspace metadata
-- Vite+ config
-- TypeScript base config
-- package-manager policy
+- workspace/project metadata
+- shared compiler/tool configuration
 - repository-wide tasks
+- package/project-manager policy
 - CI/hook integration
 
-root `package.json` scripts는 최소화한다.
-
-Vite+ built-in 또는 `vp run` task를 단순히 다시 alias하는 script를 무분별하게 추가하지 않는다.
+정확한 command surface와 tool-specific config는 Development Toolchain (`docs/development-toolchain.md`)이 소유한다.
 
 ## 7. Configuration ownership
 
-가능하면 config source를 하나로 만든다.
+같은 concern의 config source를 가능한 한 하나로 만든다.
 
-- lint/fmt/check/staged → root Vite+ config
-- package manager/workspace/catalog → `pnpm-workspace.yaml`
-- TS shared compiler policy → root/base tsconfig
-- framework runtime config → owning app/package
+- repository-wide development/tool policy → root 또는 명시된 shared config
+- framework/runtime config → owning app/package
 - CI → `.github/workflows`
+- repository-local 예외 → 해당 repository code/docs
 
-동일 설정을 root와 package에 복사해 “어느 것이 적용되는지” Agent가 추론하게 만들지 않는다.
+동일 설정을 여러 위치에 복사해 Agent나 개발자가 적용 우선순위를 추론하게 만들지 않는다. Vite+/uv/package manager 등 구체 도구 선택과 명령은 Development Toolchain (`docs/development-toolchain.md`)을 따른다.
 
 ## 8. Co-location
 
@@ -941,7 +918,7 @@ generated/local state를 source tree와 섞지 않는다.
 canonical content 자체는 Engine repository 내부 generated directory가 아니라 external/mounted docs workspace로 취급한다.
 
 
-## 17. Maintenance checklist
+## 14. Maintenance checklist
 
 새 directory/package/tool을 추가하기 전에 묻는다.
 
@@ -1016,12 +993,15 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 - 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
-- 사용자가 Draft Issue를 명시적으로 발행/활성화하면 **같은 작업에서 Development branch를 반드시 생성·연결한다.** branch 생성은 별도 사용자 요청을 기다리지 않는다.
-- 활성화 시 제목의 draft 표기를 제거하고 Project Status를 `Todo`로 전환한 뒤, 실제 구현 착수 시 `In Progress`로 이동한다.
+- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 Development branch를 즉시 만들지 않는다.
+- 아직 Iteration commitment가 없으면 `Backlog`다. 실행 주차가 정해지면 Iteration을 설정하고 `Todo`로 전환한다.
+- `Todo`는 실행 가능하지만 아직 실제 작업이 시작되지 않은 상태다.
+- 실제 구현을 시작하며 Development branch를 생성·연결하는 순간 `In progress`로 전환한다.
+- linked PR이 등록되면 branch 생성 여부와 무관하게 실제 작업이 시작된 것으로 보고 `In progress`로 전환한다.
+- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다. 실제 작업이 진행 중이면 필요에 따라 `In progress`로 명시한다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
-- 코드 변경을 직접 소유하지 않는 cross-repo coordination Item은 branch를 만들지 않을 수 있다. 대신 연결된 각 repository implementation issue가 활성화되는 순간 각각의 branch를 생성한다.
 
-- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록·field 초기화와 필요한 Development relation을 materialize할 수 있다.
+- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. Development relation은 activation이 아니라 실제 작업 시작을 표현한다.
 - 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
 - activation과 lifecycle materialization의 공통 의미는 Project Orchestration (`docs/project-orchestration.md`)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
@@ -1031,14 +1011,16 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 
 | Status | 의미 |
 |---|---|
-| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. 일반적으로 Iteration을 비운다. |
-| Todo | Iteration에 commit되었고 착수 가능한 상태다. |
-| In progress | 실제 구현·조사·검증이 진행 중이다. |
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. Iteration과 Development relation을 두지 않는다. |
+| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. Development branch/PR은 없다. |
+| In progress | 실제 구현·조사·검증이 진행 중이다. Development branch 생성 또는 linked PR 등록은 이 상태의 명시적 신호다. |
 | Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
 - Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
+- Development branch나 linked PR이 존재하는 open Item은 `Backlog`나 `Todo`에 머물지 않는다.
+- branch/PR 없이 수행되는 작업도 실제 실행 전에 Iteration commitment를 가져야 하며, Backlog 상태에서 작업하지 않는다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
@@ -1124,7 +1106,7 @@ Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필
 
 - `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
 - `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
-- `Iteration`: 현재 commitment(`Todo / In progress`)와 실제 수행된 historical work(`Done / Cancelled`)에는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 일반적으로 비운다.
+- `Iteration`: `Todo / In progress`에는 현재 commitment가 반드시 있어야 한다. 실제 수행된 historical work(`Done / Cancelled`)는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 비운다.
 - `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
 - `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
 - Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
@@ -1211,7 +1193,8 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 
 1. Project #11 Item 등록
 2. 초기 `Status / Iteration / Work Type` materialization
-3. 실제 개발 branch가 필요한 경우 Issue-linked Development relation 생성
+
+Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
 activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
 
@@ -1245,9 +1228,15 @@ seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`d
 
 ## Development relation
 
-- Issue-linked branch가 필요한지 여부는 작업 성격과 owning repository 운영 방식에 따라 결정한다.
-- `development: false`가 아니고 repository가 Issue-linked development를 사용하는 경우 activation 과정에서 branch relation을 생성한다.
-- 실제 branch 이름, base branch, 생성 API, branch protection은 owning repository가 소유한다.
+Development relation은 **실제 작업 시작의 signal**이다.
+
+- `Backlog`: Iteration commitment와 Development branch/linked PR이 없다.
+- `Todo`: Iteration commitment는 있지만 Development branch/linked PR은 아직 없다.
+- Development branch를 생성·연결하면 `In progress`로 전환한다.
+- linked PR이 등록되면 branch 생성 경로와 무관하게 `In progress`로 전환한다.
+- branch/PR 없이 수행하는 작업은 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다.
+- Development relation이 생겼는데 Iteration이 없다면 automation이 임의의 Iteration을 추론하지 않는다. 불일치로 드러내고 commitment를 먼저 정한다.
+- 실제 branch 이름, base branch, 생성 API, branch protection과 Status mutation 구현은 owning repository가 소유한다.
 - 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
 
 ## Lifecycle reconciliation
@@ -1257,10 +1246,10 @@ Status의 의미와 canonical lifecycle은 Planning Model (`docs/planning-model.
 공통적으로 자동화할 수 있는 것은 명확한 invariant에 한정한다.
 
 - active candidate가 Iteration commitment를 얻으면 `Todo`로 진행할 수 있다.
-- `Todo / In progress` 상태에서 commitment가 제거되면 `Backlog`로 돌아갈 수 있다.
+- Development branch 생성 또는 linked PR 등록은 `In progress`를 의미한다.
+- `Todo / In progress` 상태에서 commitment가 제거되면 실행 상태와 Development relation을 함께 재검토한다. active Development relation이 있는 상태를 자동으로 `Backlog`로 낮추지 않는다.
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
-- Development PR relation은 실제 작업이 시작됐다는 Evidence가 될 수 있다.
 
 Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
