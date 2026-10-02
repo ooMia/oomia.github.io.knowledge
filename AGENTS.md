@@ -9,9 +9,9 @@
 7. Do not mark work Done or invent GitHub field IDs, issue links, implementation evidence, or release dates.
 8. Use Korean prose and retain exact English field/option names.
 9. Run `python3 scripts/bundle.py` after Knowledge edits. Report changed files and unresolved questions.
-10. When resuming work, read `handoff/current.md` before inspecting live state; treat it as a volatile checkpoint, not canonical policy.
-11. Before ending substantial work, promote durable decisions to their owning canonical sources and keep `handoff/current.md` limited to remaining live state and the next safe action.
-12. Do not accumulate session transcripts, historical handoffs, or implementation inventories in Knowledge.
+10. When resuming work, use `CONTEXT.md` to identify the relevant sources, then inspect live Project #11 and linked Issue/PR state before relying on historical documents.
+11. Before ending substantial work, promote durable decisions to their owning canonical sources and ensure unfinished work is represented by a Project Item, Issue, PR, or owning-repository Evidence.
+12. Do not maintain session handoff files, transcripts, or implementation inventories as a parallel state source in Knowledge.
 13. During the active architecture transition, preserve unmerged work before superseding, adapting, or retiring legacy implementation.
 14. Do not treat document cleanup as runtime/build/deployment verification. Preserve revision-scoped Evidence and re-verify implementation claims in the owning repository.
 15. Follow `docs/git-workflow.md` for common change-management invariants; verify repository-specific branch, runner, CI, and release details in the owning repository.
