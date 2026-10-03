@@ -14,7 +14,8 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 활성 Repository Issue는 다음 초기화를 요청할 수 있다.
 
 1. Project #11 Item 등록
-2. 초기 `Status / Iteration / Work Type` materialization
+2. 초기 `Iteration / Work Type` materialization
+3. Iteration이 없으면 `Backlog`, 있으면 `Todo`로 초기 Status 파생
 
 Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
@@ -24,29 +25,32 @@ Draft 또는 아직 실행 범위가 확정되지 않은 Item은 [Planning Model
 
 ## Project seed
 
-Repository Issue는 activation 초기값을 전달하기 위해 machine-readable `project-seed`를 사용할 수 있다.
+Repository Issue는 first admission에 필요한 machine-readable `project-seed`를 사용할 수 있다.
 
 ```md
 <!-- project-seed
 {
   "iteration": null,
-  "workType": "Feature",
-  "status": "Backlog"
+  "workType": "Feature"
 }
 -->
 ```
 
-지원되는 공통 의미:
+Project admission에 사용되는 공통 값:
 
-- `status`: activation 시 요청할 초기 Project Status
 - `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
 - `workType`: Issue Outcome의 Work Type
-- `development: false`: branch가 필요하지 않은 coordination/document-only work임을 명시
-- `branch`: 특정 repository implementation이 explicit override를 지원할 때 사용할 수 있는 optional hint
 
-`project-seed`는 초기화 요청일 뿐이다. activation 이후 Project field가 current state의 source of truth이며, seed를 장기 상태 원장으로 사용하지 않는다.
+초기 Status는 seed 입력이 아니다. activation automation은 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 파생한다.
 
-seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-classification.md)을 위반하지 않아야 한다. 예를 들어 Iteration commitment가 없는 작업은 일반적으로 `Backlog`이며, `Todo`는 실제 Iteration commitment가 있는 상태다.
+현재 repository-local Development automation은 같은 marker에서 다음 optional hint를 읽을 수 있다.
+
+- `development: false`: explicit Development start에서 branch를 만들지 않음
+- `branch`: explicit Development start가 지원할 때 사용할 branch name override
+
+이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+
+seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-classification.md)을 위반하지 않아야 한다.
 
 ## Development relation
 
@@ -76,7 +80,7 @@ Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)�
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
 
-이 규칙은 현재 FSM의 `Backlog + Iteration → Todo`, `Todo/In progress + no Iteration → Backlog`, 새 Development PR link `→ In progress`와 양립한다. semantic lifecycle이 automation이 관찰하지 못하는 사건까지 추론하도록 요구하지 않는다.
+Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
 Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 

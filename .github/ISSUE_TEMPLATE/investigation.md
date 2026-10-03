@@ -11,8 +11,7 @@ assignees: "ooMia"
 <!-- project-seed
 {
   "iteration": null,
-  "workType": "Investigation",
-  "status": "Backlog"
+  "workType": "Investigation"
 }
 -->
 
@@ -32,7 +31,7 @@ assignees: "ooMia"
 
 - [ ] Question에 Evidence 기반으로 답할 수 있다.
 - [ ] 남은 불확실성을 식별했다.
-- [ ] durable change가 필요하면 별도 Change Issue로 분리했다.
+- [ ] production 또는 normative behavior 변경이 필요하면 별도 Change Issue로 분리했다.
 
 ## Findings
 

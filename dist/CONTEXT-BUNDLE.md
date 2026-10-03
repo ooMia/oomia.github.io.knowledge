@@ -39,7 +39,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약과 Site 소비 계약은 검증된 canonical `main` state를 가리킨다. Site `main@b46b4af`는 canonical Docs `c5826802`를 소비해 build와 GitHub Pages delivery까지 검증됐다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. 현재 통합 검증 revision과 delivery Evidence는 Implementation Map (`docs/implementation-map.md`)에서만 관리한다.
 
 ## PM-level 원본
 
@@ -780,7 +780,7 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다.
 
-불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 실행·검증에 필요한 context만 남기고, 적용되는 Quality Requirements가 있다면 Acceptance Criteria 또는 Context에서 식별해 Evidence로 검증한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
 
 ### Repository Issue template 선택
 
@@ -793,7 +793,7 @@ Repository Issue template은 Work Type 이름이 아니라 **완료를 무엇으
 
 - Issue 생성 전에 둘 중 하나를 선택하고 template marker와 핵심 section을 유지한다.
 - Context와 Scope처럼 상황에 따라 불필요한 section은 제거할 수 있다. 빈 칸을 채우기 위해 정보를 만들지 않는다.
-- Investigation에서 durable repository change가 필요하다는 결론이 나오면 조사 scope를 확장하지 않고 Change Issue로 분리한다.
+- Investigation에서 production 또는 normative behavior 변경이 필요하다는 결론이 나오면 조사 scope를 확장하지 않고 Change Issue로 분리한다. 반복 가능한 benchmark harness나 durable Evidence처럼 Investigation 자체의 산출물은 Work Classification 기준에 따라 Investigation에 남을 수 있다.
 - 단일 repository가 소유하지 않는 cross-repository coordination은 Repository Issue template을 추가하지 않고 Project Item으로 유지한다.
 - 둘 중 어느 template도 목적을 왜곡하지 않고 표현할 수 없다면 ad-hoc 형식을 만들기보다 canonical template set을 먼저 보완한다.
 
@@ -819,7 +819,7 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 - Development branch 또는 linked PR은 실제 작업 시작을 관찰할 수 있는 강한 signal이지만 `In progress`의 의미 자체를 정의하지 않는다. branch/PR 없이 수행하는 조사·coordination·문서 작업도 실제 수행을 시작하면 `In progress`일 수 있다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
 - Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. activation 자체는 actual work start나 Development relation을 의미하지 않는다.
-- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. admission 시 Iteration과 Work Type의 초기값을 전달하며, 초기 Status는 Iteration 존재 여부에서 파생한다. 활성화 이후의 SoT는 계속 GitHub Project다.
 - activation과 lifecycle materialization의 공통 의미는 Project Orchestration (`docs/project-orchestration.md`)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
@@ -1011,7 +1011,8 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 활성 Repository Issue는 다음 초기화를 요청할 수 있다.
 
 1. Project #11 Item 등록
-2. 초기 `Status / Iteration / Work Type` materialization
+2. 초기 `Iteration / Work Type` materialization
+3. Iteration이 없으면 `Backlog`, 있으면 `Todo`로 초기 Status 파생
 
 Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
@@ -1021,29 +1022,32 @@ Draft 또는 아직 실행 범위가 확정되지 않은 Item은 Planning Model 
 
 ## Project seed
 
-Repository Issue는 activation 초기값을 전달하기 위해 machine-readable `project-seed`를 사용할 수 있다.
+Repository Issue는 first admission에 필요한 machine-readable `project-seed`를 사용할 수 있다.
 
 ```md
 <!-- project-seed
 {
   "iteration": null,
-  "workType": "Feature",
-  "status": "Backlog"
+  "workType": "Feature"
 }
 -->
 ```
 
-지원되는 공통 의미:
+Project admission에 사용되는 공통 값:
 
-- `status`: activation 시 요청할 초기 Project Status
 - `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
 - `workType`: Issue Outcome의 Work Type
-- `development: false`: branch가 필요하지 않은 coordination/document-only work임을 명시
-- `branch`: 특정 repository implementation이 explicit override를 지원할 때 사용할 수 있는 optional hint
 
-`project-seed`는 초기화 요청일 뿐이다. activation 이후 Project field가 current state의 source of truth이며, seed를 장기 상태 원장으로 사용하지 않는다.
+초기 Status는 seed 입력이 아니다. activation automation은 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 파생한다.
 
-seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다. 예를 들어 Iteration commitment가 없는 작업은 일반적으로 `Backlog`이며, `Todo`는 실제 Iteration commitment가 있는 상태다.
+현재 repository-local Development automation은 같은 marker에서 다음 optional hint를 읽을 수 있다.
+
+- `development: false`: explicit Development start에서 branch를 만들지 않음
+- `branch`: explicit Development start가 지원할 때 사용할 branch name override
+
+이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+
+seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다.
 
 ## Development relation
 
@@ -1073,7 +1077,7 @@ Status의 의미와 canonical lifecycle은 Planning Model (`docs/planning-model.
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
 
-이 규칙은 현재 FSM의 `Backlog + Iteration → Todo`, `Todo/In progress + no Iteration → Backlog`, 새 Development PR link `→ In progress`와 양립한다. semantic lifecycle이 automation이 관찰하지 못하는 사건까지 추론하도록 요구하지 않는다.
+Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
 Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 

@@ -11,8 +11,7 @@ assignees: "ooMia"
 <!-- project-seed
 {
   "iteration": null,
-  "workType": null,
-  "status": "Backlog"
+  "workType": null
 }
 -->
 

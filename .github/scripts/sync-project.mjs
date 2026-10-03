@@ -187,7 +187,7 @@ async function main() {
   const itemId = await addItem(token, project.id, issue.id);
 
   const desired = new Map([
-    ["Status", seed.status ?? (seed.iteration ? "Todo" : "Backlog")],
+    ["Status", seed.iteration ? "Todo" : "Backlog"],
     ["Iteration", seed.iteration],
     ["Work Type", seed.workType],
   ]);
