@@ -32,9 +32,9 @@
 
 소유권이 불분명하면 구현 전에 먼저 owner를 정한다. 단순히 여러 repository가 관련된다는 이유만으로 Knowledge가 기술 계약의 owner가 되지는 않는다.
 
-## 3. Change impact note
+## 3. Change impact routing
 
-Repository Issue를 만들 때 의미 있는 영향이 있는 항목만 짧게 기록한다.
+Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 식별해 실제 owner와 원본으로 routing한다.
 
 - **Ownership:** primary owner와 실제로 수정되는 repository
 - **Contract surfaces:** 영향을 받는 canonical contract/schema
@@ -43,7 +43,7 @@ Repository Issue를 만들 때 의미 있는 영향이 있는 항목만 짧게 �
 - **Cross-repository dependency:** producer/consumer 또는 shared semantics
 - **Open questions:** 구현 전에 남아 있는 Knowledge-level OQ
 
-해당 없는 항목을 억지로 채우지 않는다. 이 note 자체가 새로운 정책 원본이 되어서는 안 되며, 결정된 규칙은 실제 owner 문서를 참조한다.
+이 목록은 Issue body에 그대로 복제하는 필수 form이 아니다. 작업 수행이나 검증에 필요한 정보만 Change Issue의 optional `Context`에 남기고, 결정된 규칙과 장기 semantics는 실제 owner 문서를 참조한다. 해당 없는 항목을 채우기 위해 내용을 만들지 않는다.
 
 ## 4. 기록 위치
 

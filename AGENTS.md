@@ -7,7 +7,7 @@
 5. Preserve implementation/release Evidence, but do not maintain historical decision IDs or source-turn chronology in current canonical documents. Only unresolved product or cross-repository questions belong in `docs/open-questions.md`.
 6. Edit only the owning source for a rule. Do not keep compatibility documents solely to duplicate implementation details that are already expressed by repository code or owner docs.
 7. Do not mark work Done or invent GitHub field IDs, issue links, implementation evidence, or release dates.
-8. When creating or materially rewriting a repository Issue, inspect `.github/ISSUE_TEMPLATE/` first and use the template that best matches the work. The GitHub-native location serves Web UI, Chat, and Agent workflows alike; moving a template does not change the Issue protocol.
+8. When creating or materially rewriting a repository Issue, inspect `.github/ISSUE_TEMPLATE/` first and select the template whose completion model matches the intended outcome. The GitHub-native location serves Web UI, Chat, and Agent workflows alike; moving a template does not change the Issue protocol.
 9. Use Korean prose and retain exact English field/option names.
 10. Run `python3 scripts/bundle.py` after Knowledge edits. Report changed files and unresolved questions.
 11. When resuming work, use `CONTEXT.md` to identify the relevant sources, then inspect live Project #11 and linked Issue/PR state before relying on historical documents.

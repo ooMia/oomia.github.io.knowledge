@@ -129,6 +129,32 @@ async function updateField(token, projectId, itemId, fieldId, value) {
     }
   `, { project: projectId, item: itemId, field: fieldId, value });
 }
+async function isAlreadyInProject(token, issueId, projectId) {
+  let after = null;
+  do {
+    const data = await graphql(token, `
+      query($issue: ID!, $after: String) {
+        node(id: $issue) {
+          ... on Issue {
+            projectItems(first: 100, after: $after, includeArchived: true) {
+              nodes { project { id } }
+              pageInfo { hasNextPage endCursor }
+            }
+          }
+        }
+      }
+    `, { issue: issueId, after });
+    const items = data.node?.projectItems;
+    if (!items) throw new Error("Cannot verify existing Project membership");
+    if (items.nodes.some((item) => item.project.id === projectId)) return true;
+    if (!items.pageInfo.hasNextPage) return false;
+    if (!items.pageInfo.endCursor || items.pageInfo.endCursor === after) {
+      throw new Error("Invalid Project membership pagination");
+    }
+    after = items.pageInfo.endCursor;
+  } while (after);
+  return false;
+}
 
 async function main() {
   const token = process.env.PROJECT_TOKEN;
@@ -150,10 +176,18 @@ async function main() {
 
   const seed = parseSeed(issue.body);
   const project = await fetchProject(token, projectOwner, projectNumber);
+
+  // Activation owns first admission only. Reopen/manual replay preserves
+  // live lifecycle fields because Project state is authoritative after admission.
+  if (await isAlreadyInProject(token, issue.id, project.id)) {
+    console.log("Existing Project item preserved; activation seed not replayed.");
+    return;
+  }
+
   const itemId = await addItem(token, project.id, issue.id);
 
   const desired = new Map([
-    ["Status", seed.status ?? "Todo"],
+    ["Status", seed.status ?? (seed.iteration ? "Todo" : "Backlog")],
     ["Iteration", seed.iteration],
     ["Work Type", seed.workType],
   ]);

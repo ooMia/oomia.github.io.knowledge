@@ -9,6 +9,11 @@ on:
         description: Existing Issue number to synchronize
         required: true
         type: number
+      start_development:
+        description: Create a linked Development branch after Iteration commitment
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: issue-activation-${{ github.repository }}-${{ github.event.issue.number || inputs.issue_number }}
@@ -39,8 +44,9 @@ jobs:
 
   development:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.issue.state == 'open' && !startsWith(github.event.issue.title, 'draft:'))
+      github.event_name == 'workflow_dispatch' &&
+      inputs.start_development
+    needs: project
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -56,5 +62,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVELOPMENT_BASE: develop
-          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
         run: node .github/scripts/create-development-branch.mjs

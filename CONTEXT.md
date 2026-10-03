@@ -9,7 +9,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
-| Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 작업 성격에 맞는 template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
+| Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-relation) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
