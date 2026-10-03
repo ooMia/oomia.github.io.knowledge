@@ -8,15 +8,18 @@ Publishing Platform 1.0의 **현재 검증 snapshot**과 cross-repository Eviden
 
 | 역할 | Repository / revision | 검증 의미 |
 |---|---|---|
-| canonical content | [`ooMia/oomia.github.io.docs@c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c) | Site canonical release가 직접 소비한 Docs revision |
-| Site canonical release | [`ooMia/oomia.github.io@b46b4af`](https://github.com/ooMia/oomia.github.io/commit/b46b4af031a1be668ebc2b6ebe6a619e9f4111f7) / [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332) | Docs `c5826802`를 포함한 Site `main` build와 GitHub Pages delivery가 모두 성공한 final delivery Evidence |
+| canonical content | [`ooMia/oomia.github.io.docs@c1cb0f1`](https://github.com/ooMia/oomia.github.io.docs/commit/c1cb0f1c7c435cfe7b2fd24173f33b54847f75c2) | Obsidian에서 작성된 canonical MDX revision `4f50b150`을 Docs-owned normalization한 현재 canonical corpus |
+| authored source Evidence | [Docs `4f50b150`](https://github.com/ooMia/oomia.github.io.docs/commit/4f50b15089607b2edea3bb8aa7f8e948a24d60fd) / [Docs #8](https://github.com/ooMia/oomia.github.io.docs/issues/8) | 실제 authoring tool에서 기존 canonical MDX의 source/frontmatter 의미를 보존하면서 Site-supported `Callout` 표현으로 수정한 Evidence |
+| Site canonical release | [`ooMia/oomia.github.io@640df2fa`](https://github.com/ooMia/oomia.github.io/commit/640df2fa45c64b2e6e2694f78e33886dd2293f7e) / [run 37101840971](https://github.com/ooMia/oomia.github.io/actions/runs/37101840971) | Docs `c1cb0f1`을 포함한 Site `main` build와 GitHub Pages delivery가 모두 성공한 canonical release Evidence |
+| Site consumer validation | [PR #26](https://github.com/ooMia/oomia.github.io/pull/26) / [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772) | exact Docs revision checkout 후 `astro sync → vp check → vp test → workspace build`가 모두 통과한 authoring/component consumer Evidence |
+| Site ownership boundary | [Site #27](https://github.com/ooMia/oomia.github.io/issues/27) / [PR #28](https://github.com/ooMia/oomia.github.io/pull/28) | canonical Docs formatting은 Docs가 소유하고 Site는 consumer contract만 검증하도록 repository boundary를 정렬한 Evidence |
 | Engine canonical integration | [`ooMia/oomia.github.io.engine@0484358`](https://github.com/ooMia/oomia.github.io.engine/commit/0484358d9118ecc8dfdb803b64909827e205ddf1) / [run 37049044873](https://github.com/ooMia/oomia.github.io.engine/actions/runs/37049044873) | Linux/macOS/Windows full validation과 packaged Engine artifact verification이 통과한 canonical Engine revision |
 | Engine optional mutation | [Engine Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30) | model-assisted metadata enrichment의 선택적 mutation Evidence |
 | Docs trusted consumer | [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694) | Engine artifact를 사용한 Docs-side trusted workflow Evidence |
 
-Site release PR [#24](https://github.com/ooMia/oomia.github.io/pull/24)의 promotion validation은 [run 37049239677](https://github.com/ooMia/oomia.github.io/actions/runs/37049239677)에서 `astro sync → vp check → vp test → workspace build`를 통과했고, PR 단계에서는 Pages deployment가 실행되지 않았다. merge 후 `main@b46b4af`의 [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332)에서 `build=success`, `deploy=success`가 확인됐다.
+Site release verification [PR #26](https://github.com/ooMia/oomia.github.io/pull/26)의 promotion validation은 [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772)에서 exact Docs revision checkout 후 `astro sync → vp check → vp test → workspace build`를 통과했다. merge 후 `main@640df2fa`의 [run 37101840971](https://github.com/ooMia/oomia.github.io/actions/runs/37101840971)에서 `build=success`, `deploy=success`가 확인됐다.
 
-따라서 이전 Q003의 final release gate인 **canonical Docs revision + Site revision + delivery result 연결**은 이 snapshot에서 충족됐다.
+따라서 canonical authored source → Docs revision → Site consumer validation → canonical Site revision → GitHub Pages delivery 연결이 이 snapshot에서 재현 가능한 Evidence로 닫혔다.
 
 ## Architecture transition
 
@@ -30,23 +33,19 @@ Site release PR [#24](https://github.com/ooMia/oomia.github.io/pull/24)의 promo
 
 | Capability | 현재 판정 | 검증된 Evidence | 다음 통합 검수 |
 |---|---|---|---|
-| Authoring | **미충족** | legacy Payload visual authoring Evidence는 있으나 현재 Git-backed md-like source를 호환 authoring tool로 수정·보존하는 target Evidence로 재검증되지 않았다. | 실제 canonical source 수정·보존 → Site 소비 Evidence |
-| Canonical Content | **부분 충족** | Docs Git revision `c5826802`가 canonical corpus를 식별하고 Site canonical release가 동일 revision을 직접 소비했다. 선택적 Engine enrichment도 Docs-side workflow에서 검증됐다. | 현재 authoring/source-preservation path와 canonical content revision 연결 |
-| Extensibility | **부분 충족** | 과거 custom component opt-in Evidence는 존재하나 현재 Site/package source of truth 기준의 end-to-end authoring/consumer Evidence는 아직 release snapshot에 연결되지 않았다. | 실제 component implementation/package + consumer + 필요한 authoring integration Evidence |
+| Authoring | **충족** | [Docs #8](https://github.com/ooMia/oomia.github.io.docs/issues/8)에서 Obsidian으로 기존 canonical MDX를 수정하고 frontmatter/source 의미를 보존한 authored revision `4f50b150`을 확보했다. | 현재 Evidence 유지 |
+| Canonical Content | **충족** | authored revision `4f50b150`이 Git revision으로 고정됐고 Docs-owned normalization 후 canonical revision `c1cb0f1`로 이어졌으며, Site canonical release가 그 exact revision을 직접 소비했다. | 현재 Evidence 유지 |
+| Extensibility | **충족** | 실제 Site implementation의 `Callout` component 표현을 canonical MDX에서 사용했고, [PR #26](https://github.com/ooMia/oomia.github.io/pull/26) / [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772)에서 sync/check/test/build를 통과한 뒤 canonical delivery까지 이어졌다. | 현재 Evidence 유지 |
 | Automation | **충족** | Engine/Docs automation Evidence와 Site `main` build/deploy automation이 실제 canonical revision 검증·delivery에 참여했다. | 현재 Evidence 유지 |
-| Publishing | **충족** | Docs `c5826802` → Site `b46b4af` 소비 관계와 final `main` build/deploy가 재현 가능한 revision/run으로 연결됐다. | 현재 Evidence 유지 |
-| Presentation | **충족** | Site canonical release build가 성공했고 동일 revision이 GitHub Pages delivery로 이어졌다. | 현재 Evidence 유지 |
-| Delivery | **충족** | Docs `c5826802` + Site `b46b4af` + run 37049335332의 GitHub Pages deploy success가 연결됐다. | 현재 Evidence 유지 |
+| Publishing | **충족** | Docs `c1cb0f1` → Site `640df2fa` 소비 관계가 promotion validation과 final `main` build/deploy로 재현 가능하게 연결됐다. | 현재 Evidence 유지 |
+| Presentation | **충족** | Site canonical release build가 supported MDX component를 포함한 corpus로 성공했고 동일 revision이 GitHub Pages delivery로 이어졌다. | 현재 Evidence 유지 |
+| Delivery | **충족** | Docs `c1cb0f1` + Site `640df2fa` + [run 37101840971](https://github.com/ooMia/oomia.github.io/actions/runs/37101840971)의 GitHub Pages deploy success가 연결됐다. | 현재 Evidence 유지 |
 
 ## 현재 남은 1.0 gap
 
-final delivery gate는 닫혔다. 현재 1.0 제품 acceptance에서 남은 핵심 gap은 다음과 같다.
+이 snapshot의 Publishing Platform 1.0 acceptance capability에는 **남은 미충족 gap이 없다**.
 
-- **Authoring:** 현재 Git-backed md-like source를 실제 호환 authoring tool로 수정하고 의미 보존을 검증한 Evidence
-- **Extensibility:** 현재 Site/package source of truth 기준의 실제 확장 표현을 authoring/consumer 경로와 연결한 Evidence
-- **Canonical Content:** 위 authoring/source-preservation Evidence를 canonical Git revision과 연결
-
-새 구현은 이 gap을 실제 owning repository의 Issue/PR/Evidence로 닫는다. 별도 날짜별 checkpoint section은 만들지 않는다.
+Authoring, Canonical Content, Extensibility, Automation, Publishing, Presentation, Delivery가 모두 재현 가능한 owning-repository Evidence와 연결됐다. 이후 W4 기능 작업은 새로운 제품 가치나 post-acceptance 확장으로 취급하며, 이미 닫힌 1.0 acceptance를 불필요하게 다시 blocker로 만들지 않는다.
 
 ## 갱신 규칙
 
