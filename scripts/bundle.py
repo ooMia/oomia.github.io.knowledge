@@ -12,7 +12,7 @@ ORDER = [
     'docs/planning-model.md', 'docs/fields.md', 'docs/work-classification.md',
     'docs/git-workflow.md',
     'docs/project-orchestration.md', 'docs/release-1.0.md',
-    'docs/implementation-map.md', 'docs/operating-rhythm.md',
+    'docs/operating-rhythm.md',
     'docs/open-questions.md',
 ]
 
@@ -34,7 +34,7 @@ def main():
     parts = ['# Publishing Platform — Chat Context Bundle\n\n'
              'GENERATED TRANSPORT SNAPSHOT — canonical 원본은 각 source 경계에 적힌 repository path입니다. 직접 수정하지 마세요.\n'
              'Repository source에 접근할 수 있으면 CONTEXT.md routing과 canonical owner를 직접 사용하세요. 이 bundle은 routing이나 live Project/Issue/PR state를 대체하지 않습니다.\n'
-             'Implementation Map은 문서에 적힌 repository revision의 검증 snapshot이며 live Project 상태가 아닙니다.\n'
+             'Completed release/migration RECORD는 명시된 immutable Evidence scope에만 적용되며 current live state를 대체하지 않습니다.\n'
              '상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.\n']
     for name in ORDER:
         content = (ROOT / name).read_text(encoding='utf-8')
