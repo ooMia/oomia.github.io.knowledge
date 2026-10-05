@@ -15,10 +15,10 @@ ORDER = [
 
 def main():
     errors = []
-    for path in ROOT.rglob('*.md'):
+    for path in sorted(ROOT.rglob('*.md')):
         if '.git' in path.parts or 'dist' in path.parts:
             continue
-        for target in re.findall(r'\]\(([^)]+)\)', path.read_text()):
+        for target in re.findall(r'\]\(([^)]+)\)', path.read_text(encoding='utf-8')):
             if re.match(r'[a-zA-Z]+:', target) or target.startswith('#'):
                 continue
             destination = (path.parent / target.split('#')[0]).resolve()
@@ -33,7 +33,7 @@ def main():
              'Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
              '상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.\n']
     for name in ORDER:
-        content = (ROOT / name).read_text()
+        content = (ROOT / name).read_text(encoding='utf-8')
         def rewrite(match):
             label, target = match.groups()
             if re.match(r'[a-zA-Z]+:', target) or target.startswith('#'):
@@ -45,7 +45,7 @@ def main():
         parts.append(f'\n---\n\n<!-- BEGIN SOURCE: {name} -->\n\n{content}\n<!-- END SOURCE: {name} -->\n')
     out = ROOT / 'dist/CONTEXT-BUNDLE.md'
     out.parent.mkdir(exist_ok=True)
-    out.write_text('\n'.join(parts))
+    with out.open('w', encoding='utf-8', newline='\n') as stream:\n        stream.write('\n'.join(parts))
     print(f'Checked local document links; bundled {len(ORDER)} source documents into {out.relative_to(ROOT)}')
 
 if __name__ == '__main__':
