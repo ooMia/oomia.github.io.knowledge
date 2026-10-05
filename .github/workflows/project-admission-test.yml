@@ -1,0 +1,25 @@
+name: Project admission contract
+
+on:
+  pull_request:
+    paths:
+      - ".github/actions/project-admission/**"
+      - ".github/workflows/project-admission.yml"
+      - ".github/workflows/project-admission-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Run admission contract tests
+        run: node --test .github/actions/project-admission/project-admission.test.mjs
