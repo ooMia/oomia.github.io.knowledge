@@ -744,7 +744,7 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 ## Issue / PR
 
-- Repository Issue를 생성하거나 크게 수정할 때는 `.github/ISSUE_TEMPLATE/`에서 작업 성격에 맞는 template을 먼저 선택한다. 현재 일반 repository work 형식은 Repository work template (`.github/ISSUE_TEMPLATE/repository-work.md`)이다.
+- Repository Issue를 생성하거나 크게 수정할 때는 `.github/ISSUE_TEMPLATE/`에서 완료 모델에 맞는 template을 먼저 선택한다. repository state 변경은 Change template (`.github/ISSUE_TEMPLATE/change.md`), 결론과 Evidence 확보는 Investigation template (`.github/ISSUE_TEMPLATE/investigation.md`)을 사용한다.
 - Issue의 operational metadata는 GitHub Project/native fields가 소유하며 body에 현재값을 중복 기록하지 않는다.
 - branch/PR/lifecycle 의미는 Planning Model (`docs/planning-model.md`), Project Orchestration (`docs/project-orchestration.md`), Git Workflow (`docs/git-workflow.md`)을 따른다.
 
@@ -926,7 +926,7 @@ Field completeness는 “모든 칸을 채운다”가 아니라 **의미상 필
 - `Status`: Project Item이면 항상 하나의 유효한 값이 있어야 한다.
 - `Work Type`: 실행 가능한 repository Issue이면 정확히 하나여야 한다.
 - `Iteration`: `Todo / In progress`에는 현재 commitment가 반드시 있어야 한다. 실제 수행된 historical work(`Done / Cancelled`)는 수행 주차가 확인되는 경우 유지한다. 아직 수행하지 않은 `Backlog`와 Draft는 비운다.
-- `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 의미 없이 placeholder를 넣지 않는다.
+- `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 현재 개인 프로젝트의 executable Repository Issue는 별도 owner가 명시되지 않으면 `ooMia`를 기본 책임자로 materialize한다.
 - `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 connector 제약 때문에 복구할 수 없으면 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
 - Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
 
@@ -963,7 +963,9 @@ PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남�
 
 - repository는 자신의 역할과 trust boundary에 맞는 검증 단계를 정의한다.
 - 빠른 development feedback과 release/canonical integration 검증은 필요한 경우 서로 다른 강도로 운영할 수 있다.
-- formatting, static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
+- source-code repository의 CI는 formatting 자체를 실패 조건으로 삼지 않는다. Vite+처럼 format check가 종합 check에 포함되는 도구를 사용하면 `vp check --no-fmt`처럼 formatting gate를 제외하고 lint/typecheck/test/build 등 결과에 영향을 주는 검증을 유지한다.
+- canonical content repository에서 source formatting이 Git history 기반 metadata 등 관찰 가능한 결과에 영향을 준다면, 저장 직후 idempotent formatter로 canonical form을 만들고 필요하면 bot commit으로 반영할 수 있다. 이 단계는 format check가 아니라 canonicalization이며, 정규화 이후 실제 내용이 바뀌기 전까지 문서 파일이 다른 이유로 수정되지 않는 상태를 목표로 한다.
+- static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
 - runner 선택은 security, cost, platform dependency, local capability를 고려한다. private repository나 local inference처럼 특정 trust/resource boundary가 필요한 작업은 self-hosted runner를 우선할 수 있고, GitHub-hosted runner는 필요한 검증에만 사용한다.
 - 동일한 고비용 검증을 여러 runner에서 중복 수행하는 것을 기본값으로 삼지 않는다. 추가 matrix는 실제 portability 또는 release risk를 검증할 때 사용한다.
 - 완료 Evidence는 문서에 적힌 기대가 아니라 실제 owning repository workflow run과 결과를 기준으로 한다.
@@ -997,7 +999,7 @@ Knowledge는 공통 invariant만 소유한다. 다음은 owning repository가 �
 
 # Project Orchestration
 
-Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. 실제 workflow 파일, script, token/permission, runner, webhook process, branch base와 같은 실행 세부사항은 이를 구현하는 owning repository가 소유한다.
+Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. Project admission의 공통 materialization 구현은 이 repository의 shared workflow/action이 소유하고, 각 caller repository는 event wiring·secret 전달과 repository-specific Development start를 소유한다. 장기 webhook runtime, branch base, branch 생성 방식 같은 실행 세부사항은 해당 owning repository가 소유한다.
 
 ## Scope
 
@@ -1016,7 +1018,7 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 
 Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
-activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
+Project admission은 Knowledge의 shared workflow/action을 하나의 구현 원본으로 사용한다. caller repository는 Issue event 또는 explicit replay를 이 workflow에 연결하고 자기 `PROJECT_TOKEN`과 repository-scoped `GITHUB_TOKEN`을 전달한다. Development start, branch base와 branch 생성 방식은 계속 repository-local automation이 소유한다.
 
 Draft 또는 아직 실행 범위가 확정되지 않은 Item은 Planning Model (`docs/planning-model.md`)의 lifecycle을 따른다. 활성화되지 않은 Draft 때문에 implementation branch를 만들지 않는다.
 
@@ -1046,6 +1048,8 @@ Project admission에 사용되는 공통 값:
 - `branch`: explicit Development start가 지원할 때 사용할 branch name override
 
 이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+
+`workType`은 executable Repository Issue admission의 필수 semantic input이다. 이미 live Project Work Type이 있으면 replay가 seed로 덮어쓰지 않고, live 값이 비어 있을 때만 seed 값을 materialize한다. live 값과 seed가 모두 없으면 의미를 추론하지 않고 fail closed한다. 기존 `status` key가 남아 있어도 admission은 이를 무시하고 Iteration에서 초기 Status를 파생한다.
 
 seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다.
 
@@ -1079,7 +1083,7 @@ Status의 의미와 canonical lifecycle은 Planning Model (`docs/planning-model.
 
 Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
-Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
+Work Type과 historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. admission은 missing Work Type을 validated `project-seed.workType`에서만 materialize하고 기존 live 값은 보존한다. 현재 개인 프로젝트의 executable Repository Issue에서 assignee가 비어 있으면 기본 책임자 `ooMia`를 deterministic하게 materialize할 수 있다. unknown state, conflicting semantic value나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
 ## Ownership boundary
 
@@ -1089,10 +1093,11 @@ Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자�
 | activation 및 reconciliation의 공통 의미 | 이 문서 |
 | 실제 Project field 값 | GitHub Project #11 |
 | Issue/PR/Development relation | GitHub repository native state |
-| workflow/script/API/token/runner 구현 | 실행하는 owning repository |
+| 공통 Project admission workflow/action | Knowledge `.github/workflows/project-admission.yml`, `.github/actions/project-admission/` |
+| caller event wiring / Development start / branch base | 실행하는 owning repository |
 | 장기 webhook/runtime implementation | 해당 implementation repository의 code/docs |
 
-공통 구현 상세를 Knowledge에 복제하지 않는다. 여러 repository에서 반복되는 실행 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
+공통 Project admission 구현은 Knowledge에 한 번만 두고 caller repository에 복제하지 않는다. repository-local 실행 차이는 그 owning source에 두며, 여러 repository에서 반복되는 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
 
 <!-- END SOURCE: docs/project-orchestration.md -->
 
