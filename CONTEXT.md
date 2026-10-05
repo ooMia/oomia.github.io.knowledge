@@ -55,4 +55,6 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 
 Repository/Agent 진입점은 [README](README.md)와 [AGENTS](AGENTS.md)이며, 둘 모두 이 문서로 수렴한다.
 
-원본 문서를 수정하고 `python3 scripts/bundle.py`로 Chat 첨부물을 재생성한다. 생성된 `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다.
+Repository 원본에 접근할 수 있으면 이 문서의 routing을 따라 필요한 canonical source를 직접 읽는다. `dist/CONTEXT-BUNDLE.md`는 repository 접근이 없거나 단일 파일로 context를 전달해야 할 때 사용하는 **generated transport snapshot**이며 canonical source나 live Project/Issue/PR state를 대체하지 않는다.
+
+bundle을 사용할 때도 embedded `CONTEXT.md`를 entry point로 삼아 필요한 source만 읽는다. `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다. Knowledge PR에서는 repository automation이 `python3 scripts/bundle.py`로 bundle을 materialize하고 재현성을 검증한다.

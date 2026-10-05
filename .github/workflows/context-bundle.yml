@@ -1,9 +1,7 @@
-name: Context bundle validation
+name: Context bundle
 
 on:
   pull_request:
-    branches:
-      - main
     paths:
       - "**/*.md"
       - "scripts/bundle.py"
@@ -16,17 +14,148 @@ on:
       - "scripts/bundle.py"
       - ".github/workflows/context-bundle.yml"
 
-permissions:
-  contents: read
-
 concurrency:
-  group: context-bundle-${{ github.workflow }}-${{ github.ref }}
+  group: context-bundle-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
+  materialize:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
+      statuses: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_OID: ${{ github.event.pull_request.head.sha }}
+      HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      STATUS_CONTEXT: context-bundle/materialized
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.HEAD_OID }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Regenerate context bundle
+        run: python3 scripts/bundle.py
+
+      - name: Ensure generator only mutates the bundle
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only)
+          if (( ${#changed[@]} == 0 )); then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if (( ${#changed[@]} != 1 )) || [[ "${changed[0]}" != "dist/CONTEXT-BUNDLE.md" ]]; then
+            printf 'Unexpected generator changes:\n'
+            printf ' - %s\n' "${changed[@]}"
+            exit 1
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub-signed bundle commit
+        if: steps.diff.outputs.changed == 'true'
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          query = """
+          mutation($repository: String!, $branch: String!, $expected: GitObjectID!, $contents: Base64String!) {
+            createCommitOnBranch(input: {
+              branch: {repositoryNameWithOwner: $repository, branchName: $branch}
+              message: {headline: "docs: regenerate Chat context bundle"}
+              expectedHeadOid: $expected
+              fileChanges: {
+                additions: [{
+                  path: "dist/CONTEXT-BUNDLE.md"
+                  contents: $contents
+                }]
+              }
+            }) {
+              commit {
+                oid
+                url
+              }
+            }
+          }
+          """
+          contents = base64.b64encode(Path("dist/CONTEXT-BUNDLE.md").read_bytes()).decode("ascii")
+          payload = {
+              "query": query,
+              "variables": {
+                  "repository": os.environ["GITHUB_REPOSITORY"],
+                  "branch": os.environ["HEAD_REF"],
+                  "expected": os.environ["HEAD_OID"],
+                  "contents": contents,
+              },
+          }
+          Path("/tmp/create-commit.json").write_text(json.dumps(payload), encoding="utf-8")
+          PY
+
+          gh api graphql --input /tmp/create-commit.json > /tmp/create-commit-response.json
+
+          new_oid="$(
+            python3 - <<'PY'
+          import json
+          from pathlib import Path
+          response = json.loads(Path("/tmp/create-commit-response.json").read_text(encoding="utf-8"))
+          print(response["data"]["createCommitOnBranch"]["commit"]["oid"])
+          PY
+          )"
+          echo "oid=$new_oid" >> "$GITHUB_OUTPUT"
+
+      - name: Verify materialized head
+        id: verify
+        shell: bash
+        env:
+          MATERIALIZED_OID: ${{ steps.commit.outputs.oid || env.HEAD_OID }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ steps.diff.outputs.changed }}" == "true" ]]; then
+            verified="$(
+              gh api "repos/$GITHUB_REPOSITORY/commits/$MATERIALIZED_OID"                 --jq '.commit.verification.verified'
+            )"
+            if [[ "$verified" != "true" ]]; then
+              echo "Materialized commit is not GitHub-Verified: $MATERIALIZED_OID"
+              exit 1
+            fi
+
+            git reset --hard HEAD
+            git fetch origin "$HEAD_REF"
+            git checkout --detach FETCH_HEAD
+            test "$(git rev-parse HEAD)" = "$MATERIALIZED_OID"
+          fi
+
+          python3 scripts/bundle.py
+          git diff --exit-code -- dist/CONTEXT-BUNDLE.md
+
+      - name: Publish latest-head status
+        if: success()
+        shell: bash
+        env:
+          MATERIALIZED_OID: ${{ steps.commit.outputs.oid || env.HEAD_OID }}
+        run: |
+          set -euo pipefail
+          gh api             --method POST             "repos/$GITHUB_REPOSITORY/statuses/$MATERIALIZED_OID"             -f state=success             -f context="$STATUS_CONTEXT"             -f description="Context bundle is materialized and reproducible"             -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  verify-main:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - name: Regenerate context bundle
