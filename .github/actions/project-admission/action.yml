@@ -1,0 +1,29 @@
+name: Project admission
+description: Reconcile a repository Issue into Publishing Platform Project #11.
+
+inputs:
+  issue_number:
+    description: Repository Issue number
+    required: true
+  initial_event:
+    description: Whether this run handles the Issue opened event
+    required: false
+    default: "false"
+  project_token:
+    description: Token with Project #11 read/write access
+    required: true
+  repository_token:
+    description: Caller repository token used only for native Issue bookkeeping
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Reconcile Project admission
+      shell: bash
+      env:
+        ISSUE_NUMBER: ${{ inputs.issue_number }}
+        INITIAL_EVENT: ${{ inputs.initial_event }}
+        PROJECT_TOKEN: ${{ inputs.project_token }}
+        REPOSITORY_TOKEN: ${{ inputs.repository_token }}
+      run: node "$GITHUB_ACTION_PATH/project-admission.mjs"
