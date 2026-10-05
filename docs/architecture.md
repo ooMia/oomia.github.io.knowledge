@@ -64,7 +64,7 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 
 ## Publishing boundary
 
-[Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)이 실제 입력·렌더링·component integration·publishability 검증을 소유한다.
+[Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)이 실제 입력·렌더링·component integration·publishability 검증을 소유한다.
 
 - 입력 계약을 만족하는 사용자 작성 파일은 그대로 소비할 수 있다.
 - Engine 후처리나 별도 projection은 공통 발행 선행 조건이 아니다.
