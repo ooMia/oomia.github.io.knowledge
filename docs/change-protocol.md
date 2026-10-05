@@ -31,7 +31,7 @@
 | Docs에 지속 데이터를 추가하거나 content identity에 영향을 줌 | Docs의 owning source; cross-repository 의미가 생기면 Architecture 확인 |
 | Site rendering·component·consumer semantics가 바뀜 | Site의 current consumption contract와 code/tests |
 | external network, paid API, remote mutation 등 side effect가 생김 | owning repository의 기술 계약·trigger policy·tests |
-| build/publish 재현성이나 release boundary가 바뀜 | owning repository 검증 + [Git Workflow](git-workflow.md) + 필요한 경우 [Implementation Map](implementation-map.md) |
+| build/publish 재현성이나 release boundary가 바뀜 | owning repository 검증 + [Git Workflow](git-workflow.md) + [release lifecycle](planning-model.md#release-lifecycle) + 해당 version-scoped release document |
 | 둘 이상의 repository가 같은 semantics를 소비함 | semantics의 단일 owner를 정하고 다른 repository는 원본을 참조 |
 | 제품/cross-repository 결정이 아직 남음 | [Open Questions](open-questions.md) |
 | package/module/API 내부 선택처럼 owner 안에서 결정 가능한 구현 세부사항 | Knowledge에 복제하지 않고 owning repository code/docs에서 결정 |
@@ -80,6 +80,6 @@ Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 �
 
 ## 6. 완료
 
-완료 판정은 [Planning Model](planning-model.md#완료-판정)을 따른다.
+완료 판정은 [Planning Model](planning-model.md#completion-and-evidence)을 따른다.
 
 기능 구현은 설계 문서 존재만으로 완료되지 않는다. 적용되는 contract와 code/tests가 일치하고, Acceptance Criteria와 Quality Requirements를 실제 Evidence로 검증해야 한다.
