@@ -82,14 +82,13 @@ child Issue branch ──PR──┘
 
 GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
 
-- child PR의 Development relation이 필요하면 GitHub의 manual link를 사용한다.
-- child Issue의 Outcome/AC/Evidence가 충족되고 child PR이 선언된 parent integration branch에 merge되면 child Issue를 명시적으로 `closed / completed` 및 Project `Done`으로 materialize할 수 있다.
-- child `Done`은 parent의 canonical activation을 의미하지 않는다. parent는 자기 Outcome/AC/Evidence와 최종 integration을 별도로 완료한다.
-- final parent PR은 이미 완료된 child Issue를 다시 close하기 위한 surface가 아니라, child 결과들을 하나의 parent Outcome으로 통합·검증·활성화하는 surface다.
-- parent가 나중에 보류되거나 취소되어도 이미 `Done`인 child work를 자동으로 미완료 상태로 되돌리지 않는다. child 결과 자체가 revert/drop/reject/supersede되어 Outcome Evidence가 무효화된 경우에만 child lifecycle을 재평가한다.
-- 아직 완료되지 않은 child는 parent decommit/cancel decision에 따라 commitment나 Status를 함께 재평가할 수 있다.
+- child PR의 Development relation이 필요하면 GitHub의 explicit relation을 사용한다.
+- child Issue의 완료 시점은 parent/child 관계 자체가 아니라 그 Issue의 Outcome/AC/Evidence가 요구하는 integration target으로 판단한다.
+- parent integration branch merge가 child Outcome의 최종 integration이면 그 시점에 `Done`이 될 수 있다.
+- child Outcome이 canonical/default branch 또는 production delivery를 요구한다면 parent buffer merge만으로 완료하지 않는다.
+- parent/sub, blocking, relates-to 관계는 PR topology와 context를 설명하지만 Status inheritance를 만들지 않는다.
 
-이 패턴의 목적은 **완료된 child work의 throughput을 즉시 기록하면서, parent의 canonical activation은 별도의 검토 가능한 integration unit으로 유지하는 것**이다.
+이 패턴의 목적은 **완료된 child work를 불필요하게 대기시키지 않으면서 각 Issue가 스스로 정의한 completion boundary를 보존하는 것**이다.
 
 ## POLICY — History and archive
 
