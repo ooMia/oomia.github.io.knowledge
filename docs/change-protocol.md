@@ -1,8 +1,14 @@
 # Feature Change Protocol
 
-새 기능이나 의미 있는 동작 변경을 시작할 때 적용되는 정책·계약·소유권을 빠르게 식별하기 위한 routing protocol이다.
+> **Authority:** REFERENCE  
+> **Owner:** feature/change impact routing to canonical semantic owners  
+> **Scope:** new features and meaningful behavior changes before implementation ownership is fixed  
+> **Read when:** deciding which contracts, repositories, side effects, and open decisions a proposed change affects  
+> **Source of truth:** the routed canonical owner and owning repository code/docs/live state
 
-이 문서는 기존 정책을 다시 정의하지 않는다. 실제 규칙은 각 canonical source와 owning repository가 소유하며, 이 문서는 **무엇을 확인하고 어디에 기록할지**만 정한다.
+새 기능이나 의미 있는 동작 변경을 시작할 때 적용되는 정책·계약·소유권을 빠르게 식별하기 위한 routing reference다.
+
+이 문서는 기존 정책을 다시 정의하지 않는다. 실제 규칙은 각 canonical source와 owning repository가 소유하며, 이 문서는 **무엇을 확인하고 어디로 이동할지**만 안내한다.
 
 ## 1. 시작점
 
