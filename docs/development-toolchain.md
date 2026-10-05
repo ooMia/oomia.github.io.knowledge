@@ -42,7 +42,7 @@ Publishing Platform repository의 **project-wide toolchain 기본값과 선택 �
 ## Repository-local references
 
 - Engine: [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [migration](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
-- Site: [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [content consumption contract](https://github.com/ooMia/oomia.github.io/blob/develop/docs/content-consumption-contract.md)
+- Site: [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [content consumption contract](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)
 - Docs: repository workflow/config가 실제 content preparation과 runner/tool 사용을 소유한다.
 
 ## External references

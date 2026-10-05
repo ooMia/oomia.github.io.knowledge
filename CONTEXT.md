@@ -34,7 +34,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 
 - [Architecture](docs/architecture.md): repository 역할과 제품 경계
 - [Feature Change Protocol](docs/change-protocol.md): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
-- [Architecture Transition](docs/architecture-transition.md): cross-repository 전환 순서·안전 규칙
+- [Architecture Transition](docs/architecture-transition.md): 완료된 DB-backed CMS → Git-backed workspace 전환의 provenance·안전 규칙
 - [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
 - [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
 - [Open Questions](docs/open-questions.md): 아직 실제 제품/coordination 결정이 필요한 항목
