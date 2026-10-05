@@ -78,6 +78,20 @@ Iteration은 active Item에서는 **current commitment**, terminal Item에서는
 
 field cardinality와 completeness는 [Project Fields](fields.md)가 소유한다.
 
+## Release lifecycle
+
+Project #11은 cross-repository **live roadmap / commitment / execution state**를 소유한다. versioned release document는 실제 product boundary와 acceptance를 별도로 고정할 필요가 생겼을 때만 만든다.
+
+- active version-scoped release document는 해당 version의 Goal / Product Boundary / Acceptance Criteria를 정의하는 **POLICY**다.
+- release가 완료되면 같은 reference unit에 immutable fulfillment Evidence를 연결하고 문서를 **RECORD**로 전환해 freeze한다.
+- 완료된 release RECORD는 요구사항과 그 충족 Evidence를 함께 보존하며 post-release roadmap이나 current implementation snapshot으로 갱신하지 않는다.
+- 다음 major/minor boundary가 실제로 생기면 기존 RECORD를 재활성화하지 않고 새 version-scoped release document를 만든다.
+- weekly Iteration을 자동 version으로 취급하지 않는다.
+- `Target Release` 같은 Project metadata는 반복적인 filtering/coordination 필요가 실제로 생기기 전에는 다시 도입하지 않는다.
+- 별도 changelog도 concrete consumer/use-case가 생기기 전에는 수기 planning ledger로 만들지 않는다. 필요해지면 completed Project/Issue/PR state에서 재구성하거나 생성할 수 있는 방식을 우선한다.
+
+현재 완료된 예시는 [Publishing Platform 1.0](release-1.0.md) RECORD다.
+
 ## Completion and Evidence
 
 - **Acceptance Criteria**는 이번 변화가 제공해야 하는 관찰 가능한 결과다.
