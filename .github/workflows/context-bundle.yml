@@ -1,0 +1,33 @@
+name: Context bundle validation
+
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "scripts/bundle.py"
+      - ".github/workflows/context-bundle.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.md"
+      - "scripts/bundle.py"
+      - ".github/workflows/context-bundle.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: context-bundle-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Regenerate context bundle
+        run: python3 scripts/bundle.py
+      - name: Verify generated bundle is committed
+        run: git diff --exit-code -- dist/CONTEXT-BUNDLE.md
