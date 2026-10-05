@@ -1,21 +1,28 @@
 # Context entry point
 
-Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 **canonical entry point**다. 먼저 현재 작업 유형을 식별하고 아래 routing에서 필요한 최소 원본만 읽는다. 구현 상세는 책임 repository의 문서와 코드가 소유한다.
+> **Authority:** REFERENCE  
+> **Owner:** task-to-source routing for Publishing Platform work  
+> **Scope:** Knowledge, Project #11, and the Engine/Site/Docs owning repositories  
+> **Read when:** a Chat/Agent task needs project context, canonical policy, implementation ownership, or live state  
+> **Source of truth:** the routed canonical owner; live Project/Issue/PR/code/workflow state for current operational claims
 
-작업을 이어받을 때는 이 문서에서 필요한 원본을 확인한 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
+Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 canonical router다. 먼저 현재 작업 유형을 식별하고 필요한 최소 원본만 읽는다. 이 문서가 specialist policy를 다시 정의하지 않는다.
+
+작업을 이어받을 때는 여기서 필요한 원본을 찾은 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
 
 ## 자주 하는 작업
 
 | 작업 | 참조 순서 |
 |---|---|
+| Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | [Agent Conventions](docs/agent-conventions.md) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
 | Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-relation) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
 | 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → Node/JS/TS 또는 Python이면 [Development Toolchain](docs/development-toolchain.md) |
-| 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 코드·Issue·tests |
-| Knowledge 문서 수정 | [Knowledge Maintenance](docs/maintenance.md) → [소유권](docs/repository-design.md#11-repository-documentation) → 해당 원본 |
+| 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 code·Issue·tests |
+| Knowledge 문서 수정 | [Knowledge Maintenance](docs/maintenance.md) → 해당 semantic owner |
 | 계획·분류·완료 검토 | [Work Classification](docs/work-classification.md) → [Planning](docs/planning-model.md) → [Fields](docs/fields.md) → 실제 Item의 Outcome/AC/Evidence |
 | 기록·발표·주간 회고 | [Operating Rhythm](docs/operating-rhythm.md) → 실제 Project Status Update·Evidence |
 | 제품/cross-repository 미결 사항 | [Open Questions](docs/open-questions.md) |
@@ -28,33 +35,21 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. 현재 통합 검증 revision과 delivery Evidence는 [Implementation Map](docs/implementation-map.md)에서만 관리한다.
+수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인하며, 통합 검증 revision과 delivery Evidence는 [Implementation Map](docs/implementation-map.md)의 명시된 scope에서만 사용한다.
 
 ## PM-level 원본
 
 - [Architecture](docs/architecture.md): repository 역할과 제품 경계
 - [Feature Change Protocol](docs/change-protocol.md): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
-- [Architecture Transition](docs/architecture-transition.md): 완료된 DB-backed CMS → Git-backed workspace 전환의 provenance·안전 규칙
+- [Architecture Transition](docs/architecture-transition.md): 완료된 DB-backed CMS → Git-backed workspace 전환의 historical provenance
 - [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
 - [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
-- [Open Questions](docs/open-questions.md): 아직 실제 제품/coordination 결정이 필요한 항목
+- [Open Questions](docs/open-questions.md): 현재 별도 lifecycle로 승격되지 않은 제품/cross-repository 관심사
 
-component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 문서를 만들지 않는다.
-
-설계가 있다는 사실과 구현 완료를 구분한다. Implementation Map의 Evidence는 기록된 revision에만 해당하며 현재 구현은 책임 레포에서 확인한다. 과거 설계 맥락은 [Architecture Transition](docs/architecture-transition.md)과 owning repository의 migration 기록에서 추적한다.
-
-## 프로젝트 협업·응답 원칙
-
-1. 작업은 검증 가능한 작은 단계로 나눈다.
-2. 이미 확정된 정책의 문서 반영·참조 정리·검증은 주도적으로 수행한다. 새로운 제품 정책 선택이나 실제 cross-repository ownership이 불확실한 경우만 질문한다.
-3. GitHub 관련 핵심 객체의 주소를 알고 있다면 처음 소개할 때 클릭 가능한 링크로 제시한다.
-4. 현재 작업 결과에 영향을 주지 않는 주변 metadata나 live field 검증은 blocker로 만들지 않는다.
-5. 다음 세션에서도 이어져야 하는 작업 상태는 Project Item, Issue, PR 또는 owning repository Evidence에 남긴다. Chat 세션 전용 handoff를 별도 원장으로 만들지 않는다.
+component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 원본을 만들지 않는다.
 
 ## 문서 사용
 
-Repository/Agent 진입점은 [README](README.md)와 [AGENTS](AGENTS.md)이며, 둘 모두 이 문서로 수렴한다.
+Repository source에 직접 접근할 수 있으면 이 routing을 따라 canonical owner를 직접 읽는다. [Knowledge Maintenance](docs/maintenance.md)가 문서 Authority/구조와 generated bundle 규칙을 소유한다.
 
-Repository 원본에 접근할 수 있으면 이 문서의 routing을 따라 필요한 canonical source를 직접 읽는다. `dist/CONTEXT-BUNDLE.md`는 repository 접근이 없거나 단일 파일로 context를 전달해야 할 때 사용하는 **generated transport snapshot**이며 canonical source나 live Project/Issue/PR state를 대체하지 않는다.
-
-bundle을 사용할 때도 embedded `CONTEXT.md`를 entry point로 삼아 필요한 source만 읽는다. `dist/CONTEXT-BUNDLE.md`를 직접 수정하지 않는다. Knowledge PR에서는 repository automation이 `python3 scripts/bundle.py`로 bundle을 materialize하고 재현성을 검증한다.
+`dist/CONTEXT-BUNDLE.md`를 사용하는 환경에서도 embedded `CONTEXT.md`를 router로 사용하고 필요한 source section만 읽는다. bundle은 canonical source나 live Project/Issue/PR state를 대체하지 않는다.
