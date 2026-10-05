@@ -45,7 +45,8 @@ def main():
         parts.append(f'\n---\n\n<!-- BEGIN SOURCE: {name} -->\n\n{content}\n<!-- END SOURCE: {name} -->\n')
     out = ROOT / 'dist/CONTEXT-BUNDLE.md'
     out.parent.mkdir(exist_ok=True)
-    with out.open('w', encoding='utf-8', newline='\n') as stream:\n        stream.write('\n'.join(parts))
+    with out.open('w', encoding='utf-8', newline='\n') as stream:
+        stream.write('\n'.join(parts))
     print(f'Checked local document links; bundled {len(ORDER)} source documents into {out.relative_to(ROOT)}')
 
 if __name__ == '__main__':
