@@ -45,6 +45,16 @@ Canonical specialist document는 제목 가까이에 다음 semantic contract를
 
 README, AGENTS, CONTEXT처럼 landing/bootstrap/router 역할 자체가 핵심인 root surface도 가능한 한 같은 의미를 드러내되, metadata를 늘리는 것보다 routing 비용을 낮추는 것이 우선이다.
 
+## Renewal migration
+
+이 contract는 renewal의 목표 상태이며 기존 문서에 header만 일괄 추가하기 위한 규칙이 아니다.
+
+- 새 canonical specialist document는 이 contract를 **MUST** 따른다.
+- 기존 문서의 Authority, Owner, Scope 또는 retrieval boundary를 실질적으로 변경할 때는 같은 변경에서 contract를 **MUST** 명시한다.
+- 아직 renewal되지 않은 기존 문서는 다음 관련 renewal에서 semantic boundary와 함께 분류한다. header가 없다는 이유만으로 현재 의미를 무효로 보지 않는다.
+- migration은 metadata 추가만 수행하지 않고 Owner / Necessity / Duplication / Retrieval / Executability 검토와 함께 진행한다.
+
+
 ## Structure by authority
 
 동일한 Authority의 문서는 비슷한 **해석 순서**를 제공해야 한다. 아래는 content frame이며 exact heading 이름이나 모든 절의 존재를 강제하지 않는다.
