@@ -7,8 +7,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ORDER = [
     'CONTEXT.md', 'docs/agent-conventions.md', 'docs/change-protocol.md',
     'docs/architecture-transition.md', 'docs/architecture.md',
-    'docs/development-toolchain.md', 'docs/repository-design.md', 'docs/maintenance.md',
-    'docs/planning-model.md', 'docs/fields.md', 'docs/git-workflow.md',
+    'docs/development-toolchain.md', 'docs/repository-design.md',
+    'docs/implementation-practices.md', 'docs/maintenance.md',
+    'docs/planning-model.md', 'docs/fields.md', 'docs/work-classification.md',
+    'docs/git-workflow.md',
     'docs/project-orchestration.md', 'docs/release-1.0.md',
     'docs/implementation-map.md', 'docs/operating-rhythm.md',
     'docs/open-questions.md',
