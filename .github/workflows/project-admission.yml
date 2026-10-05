@@ -1,0 +1,32 @@
+name: Project admission
+
+on:
+  workflow_call:
+    inputs:
+      issue_number:
+        description: Repository Issue number
+        required: true
+        type: number
+      initial_event:
+        description: Whether this call handles the Issue opened event
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      project_token:
+        required: true
+
+jobs:
+  admission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Reconcile Project #11 admission
+        uses: $/.github/actions/project-admission
+        with:
+          issue_number: ${{ inputs.issue_number }}
+          initial_event: ${{ inputs.initial_event }}
+          project_token: ${{ secrets.project_token }}
+          repository_token: ${{ github.token }}
