@@ -23,11 +23,20 @@ Canonical 문서는 주된 역할에 따라 하나의 **Authority**를 가진다
 
 Machine-readable schema, workflow/action/test, code/config, live GitHub Project/Issue/PR state는 prose Authority와 별개의 operational source다. 문서는 이들을 설명하거나 연결할 수 있지만 실제 live state나 executable behavior를 대신하지 않는다.
 
-문서는 주된 Authority 하나를 **MUST** 가져야 한다. 짧은 subordinate 설명 때문에 파일을 기계적으로 분리할 필요는 없지만, 서로 다른 Authority의 내용이 독립적으로 검색·재사용될 가치가 있고 함께 둘 경우 강제력을 오해하게 만든다면 분리하는 것이 적절하다.
+문서는 주된 Authority 하나를 **MUST** 가진다. Authority purity 자체는 문서 분리 기준이 아니다. 문서 경계는 아래의 **reference unit** 원칙을 우선하며, 같은 작업에서 함께 소비되는 짧은 subordinate 내용은 다른 Authority라도 같은 문서에 둘 수 있다. 주된 Authority와 다른 subordinate section은 heading에서 그 강도를 명시한다(예: `## GUIDANCE — Package boundaries`).
 
 ## Document contract
 
-Canonical specialist document는 제목 가까이에 다음 semantic contract를 **MUST** 드러낸다. 고정된 Markdown frontmatter나 동일 heading syntax를 요구하지 않으며, blockquote·짧은 표·동등한 prose를 사용할 수 있다.
+Canonical specialist document는 제목 바로 아래에 다음 4줄 semantic header를 **MUST** 사용한다. 이것이 renewal에서 의도적으로 고정하는 최소 Markdown syntax다.
+
+```md
+> **Authority:** POLICY
+> **Owner:** ...
+> **Scope:** ...
+> **Read when:** ...
+```
+
+본문 heading과 절 구성은 고정하지 않는다. 이 header는 다음 질문에 즉시 답하기 위한 contract다.
 
 | Field | 질문 |
 |---|---|
@@ -43,7 +52,7 @@ Canonical specialist document는 제목 가까이에 다음 semantic contract를
 - `RECORD`: 검증·역사 범위를 고정하기 위해 **Evidence scope** 또는 동등한 revision/time boundary를 둔다.
 - `GUIDANCE`: 별도 필수 확장 field는 없다.
 
-README, AGENTS, CONTEXT처럼 landing/bootstrap/router 역할 자체가 핵심인 root surface도 가능한 한 같은 의미를 드러내되, metadata를 늘리는 것보다 routing 비용을 낮추는 것이 우선이다.
+README, AGENTS, CONTEXT 같은 root surface도 이 4줄 header를 사용한다. root surface의 본문은 routing 비용을 낮추는 것이 우선이며 specialist policy를 재서술하지 않는다.
 
 ## Renewal migration
 
@@ -69,7 +78,7 @@ README, AGENTS, CONTEXT처럼 landing/bootstrap/router 역할 자체가 핵심�
 4. enforcement / verification
 5. exception 또는 reference가 실제로 필요할 때만 추가
 
-`POLICY`에서 BCP 14 keyword는 강제력을 구분할 필요가 있을 때만 **SHOULD** 사용한다. 예제는 requirement와 명확히 분리하고, concrete tool/repository example이 normative rule처럼 읽히지 않도록 한다.
+`POLICY`에서 BCP 14 keyword는 강제력을 구분할 필요가 있을 때만 **SHOULD** 사용한다. normative requirement는 가능하면 **하나의 독립적인 rule을 하나의 list item에** 표현해 review와 permalink reference가 쉬워지게 한다. 물리적인 한 줄 길이 자체를 강제하지 않는다. 예제는 requirement와 명확히 분리하고, concrete tool/repository example이 normative rule처럼 읽히지 않도록 한다.
 
 ### GUIDANCE
 
@@ -106,6 +115,19 @@ README, AGENTS, CONTEXT처럼 landing/bootstrap/router 역할 자체가 핵심�
 5. related current canonical sources
 
 `RECORD`의 claim은 명시된 Evidence scope를 넘어 현재 상태로 확장하지 않는다.
+
+## Document boundaries and reference units
+
+문서의 1차 분리 기준은 **독립적인 reference/retrieval 단위인가**이다.
+
+- 두 concern이 서로 다른 작업에서 독립적으로 참조된다면 separate document로 유지한다.
+- A 작업이 B→C를 읽더라도 다른 작업이 B만 읽는다면 B와 C를 단순히 자주 같이 등장한다는 이유로 합치지 않는다.
+- 반대로 별도의 독립 retrieval path가 없고 동일 task에서 거의 항상 함께 소비된다면, semantic owner·change cadence·size를 함께 검토해 통합할 수 있다.
+- POLICY와 GUIDANCE의 강도 차이만으로 파일을 분리하지 않는다. 같은 reference unit이면 dominant Authority 아래 subordinate section을 명시적으로 표시할 수 있다.
+- independent retrieval value가 생기면 section을 새 document로 분리하고 CONTEXT/routing에서 직접 참조한다.
+- 문서 수를 줄이는 것 자체가 목표가 아니다. composition 시 불필요한 context를 읽지 않으면서 owner를 쉽게 조합할 수 있는 구조가 목표다.
+
+이 원칙은 GitHub permalink를 활용한 section/rule reference와 양립한다. line-level permalink 편의를 위해 의미를 잘못된 file boundary로 쪼개지는 않는다.
 
 ## Bootstrap guards
 
