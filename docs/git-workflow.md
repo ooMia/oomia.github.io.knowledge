@@ -71,6 +71,8 @@ child Issue branch ──PR──┘
 ```
 
 - parent Issue branch 자체를 integration buffer로 사용할 수 있다.
+- parent/sub-issue 관계 자체만으로 integration branch를 만들지 않는다. parent Outcome이 여러 child change의 **atomic canonical activation**을 요구할 때 사용한다.
+- 단순 tracking/coordination parent, Investigation parent, 서로 독립적으로 canonical integration 가능한 child 집합은 각자 owning integration path를 유지한다.
 - child PR은 구현·review·child-level verification이 끝나면 integration branch로 merge해 open PR queue를 줄인다.
 - canonical branch를 대상으로 대기하는 PR은 parent integration PR 하나로 수렴시키는 편을 권장한다.
 - integration branch는 parent change/release/renewal이 끝나면 삭제하는 temporary coordination state이며 두 번째 canonical branch가 아니다.
