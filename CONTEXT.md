@@ -9,7 +9,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
-| Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 작업 성격에 맞는 template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
+| Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-relation) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
@@ -28,7 +28,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약과 Site 소비 계약은 검증된 canonical `main` state를 가리킨다. Site `main@b46b4af`는 canonical Docs `c5826802`를 소비해 build와 GitHub Pages delivery까지 검증됐다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. 현재 통합 검증 revision과 delivery Evidence는 [Implementation Map](docs/implementation-map.md)에서만 관리한다.
 
 ## PM-level 원본
 

@@ -1,4 +1,4 @@
-name: Issue activation
+name: Issue lifecycle
 
 on:
   issues:
@@ -6,41 +6,41 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: Existing Issue number to synchronize
+        description: Existing Issue number to admit or start
         required: true
         type: number
+      start_development:
+        description: Start work by creating or confirming a linked Development branch
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
-  group: issue-activation-${{ github.repository }}-${{ github.event.issue.number || inputs.issue_number }}
+  group: issue-lifecycle-${{ github.repository }}-${{ github.event.issue.number || inputs.issue_number }}
   cancel-in-progress: false
 
 jobs:
   project:
+    name: Project admission
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.issue.state == 'open' && !startsWith(github.event.issue.title, 'draft:'))
-    runs-on: ubuntu-latest
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Synchronize Project #11
-        env:
-          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-          PROJECT_OWNER: ooMia
-          PROJECT_NUMBER: "11"
-          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
-        run: node .github/scripts/sync-project.mjs
+      issues: write
+    uses: ooMia/oomia.github.io.knowledge/.github/workflows/project-admission.yml@0f21e830e86f60f24415e8f6a2a07faaa305c466
+    with:
+      issue_number: ${{ github.event.issue.number || inputs.issue_number }}
+      initial_event: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
+    secrets:
+      project_token: ${{ secrets.PROJECT_TOKEN }}
 
   development:
+    name: Development start
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.issue.state == 'open' && !startsWith(github.event.issue.title, 'draft:'))
+      github.event_name == 'workflow_dispatch' &&
+      inputs.start_development
+    needs: project
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -52,9 +52,23 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Verify Iteration commitment
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PROJECT_OWNER: ooMia
+          PROJECT_NUMBER: "11"
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: node .github/scripts/project-development-state.mjs verify
       - name: Create linked Development branch
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEVELOPMENT_BASE: develop
-          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
         run: node .github/scripts/create-development-branch.mjs
+      - name: Mark Project In progress
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PROJECT_OWNER: ooMia
+          PROJECT_NUMBER: "11"
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: node .github/scripts/project-development-state.mjs start

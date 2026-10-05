@@ -20,7 +20,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 Open Questions (`docs/open-questions.md`) |
-| Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 작업 성격에 맞는 template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
+| Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 완료 모델에 맞는 Change/Investigation template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | Git Workflow (`docs/git-workflow.md`) → 통합 목표 (`docs/release-1.0.md`) → 검수 연결 (`docs/implementation-map.md`) |
@@ -39,7 +39,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository에 통합되어 있다. Engine 수정 계약과 Site 소비 계약은 검증된 canonical `main` state를 가리킨다. Site `main@b46b4af`는 canonical Docs `c5826802`를 소비해 build와 GitHub Pages delivery까지 검증됐다.
+수정·소비 계약은 각각 owning repository에 통합되어 있다. 현재 통합 검증 revision과 delivery Evidence는 Implementation Map (`docs/implementation-map.md`)에서만 관리한다.
 
 ## PM-level 원본
 
@@ -109,9 +109,9 @@ Repository/Agent 진입점은 README (`README.md`)와 AGENTS (`AGENTS.md`)이며
 
 소유권이 불분명하면 구현 전에 먼저 owner를 정한다. 단순히 여러 repository가 관련된다는 이유만으로 Knowledge가 기술 계약의 owner가 되지는 않는다.
 
-## 3. Change impact note
+## 3. Change impact routing
 
-Repository Issue를 만들 때 의미 있는 영향이 있는 항목만 짧게 기록한다.
+Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 식별해 실제 owner와 원본으로 routing한다.
 
 - **Ownership:** primary owner와 실제로 수정되는 repository
 - **Contract surfaces:** 영향을 받는 canonical contract/schema
@@ -120,7 +120,7 @@ Repository Issue를 만들 때 의미 있는 영향이 있는 항목만 짧게 �
 - **Cross-repository dependency:** producer/consumer 또는 shared semantics
 - **Open questions:** 구현 전에 남아 있는 Knowledge-level OQ
 
-해당 없는 항목을 억지로 채우지 않는다. 이 note 자체가 새로운 정책 원본이 되어서는 안 되며, 결정된 규칙은 실제 owner 문서를 참조한다.
+이 목록은 Issue body에 그대로 복제하는 필수 form이 아니다. 작업 수행이나 검증에 필요한 정보만 Change Issue의 optional `Context`에 남기고, 결정된 규칙과 장기 semantics는 실제 owner 문서를 참조한다. 해당 없는 항목을 채우기 위해 내용을 만들지 않는다.
 
 ## 4. 기록 위치
 
@@ -780,7 +780,23 @@ canonical content 자체는 Engine repository 내부 generated directory가 아�
 
 Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 Work Classification (`docs/work-classification.md`)을 따른다.
 
-불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 실행·검증에 필요한 context만 남기고, 적용되는 Quality Requirements가 있다면 Acceptance Criteria 또는 Context에서 식별해 Evidence로 검증한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+
+### Repository Issue template 선택
+
+Repository Issue template은 Work Type 이름이 아니라 **완료를 무엇으로 증명하는가**에 따라 선택한다.
+
+| Template | 핵심 질문 | 완료 모델 |
+|---|---|---|
+| Change | 무엇이 달라져야 하는가? | repository의 canonical 또는 observable state가 의도대로 바뀌고 검증됨 |
+| Investigation | 무엇을 알아내야 하는가? | 질문에 대한 결론과 재현 가능한 Evidence가 확보됨 |
+
+- Issue 생성 전에 둘 중 하나를 선택하고 template marker와 핵심 section을 유지한다.
+- Context와 Scope처럼 상황에 따라 불필요한 section은 제거할 수 있다. 빈 칸을 채우기 위해 정보를 만들지 않는다.
+- Investigation에서 production 또는 normative behavior 변경이 필요하다는 결론이 나오면 조사 scope를 확장하지 않고 Change Issue로 분리한다. 반복 가능한 benchmark harness나 durable Evidence처럼 Investigation 자체의 산출물은 Work Classification 기준에 따라 Investigation에 남을 수 있다.
+- 단일 repository가 소유하지 않는 cross-repository coordination은 Repository Issue template을 추가하지 않고 Project Item으로 유지한다.
+- 둘 중 어느 template도 목적을 왜곡하지 않고 표현할 수 없다면 ad-hoc 형식을 만들기보다 canonical template set을 먼저 보완한다.
+
 
 ### Development branch 초기 구현
 
@@ -796,16 +812,14 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 - 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
-- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 Development branch를 즉시 만들지 않는다.
-- 아직 Iteration commitment가 없으면 `Backlog`다. 실행 주차가 정해지면 Iteration을 설정하고 `Todo`로 전환한다.
-- `Todo`는 실행 가능하지만 아직 실제 작업이 시작되지 않은 상태다.
-- 실제 구현을 시작하며 Development branch를 생성·연결하는 순간 `In progress`로 전환한다.
-- linked PR이 등록되면 branch 생성 여부와 무관하게 실제 작업이 시작된 것으로 보고 `In progress`로 전환한다.
-- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다. 실제 작업이 진행 중이면 필요에 따라 `In progress`로 명시한다.
+- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 작업이 시작된 것은 아니다.
+- 아직 Iteration commitment가 없으면 `Backlog`다.
+- Iteration에 commit되었지만 실제 구현·조사·검증을 시작하지 않았으면 `Todo`다.
+- Iteration에 commit된 작업을 실제로 시작하면 `In progress`다. commitment와 착수가 동시에 일어나면 `Todo`를 의례적으로 거치지 않고 Iteration과 `In progress`를 함께 materialize할 수 있다.
+- Development branch 또는 linked PR은 실제 작업 시작을 관찰할 수 있는 강한 signal이지만 `In progress`의 의미 자체를 정의하지 않는다. branch/PR 없이 수행하는 조사·coordination·문서 작업도 실제 수행을 시작하면 `In progress`일 수 있다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
-
-- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. Development relation은 activation이 아니라 실제 작업 시작을 표현한다.
-- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. activation 자체는 actual work start나 Development relation을 의미하지 않는다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. admission 시 Iteration과 Work Type의 초기값을 전달하며, 초기 Status는 Iteration 존재 여부에서 파생한다. 활성화 이후의 SoT는 계속 GitHub Project다.
 - activation과 lifecycle materialization의 공통 의미는 Project Orchestration (`docs/project-orchestration.md`)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
@@ -814,16 +828,18 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 
 | Status | 의미 |
 |---|---|
-| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. Iteration과 Development relation을 두지 않는다. |
-| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. Development branch/PR은 없다. |
-| In progress | 실제 구현·조사·검증이 진행 중이다. Development branch 생성 또는 linked PR 등록은 이 상태의 명시적 신호다. |
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. |
+| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. |
+| In progress | Iteration에 commit되었고 실제 구현·조사·검증이 진행 중이다. |
 | Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
 - Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
-- Development branch나 linked PR이 존재하는 open Item은 `Backlog`나 `Todo`에 머물지 않는다.
-- branch/PR 없이 수행되는 작업도 실제 실행 전에 Iteration commitment를 가져야 하며, Backlog 상태에서 작업하지 않는다.
+- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. Iteration이 제거되면 active Development relation과 실제 실행 상태를 함께 재검토하되, commitment 없는 실행 상태를 정상 상태로 두지 않는다.
+- 새 linked PR은 실제 작업 시작의 명확한 observable signal이므로 open Item을 `In progress`로 materialize할 수 있다. Development branch 역시 owning integration이 관찰할 수 있다면 같은 signal로 사용할 수 있다.
+- branch/PR이 없는 작업도 실제 수행을 시작했다면 `In progress`가 맞다. 이 경우 Status는 사람 또는 해당 실행 인터페이스가 명시적으로 materialize할 수 있다.
+- 상태 관계는 `Backlog → Todo → In progress`지만 UI/API가 반드시 모든 중간 상태를 순차적으로 기록할 필요는 없다. 현재 Iteration에 commit하면서 즉시 착수하는 작업은 `Backlog → In progress`로 직접 materialize할 수 있다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
@@ -995,7 +1011,8 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 활성 Repository Issue는 다음 초기화를 요청할 수 있다.
 
 1. Project #11 Item 등록
-2. 초기 `Status / Iteration / Work Type` materialization
+2. 초기 `Iteration / Work Type` materialization
+3. Iteration이 없으면 `Backlog`, 있으면 `Todo`로 초기 Status 파생
 
 Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
@@ -1005,39 +1022,44 @@ Draft 또는 아직 실행 범위가 확정되지 않은 Item은 Planning Model 
 
 ## Project seed
 
-Repository Issue는 activation 초기값을 전달하기 위해 machine-readable `project-seed`를 사용할 수 있다.
+Repository Issue는 first admission에 필요한 machine-readable `project-seed`를 사용할 수 있다.
 
 ```md
 <!-- project-seed
 {
   "iteration": null,
-  "workType": "Feature",
-  "status": "Backlog"
+  "workType": "Feature"
 }
 -->
 ```
 
-지원되는 공통 의미:
+Project admission에 사용되는 공통 값:
 
-- `status`: activation 시 요청할 초기 Project Status
 - `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
 - `workType`: Issue Outcome의 Work Type
-- `development: false`: branch가 필요하지 않은 coordination/document-only work임을 명시
-- `branch`: 특정 repository implementation이 explicit override를 지원할 때 사용할 수 있는 optional hint
 
-`project-seed`는 초기화 요청일 뿐이다. activation 이후 Project field가 current state의 source of truth이며, seed를 장기 상태 원장으로 사용하지 않는다.
+초기 Status는 seed 입력이 아니다. activation automation은 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 파생한다.
 
-seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다. 예를 들어 Iteration commitment가 없는 작업은 일반적으로 `Backlog`이며, `Todo`는 실제 Iteration commitment가 있는 상태다.
+현재 repository-local Development automation은 같은 marker에서 다음 optional hint를 읽을 수 있다.
+
+- `development: false`: explicit Development start에서 branch를 만들지 않음
+- `branch`: explicit Development start가 지원할 때 사용할 branch name override
+
+이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+
+seed 값은 Planning Model (`docs/planning-model.md`)과 Work Classification (`docs/work-classification.md`)을 위반하지 않아야 한다.
 
 ## Development relation
 
-Development relation은 **실제 작업 시작의 signal**이다.
+Development relation은 actual work start를 관찰할 수 있는 **signal**이며 Status 의미 자체의 정의는 Planning Model (`docs/planning-model.md`)이 소유한다.
 
-- `Backlog`: Iteration commitment와 Development branch/linked PR이 없다.
-- `Todo`: Iteration commitment는 있지만 Development branch/linked PR은 아직 없다.
-- Development branch를 생성·연결하면 `In progress`로 전환한다.
-- linked PR이 등록되면 branch 생성 경로와 무관하게 `In progress`로 전환한다.
-- branch/PR 없이 수행하는 작업은 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다.
+- `Backlog`: 아직 Iteration commitment가 없다.
+- `Todo`: Iteration commitment는 있지만 실제 작업은 시작되지 않았다.
+- `In progress`: Iteration commitment가 있고 실제 작업이 시작됐다.
+- 새 linked PR은 실제 작업 시작의 명확한 observable signal이므로 `In progress`로 materialize한다. closed Issue에 새 PR link가 생기는 경우의 reopen semantics는 owning automation이 명시적으로 처리할 수 있다.
+- Development branch도 owning repository integration이 그 relation을 신뢰성 있게 관찰할 수 있다면 `In progress` signal로 사용할 수 있다. 공통 automation이 관찰할 수 없는 branch event를 억지로 추론하지 않는다.
+- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실제 수행을 시작하면 `In progress`일 수 있다.
+- commitment와 actual work start가 동시에 일어나면 Iteration과 `In progress`를 함께 materialize할 수 있으며, `Todo`를 중간 write로 강제하지 않는다.
 - Development relation이 생겼는데 Iteration이 없다면 automation이 임의의 Iteration을 추론하지 않는다. 불일치로 드러내고 commitment를 먼저 정한다.
 - 실제 branch 이름, base branch, 생성 API, branch protection과 Status mutation 구현은 owning repository가 소유한다.
 - 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
@@ -1046,13 +1068,16 @@ Development relation은 **실제 작업 시작의 signal**이다.
 
 Status의 의미와 canonical lifecycle은 Planning Model (`docs/planning-model.md`)이 소유한다. orchestration automation은 그 의미를 materialize할 뿐 두 번째 lifecycle 원본이 아니다.
 
-공통적으로 자동화할 수 있는 것은 명확한 invariant에 한정한다.
+공통적으로 자동화할 수 있는 것은 명확한 invariant와 실제로 관찰 가능한 signal에 한정한다.
 
-- active candidate가 Iteration commitment를 얻으면 `Todo`로 진행할 수 있다.
-- Development branch 생성 또는 linked PR 등록은 `In progress`를 의미한다.
-- `Todo / In progress` 상태에서 commitment가 제거되면 실행 상태와 Development relation을 함께 재검토한다. active Development relation이 있는 상태를 자동으로 `Backlog`로 낮추지 않는다.
+- `Backlog` candidate가 Iteration commitment를 얻고 더 강한 work-start signal이 없으면 `Todo`로 materialize할 수 있다.
+- 이미 `In progress`이고 Iteration이 유지되는 Item을 단순히 `Todo`로 낮추지 않는다.
+- 새 linked PR처럼 automation이 실제로 관찰한 work-start signal은 `In progress`로 materialize할 수 있다.
+- `Todo / In progress` 상태에서 Iteration commitment가 제거되면 `Backlog` invariant를 복구한다. active Development relation이 남아 있다면 이를 정상 상태로 추론하지 않고 불일치로 드러내 별도 검토할 수 있다.
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
+
+Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
 Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
@@ -1128,15 +1153,18 @@ Publishing Platform 1.0의 **현재 검증 snapshot**과 cross-repository Eviden
 
 | 역할 | Repository / revision | 검증 의미 |
 |---|---|---|
-| canonical content | [`ooMia/oomia.github.io.docs@c5826802`](https://github.com/ooMia/oomia.github.io.docs/commit/c5826802be296f4ad84193119729be77a2d52c3c) | Site canonical release가 직접 소비한 Docs revision |
-| Site canonical release | [`ooMia/oomia.github.io@b46b4af`](https://github.com/ooMia/oomia.github.io/commit/b46b4af031a1be668ebc2b6ebe6a619e9f4111f7) / [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332) | Docs `c5826802`를 포함한 Site `main` build와 GitHub Pages delivery가 모두 성공한 final delivery Evidence |
+| canonical content | [`ooMia/oomia.github.io.docs@c1cb0f1`](https://github.com/ooMia/oomia.github.io.docs/commit/c1cb0f1c7c435cfe7b2fd24173f33b54847f75c2) | Obsidian에서 작성된 canonical MDX revision `4f50b150`을 Docs-owned normalization한 현재 canonical corpus |
+| authored source Evidence | [Docs `4f50b150`](https://github.com/ooMia/oomia.github.io.docs/commit/4f50b15089607b2edea3bb8aa7f8e948a24d60fd) / [Docs #8](https://github.com/ooMia/oomia.github.io.docs/issues/8) | 실제 authoring tool에서 기존 canonical MDX의 source/frontmatter 의미를 보존하면서 Site-supported `Callout` 표현으로 수정한 Evidence |
+| Site canonical release | [`ooMia/oomia.github.io@79efd753`](https://github.com/ooMia/oomia.github.io/commit/79efd753bd4b6efd63ab2e3bfccbd83935517c58) / [run 37103699755](https://github.com/ooMia/oomia.github.io/actions/runs/37103699755) | Docs `c1cb0f1`을 포함한 Site `main` build와 GitHub Pages delivery가 모두 성공한 현재 canonical release Evidence |
+| Site consumer validation | [PR #26](https://github.com/ooMia/oomia.github.io/pull/26) / [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772) | exact Docs revision checkout 후 `astro sync → vp check → vp test → workspace build`가 모두 통과한 authoring/component consumer Evidence |
+| Site ownership boundary | [Site #27](https://github.com/ooMia/oomia.github.io/issues/27) / [PR #28](https://github.com/ooMia/oomia.github.io/pull/28) | canonical Docs formatting은 Docs가 소유하고 Site는 consumer contract만 검증하도록 repository boundary를 정렬한 Evidence |
 | Engine canonical integration | [`ooMia/oomia.github.io.engine@0484358`](https://github.com/ooMia/oomia.github.io.engine/commit/0484358d9118ecc8dfdb803b64909827e205ddf1) / [run 37049044873](https://github.com/ooMia/oomia.github.io.engine/actions/runs/37049044873) | Linux/macOS/Windows full validation과 packaged Engine artifact verification이 통과한 canonical Engine revision |
 | Engine optional mutation | [Engine Issue #23](https://github.com/ooMia/oomia.github.io.engine/issues/23) / [PR #30](https://github.com/ooMia/oomia.github.io.engine/pull/30) | model-assisted metadata enrichment의 선택적 mutation Evidence |
 | Docs trusted consumer | [Docs run 36260957694](https://github.com/ooMia/oomia.github.io.docs/actions/runs/36260957694) | Engine artifact를 사용한 Docs-side trusted workflow Evidence |
 
-Site release PR [#24](https://github.com/ooMia/oomia.github.io/pull/24)의 promotion validation은 [run 37049239677](https://github.com/ooMia/oomia.github.io/actions/runs/37049239677)에서 `astro sync → vp check → vp test → workspace build`를 통과했고, PR 단계에서는 Pages deployment가 실행되지 않았다. merge 후 `main@b46b4af`의 [run 37049335332](https://github.com/ooMia/oomia.github.io/actions/runs/37049335332)에서 `build=success`, `deploy=success`가 확인됐다.
+Site authoring/component verification [PR #26](https://github.com/ooMia/oomia.github.io/pull/26)의 promotion validation은 [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772)에서 exact Docs revision checkout 후 `astro sync → vp check → vp test → workspace build`를 통과했다. 이후 Site 기능 확장이 통합된 현재 `main@79efd753`의 [run 37103699755](https://github.com/ooMia/oomia.github.io/actions/runs/37103699755)에서도 `build=success`, `deploy=success`가 확인됐다.
 
-따라서 이전 Q003의 final release gate인 **canonical Docs revision + Site revision + delivery result 연결**은 이 snapshot에서 충족됐다.
+따라서 canonical authored source → Docs revision → Site consumer validation → 현재 canonical Site revision → GitHub Pages delivery 연결이 이 snapshot에서 재현 가능한 Evidence로 닫혔다.
 
 ## Architecture transition
 
@@ -1150,23 +1178,19 @@ Site release PR [#24](https://github.com/ooMia/oomia.github.io/pull/24)의 promo
 
 | Capability | 현재 판정 | 검증된 Evidence | 다음 통합 검수 |
 |---|---|---|---|
-| Authoring | **미충족** | legacy Payload visual authoring Evidence는 있으나 현재 Git-backed md-like source를 호환 authoring tool로 수정·보존하는 target Evidence로 재검증되지 않았다. | 실제 canonical source 수정·보존 → Site 소비 Evidence |
-| Canonical Content | **부분 충족** | Docs Git revision `c5826802`가 canonical corpus를 식별하고 Site canonical release가 동일 revision을 직접 소비했다. 선택적 Engine enrichment도 Docs-side workflow에서 검증됐다. | 현재 authoring/source-preservation path와 canonical content revision 연결 |
-| Extensibility | **부분 충족** | 과거 custom component opt-in Evidence는 존재하나 현재 Site/package source of truth 기준의 end-to-end authoring/consumer Evidence는 아직 release snapshot에 연결되지 않았다. | 실제 component implementation/package + consumer + 필요한 authoring integration Evidence |
+| Authoring | **충족** | [Docs #8](https://github.com/ooMia/oomia.github.io.docs/issues/8)에서 Obsidian으로 기존 canonical MDX를 수정하고 frontmatter/source 의미를 보존한 authored revision `4f50b150`을 확보했다. | 현재 Evidence 유지 |
+| Canonical Content | **충족** | authored revision `4f50b150`이 Git revision으로 고정됐고 Docs-owned normalization 후 canonical revision `c1cb0f1`로 이어졌으며, Site canonical release가 그 exact revision을 직접 소비했다. | 현재 Evidence 유지 |
+| Extensibility | **충족** | 실제 Site implementation의 `Callout` component 표현을 canonical MDX에서 사용했고, [PR #26](https://github.com/ooMia/oomia.github.io/pull/26) / [run 37099713772](https://github.com/ooMia/oomia.github.io/actions/runs/37099713772)에서 sync/check/test/build를 통과한 뒤 canonical delivery까지 이어졌다. | 현재 Evidence 유지 |
 | Automation | **충족** | Engine/Docs automation Evidence와 Site `main` build/deploy automation이 실제 canonical revision 검증·delivery에 참여했다. | 현재 Evidence 유지 |
-| Publishing | **충족** | Docs `c5826802` → Site `b46b4af` 소비 관계와 final `main` build/deploy가 재현 가능한 revision/run으로 연결됐다. | 현재 Evidence 유지 |
-| Presentation | **충족** | Site canonical release build가 성공했고 동일 revision이 GitHub Pages delivery로 이어졌다. | 현재 Evidence 유지 |
-| Delivery | **충족** | Docs `c5826802` + Site `b46b4af` + run 37049335332의 GitHub Pages deploy success가 연결됐다. | 현재 Evidence 유지 |
+| Publishing | **충족** | Docs `c1cb0f1` → Site `79efd753` 소비 관계가 consumer validation과 final `main` build/deploy로 재현 가능하게 연결됐다. | 현재 Evidence 유지 |
+| Presentation | **충족** | Site canonical release build가 supported content expressions를 포함한 corpus로 성공했고 동일 revision이 GitHub Pages delivery로 이어졌다. | 현재 Evidence 유지 |
+| Delivery | **충족** | Docs `c1cb0f1` + Site `79efd753` + [run 37103699755](https://github.com/ooMia/oomia.github.io/actions/runs/37103699755)의 GitHub Pages deploy success가 연결됐다. | 현재 Evidence 유지 |
 
 ## 현재 남은 1.0 gap
 
-final delivery gate는 닫혔다. 현재 1.0 제품 acceptance에서 남은 핵심 gap은 다음과 같다.
+이 snapshot의 Publishing Platform 1.0 acceptance capability에는 **남은 미충족 gap이 없다**.
 
-- **Authoring:** 현재 Git-backed md-like source를 실제 호환 authoring tool로 수정하고 의미 보존을 검증한 Evidence
-- **Extensibility:** 현재 Site/package source of truth 기준의 실제 확장 표현을 authoring/consumer 경로와 연결한 Evidence
-- **Canonical Content:** 위 authoring/source-preservation Evidence를 canonical Git revision과 연결
-
-새 구현은 이 gap을 실제 owning repository의 Issue/PR/Evidence로 닫는다. 별도 날짜별 checkpoint section은 만들지 않는다.
+Authoring, Canonical Content, Extensibility, Automation, Publishing, Presentation, Delivery가 모두 재현 가능한 owning-repository Evidence와 연결됐다. 이후 W4 기능 작업은 새로운 제품 가치나 post-acceptance 확장으로 취급하며, 이미 닫힌 1.0 acceptance를 불필요하게 다시 blocker로 만들지 않는다.
 
 ## 갱신 규칙
 

@@ -17,7 +17,23 @@
 
 Project Item에는 Outcome, binary하게 판정 가능한 Acceptance Criteria, Evidence를 둔다. Repository가 작업의 1차 영역을 제공하고 Work Type이 Issue 전체의 주된 delta를 분류한다. Work Type/Labels 판정은 [Work Classification](work-classification.md)을 따른다.
 
-불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 부모 Item 링크, 구현 기술, 필요한 Quality Requirements를 명시한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+불확실한 작업은 Draft로 포착한다. 레포 소유권과 실행 범위가 분명한 구현 작업은 Repository Issue로 구체화한다. 전역 조정 Item을 억지로 하나의 레포에 귀속하지 않는다. Issue에는 실행·검증에 필요한 context만 남기고, 적용되는 Quality Requirements가 있다면 Acceptance Criteria 또는 Context에서 식별해 Evidence로 검증한다. 한 Iteration에 끝내기 어렵거나 독립 검증이 필요한 결과는 분해한다.
+
+### Repository Issue template 선택
+
+Repository Issue template은 Work Type 이름이 아니라 **완료를 무엇으로 증명하는가**에 따라 선택한다.
+
+| Template | 핵심 질문 | 완료 모델 |
+|---|---|---|
+| Change | 무엇이 달라져야 하는가? | repository의 canonical 또는 observable state가 의도대로 바뀌고 검증됨 |
+| Investigation | 무엇을 알아내야 하는가? | 질문에 대한 결론과 재현 가능한 Evidence가 확보됨 |
+
+- Issue 생성 전에 둘 중 하나를 선택하고 template marker와 핵심 section을 유지한다.
+- Context와 Scope처럼 상황에 따라 불필요한 section은 제거할 수 있다. 빈 칸을 채우기 위해 정보를 만들지 않는다.
+- Investigation에서 production 또는 normative behavior 변경이 필요하다는 결론이 나오면 조사 scope를 확장하지 않고 Change Issue로 분리한다. 반복 가능한 benchmark harness나 durable Evidence처럼 Investigation 자체의 산출물은 Work Classification 기준에 따라 Investigation에 남을 수 있다.
+- 단일 repository가 소유하지 않는 cross-repository coordination은 Repository Issue template을 추가하지 않고 Project Item으로 유지한다.
+- 둘 중 어느 template도 목적을 왜곡하지 않고 표현할 수 없다면 ad-hoc 형식을 만들기보다 canonical template set을 먼저 보완한다.
+
 
 ### Development branch 초기 구현
 
@@ -33,16 +49,14 @@ Issue와 연관된 구현을 development branch에서 시작할 때는 **green s
 
 - 실행 범위가 확정되지 않은 후보 작업은 Draft 또는 이에 준하는 비활성 planning state로 포착한다. 구체적인 UI/API 표현 방식은 이를 관리하는 interface/owner가 소유한다.
 - Draft 단계에서는 implementation branch를 만들지 않는다.
-- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 Development branch를 즉시 만들지 않는다.
-- 아직 Iteration commitment가 없으면 `Backlog`다. 실행 주차가 정해지면 Iteration을 설정하고 `Todo`로 전환한다.
-- `Todo`는 실행 가능하지만 아직 실제 작업이 시작되지 않은 상태다.
-- 실제 구현을 시작하며 Development branch를 생성·연결하는 순간 `In progress`로 전환한다.
-- linked PR이 등록되면 branch 생성 여부와 무관하게 실제 작업이 시작된 것으로 보고 `In progress`로 전환한다.
-- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실행 전에 최소한 Iteration commitment와 `Todo` 상태를 가져야 한다. 실제 작업이 진행 중이면 필요에 따라 `In progress`로 명시한다.
+- Draft를 활성화하거나 일반 Repository Issue를 생성했다고 해서 작업이 시작된 것은 아니다.
+- 아직 Iteration commitment가 없으면 `Backlog`다.
+- Iteration에 commit되었지만 실제 구현·조사·검증을 시작하지 않았으면 `Todo`다.
+- Iteration에 commit된 작업을 실제로 시작하면 `In progress`다. commitment와 착수가 동시에 일어나면 `Todo`를 의례적으로 거치지 않고 Iteration과 `In progress`를 함께 materialize할 수 있다.
+- Development branch 또는 linked PR은 실제 작업 시작을 관찰할 수 있는 강한 signal이지만 `In progress`의 의미 자체를 정의하지 않는다. branch/PR 없이 수행하는 조사·coordination·문서 작업도 실제 수행을 시작하면 `In progress`일 수 있다.
 - Development branch는 실제 구현 책임을 소유하는 repository에 둔다. 하나의 Issue가 여러 구현 레포에 걸치면 1:N 관계를 명시한다.
-
-- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. Development relation은 activation이 아니라 실제 작업 시작을 표현한다.
-- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. 이는 Project field의 **초기값 전달용**이며 활성화 이후의 SoT는 계속 GitHub Project다.
+- Project orchestration이 적용된 repository에서는 Issue activation이 Project #11 등록과 초기 field materialization을 수행할 수 있다. activation 자체는 actual work start나 Development relation을 의미하지 않는다.
+- 새 Repository Issue에는 machine-readable `project-seed`를 함께 둘 수 있다. admission 시 Iteration과 Work Type의 초기값을 전달하며, 초기 Status는 Iteration 존재 여부에서 파생한다. 활성화 이후의 SoT는 계속 GitHub Project다.
 - activation과 lifecycle materialization의 공통 의미는 [Project Orchestration](project-orchestration.md)을 따른다. workflow, token, runner, branch base 같은 실행 세부사항은 owning repository가 소유한다.
 
 ## Project Status lifecycle
@@ -51,16 +65,18 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 
 | Status | 의미 |
 |---|---|
-| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. Iteration과 Development relation을 두지 않는다. |
-| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. Development branch/PR은 없다. |
-| In progress | 실제 구현·조사·검증이 진행 중이다. Development branch 생성 또는 linked PR 등록은 이 상태의 명시적 신호다. |
+| Backlog | 유효한 후보 작업이지만 아직 Iteration commitment가 아니다. |
+| Todo | Iteration에 commit되었고 착수 가능하지만 실제 작업은 아직 시작되지 않았다. |
+| In progress | Iteration에 commit되었고 실제 구현·조사·검증이 진행 중이다. |
 | Done | Outcome, Acceptance Criteria, 적용되는 Quality Requirements와 Evidence를 충족했다. |
 | Cancelled | 더 이상 수행하지 않기로 결정한 작업이다. superseded, rejected, invalidated 등을 포함하며 완료 성과로 계산하지 않는다. |
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
 - Draft 표현 방식과 repository state는 planning 의미를 임의로 바꾸지 않는다. `Cancelled`는 superseded/rejected/invalidated 등 더 이상 추진하지 않기로 한 planning decision일 때만 사용하며, 그 판단의 SoT는 Project Status다.
-- Development branch나 linked PR이 존재하는 open Item은 `Backlog`나 `Todo`에 머물지 않는다.
-- branch/PR 없이 수행되는 작업도 실제 실행 전에 Iteration commitment를 가져야 하며, Backlog 상태에서 작업하지 않는다.
+- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. Iteration이 제거되면 active Development relation과 실제 실행 상태를 함께 재검토하되, commitment 없는 실행 상태를 정상 상태로 두지 않는다.
+- 새 linked PR은 실제 작업 시작의 명확한 observable signal이므로 open Item을 `In progress`로 materialize할 수 있다. Development branch 역시 owning integration이 관찰할 수 있다면 같은 signal로 사용할 수 있다.
+- branch/PR이 없는 작업도 실제 수행을 시작했다면 `In progress`가 맞다. 이 경우 Status는 사람 또는 해당 실행 인터페이스가 명시적으로 materialize할 수 있다.
+- 상태 관계는 `Backlog → Todo → In progress`지만 UI/API가 반드시 모든 중간 상태를 순차적으로 기록할 필요는 없다. 현재 Iteration에 commit하면서 즉시 착수하는 작업은 `Backlog → In progress`로 직접 materialize할 수 있다.
 - 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
