@@ -81,6 +81,11 @@ Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)�
 - `Todo / In progress` 상태에서 Iteration commitment가 제거되면 `Backlog` invariant를 복구한다. active Development relation이 남아 있다면 이를 정상 상태로 추론하지 않고 불일치로 드러내 별도 검토할 수 있다.
 - `closed / completed` 결과는 `Done`과 연결할 수 있다.
 - `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
+- close/cancel transition 자체는 기존 Iteration을 지우지 않는다. explicit commitment가 있었던 Item의 Iteration은 terminal historical provenance로 유지한다.
+- Item에 귀속되는 durable product/platform Git tree에 영향을 준 실제 구현이 확인되는데 Iteration이 비어 있다면 reconciliation 대상으로 드러낸다. historical Iteration은 Issue 생성/종료 날짜만으로 자동 추론하지 않고 실제 work-start Evidence를 기준으로 보정한다.
+- 독립 branch에서만 수행되고 durable product/platform Git tree에 편입되지 않은 채 폐기된 작업은 historical Iteration이 없어도 invariant 위반으로 보지 않는다.
+- terminal Item의 substantive reopen은 새로운 live-planning 결정으로 취급한다. 새 Iteration에 즉시 recommit하지 않는다면 기존 Iteration을 clear하고 `Backlog`로 재평가하는 것을 권고한다. 단순 metadata 수정처럼 잠시 reopen/close하는 행위에는 Iteration clear를 자동 적용하지 않는다.
+- common automation이 substantive reopen과 임시 reopen을 신뢰성 있게 구분할 수 없다면 모든 reopen에 일괄 clear하지 않고 review 대상으로 드러낸다.
 
 Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
