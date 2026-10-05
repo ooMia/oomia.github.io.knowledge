@@ -77,7 +77,12 @@ Project의 `Status`는 repository Issue의 open/closed 여부를 복제하지 �
 - 새 linked PR은 실제 작업 시작의 명확한 observable signal이므로 open Item을 `In progress`로 materialize할 수 있다. Development branch 역시 owning integration이 관찰할 수 있다면 같은 signal로 사용할 수 있다.
 - branch/PR이 없는 작업도 실제 수행을 시작했다면 `In progress`가 맞다. 이 경우 Status는 사람 또는 해당 실행 인터페이스가 명시적으로 materialize할 수 있다.
 - 상태 관계는 `Backlog → Todo → In progress`지만 UI/API가 반드시 모든 중간 상태를 순차적으로 기록할 필요는 없다. 현재 Iteration에 commit하면서 즉시 착수하는 작업은 `Backlog → In progress`로 직접 materialize할 수 있다.
-- 실제 수행된 작업은 완료·취소 여부와 관계없이 해당 Iteration을 historical accounting으로 유지할 수 있다.
+- Iteration은 시간적 의미를 갖는다. active Item에서는 current commitment를 나타내고, terminal Item에서는 해당 Item이 처음 명시적으로 commit되었거나 durable repository Git tree에 영향을 주는 실제 구현이 시작된 Iteration을 압축해 보존한다.
+- Item이 명시적으로 Iteration commitment를 얻었다면 결과가 `Cancelled`이더라도 해당 Iteration을 유지한다. cancellation 자체는 Iteration clear trigger가 아니다.
+- 명시 commitment가 없더라도 Item에 귀속되는 durable product/platform Git tree에 남는 code/docs/workflow/configuration 등 실제 구현이 발생했다면 Iteration은 필수다. 값은 close/merge 시점이 아니라 실제 작업이 시작된 기간을 기준으로 한다.
+- 독립 branch에서 수행되었지만 durable product/platform Git tree에 편입되지 않고 branch와 함께 폐기된 작업은 당시 current Iteration을 기록해도 되지만 필수는 아니다.
+- terminal Item을 substantive하게 reopen하는 것은 새로운 live-planning 결정이다. 즉시 새 Iteration에 recommit하지 않는다면 기존 Iteration을 `null`로 비우고 `Backlog`로 재평가하는 것을 권고한다. 과거 Iteration provenance는 Issue/Project history, Status Updates, Git Evidence에서 복구한다. metadata 정리처럼 잠시 reopen했다가 다시 닫는 임시 변경에는 Iteration clear를 권고하지 않는다.
+- Iteration은 single-value field이므로 여러 Iteration에 걸친 carry-over/recommit history 전체를 표현하지 않는다. Project field는 현재 commitment 또는 대표 historical slot만 보존하고, 나머지 시간적 이력은 Status Updates와 Issue/PR/Git Evidence가 보완한다.
 - Iteration Goal 변경·회고는 Project Status Update에 기록하고, repository Issue는 자기 Outcome/AC/Evidence를 유지한다.
 - `project-seed`는 activation 초기값일 뿐이며 activation 이후 Project field가 current state의 SoT다.
 - activation/reconciliation automation은 이 lifecycle을 materialize하는 실행 메커니즘이다. automation은 명확한 Status/Iteration invariant만 적용하고 Work Type·Assignee·historical Iteration처럼 문맥 판단이 필요한 값을 추론하지 않는다. automation ownership boundary는 [Project Orchestration](project-orchestration.md#ownership-boundary)을 따른다.
