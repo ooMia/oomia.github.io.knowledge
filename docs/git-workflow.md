@@ -22,7 +22,9 @@ PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남�
 
 - repository는 자신의 역할과 trust boundary에 맞는 검증 단계를 정의한다.
 - 빠른 development feedback과 release/canonical integration 검증은 필요한 경우 서로 다른 강도로 운영할 수 있다.
-- formatting, static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
+- source-code repository의 CI는 formatting 자체를 실패 조건으로 삼지 않는다. Vite+처럼 format check가 종합 check에 포함되는 도구를 사용하면 `vp check --no-fmt`처럼 formatting gate를 제외하고 lint/typecheck/test/build 등 결과에 영향을 주는 검증을 유지한다.
+- canonical content repository에서 source formatting이 Git history 기반 metadata 등 관찰 가능한 결과에 영향을 준다면, 저장 직후 idempotent formatter로 canonical form을 만들고 필요하면 bot commit으로 반영할 수 있다. 이 단계는 format check가 아니라 canonicalization이며, 정규화 이후 실제 내용이 바뀌기 전까지 문서 파일이 다른 이유로 수정되지 않는 상태를 목표로 한다.
+- static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
 - runner 선택은 security, cost, platform dependency, local capability를 고려한다. private repository나 local inference처럼 특정 trust/resource boundary가 필요한 작업은 self-hosted runner를 우선할 수 있고, GitHub-hosted runner는 필요한 검증에만 사용한다.
 - 동일한 고비용 검증을 여러 runner에서 중복 수행하는 것을 기본값으로 삼지 않는다. 추가 matrix는 실제 portability 또는 release risk를 검증할 때 사용한다.
 - 완료 Evidence는 문서에 적힌 기대가 아니라 실제 owning repository workflow run과 결과를 기준으로 한다.
