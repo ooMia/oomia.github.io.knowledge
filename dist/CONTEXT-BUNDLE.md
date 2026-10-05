@@ -279,9 +279,11 @@ Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 �
 
 # Architecture Transition — DB-backed CMS → Git-backed Content Workspace
 
-상태: **Completed — historical transition record**  
-기준일: 2026-09-21  
-완료 확인: 2026-10-05
+> **Authority:** RECORD  
+> **Owner:** completed DB-backed CMS → Git-backed content migration provenance  
+> **Scope:** transition decisions and Evidence from 2026-09-21 through completion on 2026-10-05  
+> **Read when:** reconstructing why the architecture changed, auditing migration safety, or verifying the completed transition  
+> **Evidence scope:** Knowledge #47 / merged PR #48 (`07d07579b2c4dd6082c81494fe854d8109a9ab2b`) and the pinned owner revisions linked below
 
 이 문서는 DB-backed CMS 중심 구현에서 Git-backed document workspace로 전환할 때 사용한 **cross-repository 전환 순서·안전 규칙·Evidence 연결**을 보존한다. 전환은 완료되었으며 이 문서는 현재 작업에 대한 active migration gate가 아니다. Engine/Site 내부의 현재 구현 상태와 전략은 각 repository의 문서와 코드가 소유한다.
 
@@ -327,8 +329,8 @@ optional Engine mutation → same Docs workspace
 
 ## 4. Repository별 migration source
 
-- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
-- Site: [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)
+- Engine: [수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/0484358d9118ecc8dfdb803b64909827e205ddf1/docs/content-modification-contract.md), [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/0484358d9118ecc8dfdb803b64909827e205ddf1/docs/migration.md)
+- Site: [소비 계약](https://github.com/ooMia/oomia.github.io/blob/79efd753bd4b6efd63ab2e3bfccbd83935517c58/docs/content-consumption-contract.md)
 - Docs: canonical content remote와 history
 - Knowledge: 통합 목표, 전환 순서, acceptance, Evidence linkage
 
@@ -383,7 +385,7 @@ optional Engine mutation → same Docs workspace
 - [x] legacy Payload/PostgreSQL runtime은 current Engine history에 이식되지 않았고, owning migration record가 filesystem-first runtime과 legacy boundary를 보존한다.
 - [x] Implementation Map (`docs/implementation-map.md`)이 새 기준 revisions로 재검증됐으며 1.0 acceptance capability에 남은 미충족 gap이 없다.
 
-완료 판정의 통합 Evidence는 이 문서와 같은 revision의 Implementation Map (`docs/implementation-map.md`), Engine [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md), Site [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)에서 추적한다. 문서 정리만으로 completion을 판정한 것이 아니다.
+완료 판정의 통합 Evidence는 이 문서와 같은 revision의 Implementation Map (`docs/implementation-map.md`), Engine [migration record](https://github.com/ooMia/oomia.github.io.engine/blob/0484358d9118ecc8dfdb803b64909827e205ddf1/docs/migration.md), Site [소비 계약](https://github.com/ooMia/oomia.github.io/blob/79efd753bd4b6efd63ab2e3bfccbd83935517c58/docs/content-consumption-contract.md)에서 추적한다. 문서 정리만으로 completion을 판정한 것이 아니다.
 
 후속 기능 변경은 현재 Architecture와 각 owning repository의 live code/docs로 판단한다. 새로운 cross-repository migration이 필요하면 이 완료 기록을 다시 active로 간주하지 않고 별도 Change로 정의한다.
 
@@ -396,7 +398,11 @@ optional Engine mutation → same Docs workspace
 
 # Architecture
 
-상태: Publishing Platform의 repository 역할과 PM-level 제품 경계를 설명하는 canonical 문서.
+> **Authority:** POLICY  
+> **Owner:** Publishing Platform product boundary and repository responsibility model  
+> **Scope:** canonical content flow and Engine / Docs / Site / Knowledge responsibility boundaries  
+> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries
+
 
 ## 원칙
 
@@ -417,8 +423,6 @@ optional Engine mutation → same Docs workspace
 | `oomia.github.io.docs` | canonical content remote와 shared Git revision history |
 | `oomia.github.io` | Docs 입력을 실제 구현 계약에 따라 소비·렌더링·검증하고 전달 |
 | `oomia.github.io.knowledge` | 공통 workflow·coordination·개발 기준·통합 목표·acceptance·Evidence linkage |
-
-`mono`는 Site repository의 로컬 별칭이며 별도 원격 repository가 아니다.
 
 ## Canonical content workspace
 
