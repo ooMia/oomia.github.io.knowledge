@@ -19,8 +19,8 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-signals) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | [Implementation Practices](docs/implementation-practices.md) → owning repository contract/code/tests; branch/PR 경계가 필요하면 [Git Workflow](docs/git-workflow.md) |
-| PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#완료-판정) → 해당 Issue 및 구현 레포의 검증 방법 |
-| major/minor release | [Git Workflow](docs/git-workflow.md) → [통합 목표](docs/release-1.0.md) → [검수 연결](docs/implementation-map.md) |
+| PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#completion-and-evidence) → 해당 Issue 및 구현 레포의 검증 방법 |
+| major/minor release | [Release lifecycle](docs/planning-model.md#release-lifecycle) → live Project #11 roadmap → 해당 version-scoped release document → [Git Workflow](docs/git-workflow.md) |
 | 새 레포 scaffolding·디렉토리 역할 | [Repository Design](docs/repository-design.md) → Node/JS/TS 또는 Python이면 [Development Toolchain](docs/development-toolchain.md) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 code·Issue·tests |
 | Knowledge 문서 수정 | [Knowledge Maintenance](docs/maintenance.md) → 해당 semantic owner |
@@ -36,15 +36,14 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인하며, 통합 검증 revision과 delivery Evidence는 [Implementation Map](docs/implementation-map.md)의 명시된 scope에서만 사용한다.
+수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인한다. 완료된 1.0의 historical integration Evidence만 [Publishing Platform 1.0](docs/release-1.0.md) RECORD의 pinned scope를 사용한다.
 
 ## PM-level 원본
 
 - [Architecture](docs/architecture.md): repository 역할과 제품 경계
 - [Feature Change Protocol](docs/change-protocol.md): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
 - [Architecture Transition](docs/architecture-transition.md): 완료된 DB-backed CMS → Git-backed workspace 전환의 historical provenance
-- [Release 1.0](docs/release-1.0.md): 통합 목표·수용 기준
-- [Implementation Map](docs/implementation-map.md): revision-bound Evidence와 통합 검수 연결
+- [Release 1.0](docs/release-1.0.md): 완료된 1.0 목표·수용 기준·immutable Evidence archive
 - [Open Questions](docs/open-questions.md): 현재 별도 lifecycle로 승격되지 않은 제품/cross-repository 관심사
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 원본을 만들지 않는다.
