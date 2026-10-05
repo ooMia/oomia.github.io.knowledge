@@ -1,6 +1,6 @@
 # Project Orchestration
 
-Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. 실제 workflow 파일, script, token/permission, runner, webhook process, branch base와 같은 실행 세부사항은 이를 구현하는 owning repository가 소유한다.
+Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. Project admission의 공통 materialization 구현은 이 repository의 shared workflow/action이 소유하고, 각 caller repository는 event wiring·secret 전달과 repository-specific Development start를 소유한다. 장기 webhook runtime, branch base, branch 생성 방식 같은 실행 세부사항은 해당 owning repository가 소유한다.
 
 ## Scope
 
@@ -19,7 +19,7 @@ Publishing Platform Project #11과 repository Issue 사이의 **공통 coordinat
 
 Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
 
-activation mechanism은 repository별 automation이 구현한다. Knowledge는 event 이름, workflow filename, runner, API 호출 방식이나 token 구성을 규정하지 않는다.
+Project admission은 Knowledge의 shared workflow/action을 하나의 구현 원본으로 사용한다. caller repository는 Issue event 또는 explicit replay를 이 workflow에 연결하고 자기 `PROJECT_TOKEN`과 repository-scoped `GITHUB_TOKEN`을 전달한다. Development start, branch base와 branch 생성 방식은 계속 repository-local automation이 소유한다.
 
 Draft 또는 아직 실행 범위가 확정되지 않은 Item은 [Planning Model](planning-model.md)의 lifecycle을 따른다. 활성화되지 않은 Draft 때문에 implementation branch를 만들지 않는다.
 
@@ -49,6 +49,8 @@ Project admission에 사용되는 공통 값:
 - `branch`: explicit Development start가 지원할 때 사용할 branch name override
 
 이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+
+`workType`은 executable Repository Issue admission의 필수 semantic input이다. 이미 live Project Work Type이 있으면 replay가 seed로 덮어쓰지 않고, live 값이 비어 있을 때만 seed 값을 materialize한다. live 값과 seed가 모두 없으면 의미를 추론하지 않고 fail closed한다. 기존 `status` key가 남아 있어도 admission은 이를 무시하고 Iteration에서 초기 Status를 파생한다.
 
 seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-classification.md)을 위반하지 않아야 한다.
 
@@ -82,7 +84,7 @@ Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)�
 
 Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
 
-Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. unknown state나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
+Work Type과 historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. admission은 missing Work Type을 validated `project-seed.workType`에서만 materialize하고 기존 live 값은 보존한다. 현재 개인 프로젝트의 executable Repository Issue에서 assignee가 비어 있으면 기본 책임자 `ooMia`를 deterministic하게 materialize할 수 있다. unknown state, conflicting semantic value나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
 
 ## Ownership boundary
 
@@ -92,7 +94,8 @@ Work Type, Assignee, historical Iteration처럼 해석이 필요한 값은 자�
 | activation 및 reconciliation의 공통 의미 | 이 문서 |
 | 실제 Project field 값 | GitHub Project #11 |
 | Issue/PR/Development relation | GitHub repository native state |
-| workflow/script/API/token/runner 구현 | 실행하는 owning repository |
+| 공통 Project admission workflow/action | Knowledge `.github/workflows/project-admission.yml`, `.github/actions/project-admission/` |
+| caller event wiring / Development start / branch base | 실행하는 owning repository |
 | 장기 webhook/runtime implementation | 해당 implementation repository의 code/docs |
 
-공통 구현 상세를 Knowledge에 복제하지 않는다. 여러 repository에서 반복되는 실행 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
+공통 Project admission 구현은 Knowledge에 한 번만 두고 caller repository에 복제하지 않는다. repository-local 실행 차이는 그 owning source에 두며, 여러 repository에서 반복되는 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
