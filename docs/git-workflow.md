@@ -1,50 +1,72 @@
 # Git Workflow
 
-Publishing Platform repository가 공유하는 **변경 관리 invariant**의 단일 원본이다. 구체적인 branch 이름, integration topology, runner 선택, CI matrix, release trigger는 각 repository의 역할·보안·비용·platform 제약에 따라 owning repository가 정의한다.
+> **Authority:** POLICY  
+> **Owner:** cross-repository change integration and history invariants  
+> **Scope:** Publishing Platform repositories that integrate durable changes through Git/GitHub  
+> **Read when:** creating an Issue-linked branch, preparing/integrating a PR, defining CI gates, or preserving historical Evidence  
+> **Enforced by:** owning repository branch/ruleset/workflow configuration where implemented
 
-## 공통 통합 원칙
+이 문서는 repository가 공유해야 하는 **integration invariant**만 소유한다. exact branch name, topology, runner, CI matrix, release trigger와 repository-local hotfix path는 owning repository가 정의한다.
 
-- 각 repository는 durable/canonical branch와 필요한 integration path를 명확히 정의한다. `main`/`develop` 같은 이름을 모든 repository에 공통으로 강제하지 않는다.
-- 한 번의 작은 변화가 아닌 repository 작업은 해당 repository가 Issue orchestration 대상이면 Issue-linked branch에서 수행한다.
-- 변경은 owning repository가 정의한 PR/review/integration 경로를 거쳐 canonical state에 반영한다. repository가 정한 integration 단계나 release gate를 임의로 우회하지 않는다.
-- branch topology와 release promotion 방식은 repository 역할에 맞게 결정한다. 콘텐츠 remote, implementation repository, coordination repository가 동일한 topology를 가질 필요는 없다.
-- merge method는 공통 강제 정책으로 고정하지 않는다. 최종 diff와 history의 검토 가치에 따라 owning repository 또는 해당 PR에서 선택한다.
+## POLICY — Integration
 
-문서를 수정했다고 실제 branch protection, workflow, repository setting까지 변경된 것으로 간주하지 않는다. 현재 동작은 owning repository의 live workflow/settings를 확인한다.
+- 각 repository는 durable/canonical state와 그 integration path를 **MUST** 명확히 정의한다.
+- Issue orchestration 대상의 substantive repository work는 **SHOULD** Issue-linked branch에서 수행한다.
+- durable change는 owning repository가 정의한 PR/review/integration path를 거쳐 canonical state에 반영하며, repository-local release/integration gate를 임의로 우회하지 않는다.
+- branch topology와 promotion 방식은 repository 역할에 맞게 결정하며 모든 repository에 동일한 `main/develop` topology를 강제하지 않는다.
+- merge method는 project-wide 하나로 고정하지 않는다. owning repository policy와 해당 PR의 history/review 목적이 결정한다.
+- PR이 merge되기 전에는 canonical integration이 완료되었다고 보고하지 않는다.
 
-## Issue branch와 PR
+문서에 policy를 적었다고 실제 branch protection/ruleset/workflow가 변경된 것으로 간주하지 않는다. current enforcement는 owning repository의 live setting/workflow에서 확인한다.
 
-Issue lifecycle은 [Planning Model](planning-model.md), 공통 activation semantics와 Project 연결은 [Project Orchestration](project-orchestration.md)이 소유한다. 실제 branch base, workflow file, script, token/permission 구성은 실행 repository가 소유한다.
+## POLICY — Verification and formatting
 
-PR에는 결과와 변경 이유, 관련 Issue, 실제 수행한 검증과 남은 제한을 적는다. 여러 commit을 사용한 작업도 최종 diff가 하나의 검토 가능한 변화로 읽혀야 한다. merge 완료 전에는 완료된 integration으로 보고하지 않는다.
+- 각 repository는 자기 Outcome과 trust boundary에 필요한 executable verification을 **MUST** 정의한다.
+- completion Evidence는 prose expectation이 아니라 실제 owning repository의 test/build/workflow/deployment result를 기준으로 한다.
+- **source-code repository의 CI는 formatting 차이만을 이유로 실패해서는 안 된다.** CI가 canonical formatting 자체를 materialize하는 것이 아니라면 formatter preference를 integration failure gate로 사용하지 않는다.
+- 문서/content처럼 formatting 자체가 canonical artifact의 일부인 repository는 owning workflow가 그 형식을 materialize/normalize하고 idempotence를 검증할 수 있다. 이는 “format check 실패”와 구분한다.
+- lint semantics, type checking, tests, build, artifact/runtime verification 등 실제 결과를 검증하는 gate는 repository risk에 맞게 유지한다.
 
-## 검증과 runner
+exact formatter command, bot implementation, check command와 job composition은 owning repository가 소유한다.
 
-- repository는 자신의 역할과 trust boundary에 맞는 검증 단계를 정의한다.
-- 빠른 development feedback과 release/canonical integration 검증은 필요한 경우 서로 다른 강도로 운영할 수 있다.
-- source-code repository의 CI는 formatting 자체를 실패 조건으로 삼지 않는다. Vite+처럼 format check가 종합 check에 포함되는 도구를 사용하면 `vp check --no-fmt`처럼 formatting gate를 제외하고 lint/typecheck/test/build 등 결과에 영향을 주는 검증을 유지한다.
-- canonical content repository에서 source formatting이 Git history 기반 metadata 등 관찰 가능한 결과에 영향을 준다면, 저장 직후 idempotent formatter로 canonical form을 만들고 필요하면 bot commit으로 반영할 수 있다. 이 단계는 format check가 아니라 canonicalization이며, 정규화 이후 실제 내용이 바뀌기 전까지 문서 파일이 다른 이유로 수정되지 않는 상태를 목표로 한다.
-- static checks, tests, build, artifact verification, cross-platform matrix는 실제 repository 책임과 failure risk에 따라 선택한다. 모든 repository에 동일 matrix를 강제하지 않는다.
-- runner 선택은 security, cost, platform dependency, local capability를 고려한다. private repository나 local inference처럼 특정 trust/resource boundary가 필요한 작업은 self-hosted runner를 우선할 수 있고, GitHub-hosted runner는 필요한 검증에만 사용한다.
-- 동일한 고비용 검증을 여러 runner에서 중복 수행하는 것을 기본값으로 삼지 않는다. 추가 matrix는 실제 portability 또는 release risk를 검증할 때 사용한다.
-- 완료 Evidence는 문서에 적힌 기대가 아니라 실제 owning repository workflow run과 결과를 기준으로 한다.
+## GUIDANCE — Verification profile and runners
 
-## History와 archive
+아래는 공통 강제 정책이 아니라 CI profile을 설계할 때의 권고다.
 
-- Git branch를 장기 지식 archive로 사용하지 않는다.
-- 과거 맥락은 Git history, immutable commit/permalink, 필요한 migration 문서와 revision-bound Evidence에서 추적한다.
-- legacy/archive/backup branch는 현재 운영 경로가 아니며, 지속 가치가 canonical 문서와 Git history에 흡수되면 별도 장기 보존 정책으로 간주하지 않는다.
-- forensic 재현을 위해 특정 ref를 고정할 필요가 있으면 owning repository가 명시적인 tag 또는 immutable Evidence를 선택할 수 있다.
+- 빠른 development feedback과 canonical/release integration은 필요하면 서로 다른 강도로 운영한다.
+- static checks, tests, build, artifact verification, cross-platform matrix는 실제 failure risk에 맞춘다.
+- runner 선택은 security, cost, platform dependency, local capability를 함께 고려한다.
+- self-hosted resource가 필요한 validation과 GitHub-hosted portability validation을 역할에 따라 나눌 수 있다.
+- 동일한 고비용 검증을 여러 runner에서 반복하는 것을 기본값으로 삼지 않는다. 추가 matrix는 실제 portability/release risk를 검증할 때 사용한다.
 
-## 정책 적용 범위
+구체 runner label, OS matrix, cache strategy와 command는 owning repository workflow가 현재 source of truth다.
 
-Knowledge는 공통 invariant만 소유한다. 다음은 owning repository가 구체화한다.
+## POLICY — Issue branch and PR boundary
 
-- canonical/integration branch 이름과 topology
-- issue branch의 실제 base ref
-- PR/release promotion 경로
-- runner 종류와 label
-- CI job 구성과 OS matrix
-- repository-specific hotfix/patch 경로
+Issue lifecycle은 [Planning Model](planning-model.md), Project activation/materialization은 [Project Orchestration](project-orchestration.md)이 소유한다.
 
-공통 정책과 repository-local 운영이 충돌하면 먼저 repository 역할상 필요한 차이인지 확인한다. 반복되는 차이가 여러 repository에 공통 invariant로 승격될 때만 Knowledge 정책을 확장한다.
+- branch base/name, workflow file, token/permission은 owning repository가 소유한다.
+- PR은 결과, 변경 이유, 관련 Issue, 실제 수행한 verification과 남은 limitation을 설명해야 한다.
+- 여러 commit을 사용해도 final diff는 하나의 검토 가능한 변화로 읽히는 편을 우선한다.
+- implementation-start 방식은 [Implementation Practices](implementation-practices.md)의 GUIDANCE를 참고한다.
+
+## POLICY — History and archive
+
+- Git branch를 장기 knowledge archive로 사용하지 않는다.
+- 과거 맥락은 Git history, immutable commit/permalink, 필요한 migration/release RECORD와 revision-bound Evidence에서 추적한다.
+- legacy/archive/backup branch는 current operating path가 아니다.
+- forensic reproduction을 위해 ref 고정이 필요하면 owning repository가 explicit tag 또는 immutable Evidence를 선택할 수 있다.
+
+## Repository-local ownership
+
+Knowledge는 위 invariant만 소유한다. 다음은 owning repository가 구체화한다.
+
+- canonical/integration branch name과 topology
+- Issue branch base ref
+- PR/release promotion path
+- runner kind/label
+- CI job/OS matrix/cache
+- formatter/canonicalization implementation
+- repository-specific hotfix/patch path
+
+repository-local 차이가 반복되어 여러 repository에 적용되는 invariant가 되었을 때만 이 POLICY를 확장한다.
