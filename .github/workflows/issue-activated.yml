@@ -25,23 +25,15 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.issue.state == 'open' && !startsWith(github.event.issue.title, 'draft:'))
-    runs-on: ubuntu-latest
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Ensure Project #11 admission
-        env:
-          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-          PROJECT_OWNER: ooMia
-          PROJECT_NUMBER: "11"
-          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
-        run: node .github/scripts/sync-project.mjs
+      issues: write
+    uses: ooMia/oomia.github.io.knowledge/.github/workflows/project-admission.yml@0f21e830e86f60f24415e8f6a2a07faaa305c466
+    with:
+      issue_number: ${{ github.event.issue.number || inputs.issue_number }}
+      initial_event: ${{ github.event_name == 'issues' && github.event.action == 'opened' }}
+    secrets:
+      project_token: ${{ secrets.PROJECT_TOKEN }}
 
   development:
     name: Development start
