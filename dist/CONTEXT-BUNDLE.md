@@ -1307,6 +1307,43 @@ Issue lifecycle은 Planning Model (`docs/planning-model.md`), Project activation
 - 여러 commit을 사용해도 final diff는 하나의 검토 가능한 변화로 읽히는 편을 우선한다.
 - implementation-start 방식은 Implementation Practices (`docs/implementation-practices.md`)의 GUIDANCE를 참고한다.
 
+## GUIDANCE — Early Draft PR and scoped integration
+
+### Early Draft PR
+
+substantive Issue work는 첫 coherent commit이 생겨 diff가 의미를 갖기 시작하면 Draft PR을 조기에 여는 편을 권장한다.
+
+- Draft PR은 implementation context, CI result, review discussion, Development relation을 하나의 durable surface에 모은다.
+- 빈 PR 또는 아직 검토 가능한 변화가 전혀 없는 PR을 절차 충족만을 위해 만들지 않는다.
+- implementation이 계속 진행 중임을 Draft state로 표현하고, acceptance와 final verification이 준비되면 Ready for review로 전환한다.
+
+### Scoped integration branch
+
+여러 Issue의 독립적인 변경을 **하나의 atomic parent change**로 canonical branch에 통합해야 할 때는 permanent `develop` 대신 parent scope에 한정된 temporary integration branch를 사용할 수 있다.
+
+```text
+child Issue branch ──PR──┐
+child Issue branch ──PR──┼→ scoped integration branch ──parent PR──→ canonical branch
+child Issue branch ──PR──┘
+```
+
+- parent Issue branch 자체를 integration buffer로 사용할 수 있다.
+- child PR은 구현·review·child-level verification이 끝나면 integration branch로 merge해 open PR queue를 줄인다.
+- canonical branch를 대상으로 대기하는 PR은 parent integration PR 하나로 수렴시키는 편을 권장한다.
+- integration branch는 parent change/release/renewal이 끝나면 삭제하는 temporary coordination state이며 두 번째 canonical branch가 아니다.
+- 여러 unrelated initiatives를 장기간 한 branch에 누적하지 않는다. 반복적인 continuous-integration buffer가 실제 repository requirement가 될 때만 permanent `develop` 도입을 별도로 판단한다.
+- child work가 다른 child change에 의존하면 그 dependency를 branch base/PR 관계에서 명시하고, 독립적인 work는 불필요하게 서로 stack하지 않는다.
+- child PR과 parent PR에 필요한 validation이 실제 base branch에서 실행되는지는 owning repository workflow가 보장해야 한다. integration branch를 사용한다는 이유로 child-level verification을 생략하지 않는다.
+
+GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
+
+- child PR의 Development relation이 필요하면 GitHub의 manual link를 사용한다.
+- child Issue는 parent change가 canonical branch에 통합될 때까지 open/live planning state로 유지하는 것을 기본으로 한다.
+- final parent PR은 default branch를 대상으로 필요한 child Issue closing references를 가질 수 있다.
+- child Issue 자체의 Outcome이 buffer integration으로 명시적으로 끝나는 특수한 경우에만 더 이른 completion을 별도로 판단한다.
+
+이 패턴의 목적은 **완료된 구현 PR을 오래 열어 두지 않으면서 canonical activation은 하나의 검토 가능한 integration unit으로 유지하는 것**이다.
+
 ## POLICY — History and archive
 
 - Git branch를 장기 knowledge archive로 사용하지 않는다.
