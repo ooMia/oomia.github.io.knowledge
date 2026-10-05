@@ -1,6 +1,10 @@
 # Architecture
 
-상태: Publishing Platform의 repository 역할과 PM-level 제품 경계를 설명하는 canonical 문서.
+> **Authority:** POLICY  
+> **Owner:** Publishing Platform product boundary and repository responsibility model  
+> **Scope:** canonical content flow and Engine / Docs / Site / Knowledge responsibility boundaries  
+> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries
+
 
 ## 원칙
 
@@ -21,8 +25,6 @@
 | `oomia.github.io.docs` | canonical content remote와 shared Git revision history |
 | `oomia.github.io` | Docs 입력을 실제 구현 계약에 따라 소비·렌더링·검증하고 전달 |
 | `oomia.github.io.knowledge` | 공통 workflow·coordination·개발 기준·통합 목표·acceptance·Evidence linkage |
-
-`mono`는 Site repository의 로컬 별칭이며 별도 원격 repository가 아니다.
 
 ## Canonical content workspace
 
