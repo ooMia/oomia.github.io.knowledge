@@ -1,49 +1,56 @@
 # Development Toolchain — Vite+ / uv First
 
-Publishing Platform repository의 **project-wide toolchain 기본값과 선택 원칙**을 소유한다. exact runtime/tool version, framework command, root config, CI job, hook, IDE 설정과 repository-specific 예외는 각 owning repository가 소유한다.
+> **Authority:** GUIDANCE  
+> **Owner:** project-wide toolchain defaults and tool-selection principles  
+> **Scope:** Publishing Platform repositories using Node.js/JavaScript/TypeScript or Python tooling  
+> **Read when:** choosing a repository toolchain, replacing overlapping tooling, or reviewing tool ownership
 
-## 기본값
+이 문서는 공통 **default와 선택 원칙**을 제공한다. exact runtime/tool version, command, config, CI job, hook, IDE setting과 migration state는 owning repository가 소유한다. repository-local 이유가 있으면 이 GUIDANCE와 다른 도구를 사용할 수 있다.
 
-| Repository / project type | 기본 toolchain |
+## Defaults
+
+| Project type | Preferred default |
 |---|---|
 | Node.js / JavaScript / TypeScript | Vite+ (`vp`) first |
 | Python | `uv` first |
 
-다른 도구가 실제 기술적 요구 때문에 필요하면 사용할 수 있지만, 같은 책임을 가진 도구를 단순 선호나 과거 습관 때문에 중복 표준으로 유지하지 않는다.
+같은 책임을 가진 도구를 단순 선호나 과거 습관 때문에 여러 기본값으로 유지하지 않는 편을 권장한다.
 
-## Node / JS / TS — Vite+ first
+## Node / JS / TS
 
 - Vite+가 제공하는 package management, static checks, test/build/task, environment, hook 기능은 가능한 한 `vp` command surface를 우선한다.
-- package/framework 고유 command가 필요하면 owning repository가 명시적인 task/script로 노출한다.
-- Vite+가 이미 소유하는 역할을 위해 Turbo, Husky, ESLint/Prettier wrapper 등 동등 책임 도구를 기본값으로 병행하지 않는다.
-- runtime/package-manager/tool version은 repository 안에서 재현 가능하게 선언한다. global latest behavior를 repository contract로 간주하지 않는다.
-- stateful publish/deploy/Git mutation처럼 외부 상태를 바꾸는 작업은 cacheable pure task처럼 다루지 않는다.
+- framework/package 고유 command가 필요하면 owning repository가 명시적인 task/script로 노출하는 편이 좋다.
+- Vite+와 같은 책임을 가진 Turbo, Husky, formatter/linter wrapper 등을 병행할 때는 실제 남아 있는 responsibility를 repository-local source에서 설명한다.
+- runtime/package-manager/tool version은 repository-declared state로 재현 가능하게 유지한다.
+- publish/deploy/Git mutation 같은 side-effect operation을 cacheable pure task와 같은 방식으로 취급하지 않는다.
 
-정확한 `vp` command, `vite.config.*`, package-manager pinning, hook, cache, CI setup은 owning repository의 README/config/workflow가 현재 구현을 설명한다.
+현재 exact `vp` command, `vite.config.*`, package-manager pinning, hook/cache/CI setup은 owning repository README/config/workflow를 직접 확인한다.
 
-## Python — uv first
+## Python
 
-- project metadata와 dependency declaration은 `pyproject.toml`을 중심으로 관리한다.
-- dependency synchronization, lock, add/remove, project command 실행은 `uv`를 기본 interface로 사용한다.
-- 재현 가능한 dependency state가 필요하면 `uv.lock`을 repository가 관리한다.
+- project metadata와 dependency declaration은 `pyproject.toml` 중심 구성을 우선한다.
+- dependency synchronization, lock, add/remove, project command 실행은 `uv` interface를 우선한다.
+- reproducible dependency state가 필요하면 repository-owned `uv.lock`을 사용하는 편이 좋다.
 - Python/runtime requirement와 exact version은 owning repository 설정이 선언한다.
-- `pip`, Poetry, Pipenv, Conda 등은 실제 runtime/distribution 제약이 있을 때 예외로 사용할 수 있지만 `uv`와 같은 책임의 기본 project manager로 병행하지 않는다.
+- `pip`, Poetry, Pipenv, Conda 등은 runtime/distribution 제약이 있을 때 선택할 수 있지만 같은 responsibility의 기본 project manager를 불필요하게 중복하지 않는다.
 
-정확한 `uv` command, Python version, environment/CI setup은 owning repository가 소유한다.
+exact `uv` command, Python version, environment/CI setup은 owning repository가 소유한다.
 
-## 공통 원칙
+## Shared heuristics
 
-- **Single owner:** 같은 concern의 formatter, linter, task runner, package/project manager를 여러 계층에서 중복 소유하지 않는다.
-- **Reproducibility:** developer machine의 전역 환경이 우연히 맞는다고 가정하지 않고 repository-declared state로 재현한다.
-- **Repository-local application:** 공통 기본값을 실제로 어떻게 적용했는지는 각 repository code/config/docs가 소유한다.
-- **Explicit exception:** project-wide 기본값과 다른 선택은 실제 기술적 이유와 검증 방법을 owning repository에 남긴다.
-- **Side-effect boundary:** build/check와 publish/deploy/Git mutation 같은 side-effect operation을 명확히 구분한다.
+- **Single owner:** formatter, linter, task runner, package/project manager 같은 동일 concern을 여러 계층이 독립적으로 소유하지 않는다.
+- **Reproducibility:** developer machine의 우연한 global environment보다 repository-declared state를 우선한다.
+- **Repository-local application:** 공통 default의 실제 적용 상태는 repository code/config/docs에서 확인한다.
+- **Explicit deviation:** default와 다른 선택은 기술적 이유와 verification 방법이 repository-local source에서 이해 가능하도록 한다.
+- **Side-effect boundary:** build/check와 publish/deploy/Git mutation을 구분한다.
 
-## Repository-local references
+## Current implementation references
 
-- Engine: [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md), [migration](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/migration.md)
-- Site: [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [content consumption contract](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)
-- Docs: repository workflow/config가 실제 content preparation과 runner/tool 사용을 소유한다.
+- Engine: [README](https://github.com/ooMia/oomia.github.io.engine/blob/main/README.md)
+- Site: [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md)
+- Docs: repository workflow/config가 실제 content preparation과 runner/tool usage를 소유한다.
+
+위 링크는 **current implementation lookup**이며 이 GUIDANCE의 Evidence나 강제 조건이 아니다.
 
 ## External references
 
