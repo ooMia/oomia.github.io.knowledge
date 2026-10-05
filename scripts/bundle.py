@@ -5,7 +5,8 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 ORDER = [
-    'CONTEXT.md', 'docs/change-protocol.md', 'docs/architecture-transition.md', 'docs/architecture.md',
+    'CONTEXT.md', 'docs/agent-conventions.md', 'docs/change-protocol.md',
+    'docs/architecture-transition.md', 'docs/architecture.md',
     'docs/development-toolchain.md', 'docs/repository-design.md', 'docs/maintenance.md',
     'docs/planning-model.md', 'docs/fields.md', 'docs/git-workflow.md',
     'docs/project-orchestration.md', 'docs/release-1.0.md',
@@ -29,8 +30,9 @@ def main():
     if errors:
         raise SystemExit('\n'.join(errors))
     parts = ['# Publishing Platform — Chat Context Bundle\n\n'
-             'GENERATED FILE — 원본은 각 문서 경계에 적힌 경로입니다. 직접 수정하지 마세요.\n'
-             'Implementation Map은 문서에 적힌 repository revision의 검증 스냅샷이며 live Project 상태가 아닙니다.\n'
+             'GENERATED TRANSPORT SNAPSHOT — canonical 원본은 각 source 경계에 적힌 repository path입니다. 직접 수정하지 마세요.\n'
+             'Repository source에 접근할 수 있으면 CONTEXT.md routing과 canonical owner를 직접 사용하세요. 이 bundle은 routing이나 live Project/Issue/PR state를 대체하지 않습니다.\n'
+             'Implementation Map은 문서에 적힌 repository revision의 검증 snapshot이며 live Project 상태가 아닙니다.\n'
              '상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.\n']
     for name in ORDER:
         content = (ROOT / name).read_text(encoding='utf-8')
