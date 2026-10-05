@@ -65,6 +65,22 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
+## Hierarchical completion
+
+Parent/sub-issue 관계가 있는 경우 `Done`은 **각 Item의 scope에서 평가하는 completion**이다.
+
+- child Issue가 자신의 Outcome / Acceptance Criteria / Quality Requirements / Evidence를 충족하고, 선언된 parent integration branch에 linked child PR이 merge되어 해당 결과가 parent integration target에 포함되었다면 child는 `Done`이 될 수 있다.
+- child `Done`은 parent Outcome 전체가 canonical/default branch에 활성화되었다는 뜻이 아니다.
+- parent는 자기 Outcome / Acceptance Criteria / Evidence를 별도로 충족해야 하며, parent가 canonical/default branch를 integration target으로 삼는다면 그 integration까지 완료되어야 `Done`이다.
+- 따라서 `parent=In progress, child=Done`은 정상적인 상태다. parent가 여러 완료된 child를 포함한 채 아직 통합·검증 중이라는 뜻이다.
+- parent가 commitment를 잃어 `Todo` 또는 `Backlog`로 내려가면 아직 terminal이 아닌 descendant의 commitment와 Status를 함께 재평가한다.
+- parent가 `Cancelled`되면 아직 완료되지 않은 descendant도 더 이상 수행하지 않는 경우 `Cancelled`로 전환할 수 있다.
+- 이미 `Done`인 child는 ancestor Status 변화만으로 자동 reopen/demote하지 않는다. 완료된 child work와 상위 initiative의 채택 여부를 별도 사실로 보존한다.
+- `Done` child의 Outcome 자체가 무효화되었을 때만 terminal state를 재평가한다. 예: parent integration branch에서 해당 child merge가 revert/drop되었거나, accepted parent decision이 child 결과를 rejected/superseded로 명시하거나, 기존 Acceptance Criteria를 충족하지 않았음이 새 Evidence로 확인된 경우.
+- terminal child Outcome이 무효화된 뒤 더 이상 수행하지 않기로 했다면 `Cancelled`, 다시 수행하기로 commit했다면 실제 commitment/work-start에 맞춰 `Backlog / Todo / In progress`로 재진입한다.
+
+이 모델은 **완료된 work의 throughput**과 **상위 initiative의 canonical adoption**을 분리한다. Parent issue / Sub-issue progress는 child completion을 집계할 수 있지만 parent Status와 parent-level DoD를 대체하지 않는다.
+
 ## Iteration semantics
 
 Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **압축된 execution/commitment provenance**를 나타낸다.
