@@ -1,31 +1,36 @@
 # Project Orchestration
 
-Publishing Platform Project #11과 repository Issue 사이의 **공통 coordination semantics**를 소유한다. Project admission의 공통 materialization 구현은 이 repository의 shared workflow/action이 소유하고, 각 caller repository는 event wiring·secret 전달과 repository-specific Development start를 소유한다. 장기 webhook runtime, branch base, branch 생성 방식 같은 실행 세부사항은 해당 owning repository가 소유한다.
+> **Authority:** POLICY  
+> **Owner:** Repository Issue activation, observable-signal materialization, and Project #11 reconciliation semantics  
+> **Scope:** common coordination between Issue-driven Publishing Platform repositories and Project #11  
+> **Read when:** admitting/replaying an Issue, interpreting Development signals, or reconciling Project state  
+> **Enforced by:** Knowledge shared Project-admission workflow/action and repository-local integrations where implemented
 
-## Scope
+이 문서는 [Planning Model](planning-model.md)이 정의한 lifecycle **meaning**을 Project/native state에 materialize하는 공통 contract를 소유한다. 실제 Project field 값은 Project #11, Issue/PR relation은 GitHub repository native state가 소유한다.
 
-- Repository Issue가 활성화되면 Project #11의 실행 상태와 연결될 수 있다.
-- activation 이후의 current state는 GitHub Project fields와 repository-native Issue/PR relation이 소유한다.
-- Docs처럼 Issue-driven implementation repository가 아닌 저장소는 동일한 orchestration을 강제하지 않는다.
-- 공통 branch/PR/change-management invariant는 [Git Workflow](git-workflow.md)를 따른다.
+## Scope and ownership
 
-## Issue activation semantics
+- Repository Issue가 활성화되면 Project #11 Item과 필요한 initial fields를 materialize할 수 있다.
+- activation 이후 current state는 live Project fields와 repository-native Issue/PR relation이 source of truth다.
+- Docs처럼 Issue-driven implementation이 중심이 아닌 repository에는 동일 orchestration을 강제하지 않는다.
+- branch/PR integration invariant는 [Git Workflow](git-workflow.md)이 소유한다.
+- caller event wiring, branch base/name, token/runner/runtime, webhook process 같은 implementation detail은 owning repository가 소유한다.
 
-활성 Repository Issue는 다음 초기화를 요청할 수 있다.
+## Issue activation
 
-1. Project #11 Item 등록
-2. 초기 `Iteration / Work Type` materialization
-3. Iteration이 없으면 `Backlog`, 있으면 `Todo`로 초기 Status 파생
+Common admission은 활성 Repository Issue에 대해 다음 결과를 materialize할 수 있다.
 
-Issue activation 자체는 Development relation을 만들지 않는다. Development branch/PR은 planning activation이 아니라 실제 작업 시작을 표현한다.
+1. Project #11 Item membership
+2. initial Iteration / Work Type
+3. Iteration 존재 여부에 따른 initial Status
 
-Project admission은 Knowledge의 shared workflow/action을 하나의 구현 원본으로 사용한다. caller repository는 Issue event 또는 explicit replay를 이 workflow에 연결하고 자기 `PROJECT_TOKEN`과 repository-scoped `GITHUB_TOKEN`을 전달한다. Development start, branch base와 branch 생성 방식은 계속 repository-local automation이 소유한다.
+Issue activation 자체는 actual work start나 Development relation을 의미하지 않는다. Draft 또는 실행 범위가 아직 확정되지 않은 candidate의 planning meaning은 [Planning Model](planning-model.md)을 따른다.
 
-Draft 또는 아직 실행 범위가 확정되지 않은 Item은 [Planning Model](planning-model.md)의 lifecycle을 따른다. 활성화되지 않은 Draft 때문에 implementation branch를 만들지 않는다.
+공통 admission implementation의 parser, API calls, field lookup, pagination, retries와 token handling은 Knowledge의 workflow/action/tests가 소유한다. 이 문서는 그 알고리즘을 복제하지 않는다.
 
 ## Project seed
 
-Repository Issue는 first admission에 필요한 machine-readable `project-seed`를 사용할 수 있다.
+Repository Issue는 first admission을 위한 machine-readable `project-seed`를 제공할 수 있다.
 
 ```md
 <!-- project-seed
@@ -36,71 +41,57 @@ Repository Issue는 first admission에 필요한 machine-readable `project-seed`
 -->
 ```
 
-Project admission에 사용되는 공통 값:
+Common semantic inputs:
 
-- `iteration`: 초기 Iteration. 아직 commitment가 아니면 `null`
-- `workType`: Issue Outcome의 Work Type
+- `iteration` → initial Iteration; commitment가 아직 없으면 `null`
+- `workType` → Issue Outcome의 Work Type
 
-초기 Status는 seed 입력이 아니다. activation automation은 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 파생한다.
+`status`는 authoritative seed input이 아니다. initial Status는 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 materialize한다.
 
-현재 repository-local Development automation은 같은 marker에서 다음 optional hint를 읽을 수 있다.
+replay에서 existing live Project value를 stale seed로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated `workType`을 사용할 수 있지만 live/seed 모두 없으면 의미를 추론하지 않고 fail closed한다.
 
-- `development: false`: explicit Development start에서 branch를 만들지 않음
-- `branch`: explicit Development start가 지원할 때 사용할 branch name override
+branch name, Development start suppression 등 Project field가 아닌 repository-local hints가 같은 comment에 존재할 수 있지만, 그 의미는 해당 owning integration이 소유하며 이 공통 contract가 정의하지 않는다.
 
-이 hint는 Project field나 lifecycle state가 아니며 activation 이후 current state를 대체하지 않는다. Project field의 current state는 GitHub Project가 source of truth다.
+seed 값은 [Planning Model](planning-model.md), [Project Fields](fields.md), [Work Classification](work-classification.md)의 semantics를 위반하지 않아야 한다.
 
-`workType`은 executable Repository Issue admission의 필수 semantic input이다. 이미 live Project Work Type이 있으면 replay가 seed로 덮어쓰지 않고, live 값이 비어 있을 때만 seed 값을 materialize한다. live 값과 seed가 모두 없으면 의미를 추론하지 않고 fail closed한다. 기존 `status` key가 남아 있어도 admission은 이를 무시하고 Iteration에서 초기 Status를 파생한다.
+## Development signals
 
-seed 값은 [Planning Model](planning-model.md)과 [Work Classification](work-classification.md)을 위반하지 않아야 한다.
+Development relation은 actual work start를 관찰할 수 있는 **signal**이다. `Backlog / Todo / In progress`의 의미 자체는 [Planning Model](planning-model.md)이 소유한다.
 
-## Development relation
-
-Development relation은 actual work start를 관찰할 수 있는 **signal**이며 Status 의미 자체의 정의는 [Planning Model](planning-model.md)이 소유한다.
-
-- `Backlog`: 아직 Iteration commitment가 없다.
-- `Todo`: Iteration commitment는 있지만 실제 작업은 시작되지 않았다.
-- `In progress`: Iteration commitment가 있고 실제 작업이 시작됐다.
-- 새 linked PR은 실제 작업 시작의 명확한 observable signal이므로 `In progress`로 materialize한다. closed Issue에 새 PR link가 생기는 경우의 reopen semantics는 owning automation이 명시적으로 처리할 수 있다.
-- Development branch도 owning repository integration이 그 relation을 신뢰성 있게 관찰할 수 있다면 `In progress` signal로 사용할 수 있다. 공통 automation이 관찰할 수 없는 branch event를 억지로 추론하지 않는다.
-- branch/PR 없이 수행하는 조사·coordination·문서 작업도 실제 수행을 시작하면 `In progress`일 수 있다.
-- commitment와 actual work start가 동시에 일어나면 Iteration과 `In progress`를 함께 materialize할 수 있으며, `Todo`를 중간 write로 강제하지 않는다.
-- Development relation이 생겼는데 Iteration이 없다면 automation이 임의의 Iteration을 추론하지 않는다. 불일치로 드러내고 commitment를 먼저 정한다.
-- 실제 branch 이름, base branch, 생성 API, branch protection과 Status mutation 구현은 owning repository가 소유한다.
-- 이미 존재하는 branch와 Issue relation이 불일치하면 automation이 임의로 추론해 연결하지 않고 repository-local recovery 절차를 따른다.
+- 새 linked PR은 open Item의 work-start signal로 사용해 `In progress`를 materialize할 수 있다.
+- Development branch도 owning integration이 relation을 신뢰성 있게 관찰할 수 있을 때 같은 signal로 사용할 수 있다.
+- branch/PR 없이 진행되는 Investigation, coordination, documentation은 사람 또는 해당 execution interface가 work start를 명시적으로 materialize할 수 있다.
+- commitment와 work start가 동시에 확인되면 Iteration과 `In progress`를 함께 materialize할 수 있으며 `Todo` intermediate write를 강제하지 않는다.
+- work-start signal이 있는데 Iteration commitment가 없다면 arbitrary Iteration을 추론하지 않고 inconsistency로 드러낸다.
+- branch/Issue relation이 불명확하면 이름이나 타이밍만으로 임의 연결하지 않고 repository-local recovery가 소유한다.
 
 ## Lifecycle reconciliation
 
-Status의 의미와 canonical lifecycle은 [Planning Model](planning-model.md)이 소유한다. orchestration automation은 그 의미를 materialize할 뿐 두 번째 lifecycle 원본이 아니다.
+Reconciliation은 canonical meaning을 새로 정의하지 않고 명확한 invariant와 관찰 가능한 event를 live state에 반영한다.
 
-공통적으로 자동화할 수 있는 것은 명확한 invariant와 실제로 관찰 가능한 signal에 한정한다.
+- uncommitted candidate가 Iteration commitment를 얻고 더 강한 work-start signal이 없으면 `Todo`를 materialize할 수 있다.
+- existing `In progress`를 replay convenience만으로 `Todo`로 낮추지 않는다.
+- 실제로 관찰된 work-start signal은 `In progress`를 materialize할 수 있다.
+- `Todo / In progress`에서 commitment가 제거되면 `Backlog` invariant를 복구하되 남아 있는 active Development relation은 별도 inconsistency로 드러낸다.
+- `closed / completed`는 `Done`, `closed / not_planned` 또는 명확한 cancellation은 `Cancelled`로 materialize할 수 있다.
+- close/cancel transition만으로 기존 Iteration을 지우지 않는다.
+- durable product/platform Git-tree implementation이 확인되는데 Iteration이 비어 있으면 reconciliation 대상으로 드러낸다. historical Iteration은 Issue 생성/종료 날짜만으로 자동 추론하지 않는다.
+- substantive reopen과 administrative reopen을 automation이 신뢰성 있게 구분할 수 없다면 Iteration을 일괄 clear하지 않고 review 대상으로 남긴다.
+- unknown/conflicting state나 concurrent change는 임의 overwrite보다 fail/re-read/review를 우선한다.
 
-- `Backlog` candidate가 Iteration commitment를 얻고 더 강한 work-start signal이 없으면 `Todo`로 materialize할 수 있다.
-- 이미 `In progress`이고 Iteration이 유지되는 Item을 단순히 `Todo`로 낮추지 않는다.
-- 새 linked PR처럼 automation이 실제로 관찰한 work-start signal은 `In progress`로 materialize할 수 있다.
-- `Todo / In progress` 상태에서 Iteration commitment가 제거되면 `Backlog` invariant를 복구한다. active Development relation이 남아 있다면 이를 정상 상태로 추론하지 않고 불일치로 드러내 별도 검토할 수 있다.
-- `closed / completed` 결과는 `Done`과 연결할 수 있다.
-- `closed / not_planned` 또는 명확한 cancellation 결과는 `Cancelled`와 연결할 수 있다.
-- close/cancel transition 자체는 기존 Iteration을 지우지 않는다. explicit commitment가 있었던 Item의 Iteration은 terminal historical provenance로 유지한다.
-- Item에 귀속되는 durable product/platform Git tree에 영향을 준 실제 구현이 확인되는데 Iteration이 비어 있다면 reconciliation 대상으로 드러낸다. historical Iteration은 Issue 생성/종료 날짜만으로 자동 추론하지 않고 실제 work-start Evidence를 기준으로 보정한다.
-- 독립 branch에서만 수행되고 durable product/platform Git tree에 편입되지 않은 채 폐기된 작업은 historical Iteration이 없어도 invariant 위반으로 보지 않는다.
-- terminal Item의 substantive reopen은 새로운 live-planning 결정으로 취급한다. 새 Iteration에 즉시 recommit하지 않는다면 기존 Iteration을 clear하고 `Backlog`로 재평가하는 것을 권고한다. 단순 metadata 수정처럼 잠시 reopen/close하는 행위에는 Iteration clear를 자동 적용하지 않는다.
-- common automation이 substantive reopen과 임시 reopen을 신뢰성 있게 구분할 수 없다면 모든 reopen에 일괄 clear하지 않고 review 대상으로 드러낸다.
-
-Automation parity는 개별 transition의 존재뿐 아니라 transition priority와 resulting invariant까지 owning implementation에서 검증한다. Knowledge 문서만으로 runtime parity를 가정하지 않는다.
-
-Work Type과 historical Iteration처럼 해석이 필요한 값은 자동화가 임의로 추론하지 않는다. admission은 missing Work Type을 validated `project-seed.workType`에서만 materialize하고 기존 live 값은 보존한다. 현재 개인 프로젝트의 executable Repository Issue에서 assignee가 비어 있으면 기본 책임자 `ooMia`를 deterministic하게 materialize할 수 있다. unknown state, conflicting semantic value나 concurrent change를 발견하면 덮어쓰기보다 실패/검토 대상으로 남긴다.
+Work Type, historical Iteration처럼 semantic interpretation이 필요한 값을 automation이 제목·날짜·repository 종류만으로 추론하지 않는다. field completeness 자체는 [Project Fields](fields.md)가 소유한다.
 
 ## Ownership boundary
 
 | Concern | Owner |
 |---|---|
-| Status/Iteration/Work Type 의미와 DoD | [Planning Model](planning-model.md), [Work Classification](work-classification.md) |
-| activation 및 reconciliation의 공통 의미 | 이 문서 |
-| 실제 Project field 값 | GitHub Project #11 |
-| Issue/PR/Development relation | GitHub repository native state |
-| 공통 Project admission workflow/action | Knowledge `.github/workflows/project-admission.yml`, `.github/actions/project-admission/` |
-| caller event wiring / Development start / branch base | 실행하는 owning repository |
-| 장기 webhook/runtime implementation | 해당 implementation repository의 code/docs |
+| Status/Iteration lifecycle meaning, DoD, Evidence | [Planning Model](planning-model.md) |
+| field schema/cardinality/completeness | [Project Fields](fields.md) |
+| Work Type / Label meaning | [Work Classification](work-classification.md) |
+| activation / signal / reconciliation materialization contract | 이 문서 |
+| live Project field values | GitHub Project #11 |
+| Issue / PR / Development relation | GitHub repository native state |
+| common Project admission implementation | Knowledge workflow/action/tests |
+| caller wiring / branch implementation / runtime | executing owning repository |
 
-공통 Project admission 구현은 Knowledge에 한 번만 두고 caller repository에 복제하지 않는다. repository-local 실행 차이는 그 owning source에 두며, 여러 repository에서 반복되는 차이가 실제 coordination invariant로 승격될 때만 이 문서를 확장한다.
+공통 implementation은 하나의 owner에 두고 caller repository에 복제하지 않는다. 여러 repository-local 차이가 반복되어 실제 coordination invariant가 될 때만 이 POLICY를 확장한다.
