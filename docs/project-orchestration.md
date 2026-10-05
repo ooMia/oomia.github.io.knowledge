@@ -65,19 +65,17 @@ Development relation은 actual work start를 관찰할 수 있는 **signal**이�
 - work-start signal이 있는데 Iteration commitment가 없다면 arbitrary Iteration을 추론하지 않고 inconsistency로 드러낸다.
 - branch/Issue relation이 불명확하면 이름이나 타이밍만으로 임의 연결하지 않고 repository-local recovery가 소유한다.
 
-## Hierarchical materialization
+## Relationship materialization
 
-Parent/sub-issue relation과 scoped integration branch를 사용하는 경우 common orchestration은 [Planning Model](planning-model.md#hierarchical-completion)의 scope-local completion semantics를 따른다.
+GitHub relationship은 planning context와 dependency를 materialize하는 source이며 lifecycle inheritance를 의미하지 않는다.
 
-- explicit GitHub parent/sub-issue relation을 hierarchy source로 사용한다. title, branch name, timing만으로 parent를 추론하지 않는다.
-- parent integration branch는 owning workflow/state가 명시적으로 선택한 ref를 사용한다. branch 이름 패턴만으로 integration target을 추론하지 않는다.
-- linked child PR이 선언된 parent integration branch에 merge된 사실은 child completion의 강한 integration Evidence가 될 수 있다.
-- PR merge 하나만으로 arbitrary child를 자동 `Done`으로 만들지 않는다. child Outcome/AC 검증과 repository Issue completion decision이 함께 있어야 한다.
-- non-default parent integration branch에서는 closing keyword auto-close에 의존하지 않는다. child Issue completion은 명시적으로 materialize한다.
-- parent의 decommit/cancel은 아직 terminal이 아닌 descendant에 propagation할 수 있다. 실제 commitment, active Development relation, parent decision을 함께 읽는다.
-- 이미 `Done`인 descendant는 parent Status 변화만으로 재작성하지 않는다.
-- terminal child를 다시 materialize하려면 child Outcome invalidation을 보여주는 explicit Evidence가 필요하다. merge revert/drop, explicit rejection/supersession, failed Acceptance Evidence 등이 이에 해당한다.
-- sub-issue completion ratio는 progress signal이지 parent Status의 source of truth가 아니다. parent `Done`은 parent-level Outcome/AC/Evidence에 따라 별도로 materialize한다.
+- parent/sub-issue, blocks/blocked-by, relates-to는 GitHub가 제공하는 explicit relation을 source로 사용하고 title, branch name, timing만으로 관계를 추론하지 않는다.
+- related Item의 Status 변화만으로 다른 Item의 Status를 자동 변경하지 않는다.
+- Issue completion은 [Planning Model](planning-model.md#issue-local-completion-and-relationships)의 issue-local semantics를 따른다.
+- PR merge는 해당 Issue가 선언한 integration target과 AC에 부합할 때 completion Evidence가 될 수 있다. non-default integration branch에 merge됐다는 사실만으로 모든 Issue를 일률적으로 `Done` 처리하지 않는다.
+- terminal Status를 변경하려면 해당 Item 자신의 Outcome/AC/Evidence 변화 또는 명시적인 planning decision이 필요하다.
+
+Relationship별 automatic scheduling/propagation이 실제 반복 요구가 되기 전에는 common orchestration policy로 추가하지 않는다.
 
 ## Lifecycle reconciliation
 
