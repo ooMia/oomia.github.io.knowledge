@@ -1037,6 +1037,18 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
+## Issue-local completion and relationships
+
+Issue `Status`는 **각 Issue가 선언한 자기 scope의 Outcome / Acceptance Criteria / Evidence**로 판단한다.
+
+- parent/sub-issue, blocks/blocked-by, relates-to 같은 relationship은 context·composition·dependency를 표현하지만 descendant/related Issue의 Status를 자동 상속하거나 전파하지 않는다.
+- parent와 child는 각각 독립적인 completion unit이다. 따라서 `parent=In progress, child=Done` 또는 `parent=Cancelled, child=Done`은 각 Issue의 Outcome이 독립적으로 성립한다면 정상이다.
+- Issue가 어떤 integration target까지 포함해야 완료인지도 그 Issue의 Outcome/AC가 결정한다. parent integration branch merge가 충분한 Issue도 있고, canonical/default branch 또는 production delivery까지 요구하는 Issue도 있을 수 있다.
+- relationship의 변경이나 관련 Issue의 Status 변화만으로 terminal Issue를 자동 reopen/demote하지 않는다.
+- 기존 `Done` 판정을 바꾸려면 해당 Issue 자신의 Outcome/AC/Evidence가 더 이상 성립하지 않는다는 새 Evidence가 필요하다.
+
+Relationship 종류별 추가 scheduling/propagation semantics가 실제 운영상 필요해지면 별도 policy로 확장한다. 현재는 relationship을 lifecycle inheritance mechanism으로 사용하지 않는다.
+
 ## Iteration semantics
 
 Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **압축된 execution/commitment provenance**를 나타낸다.
@@ -1328,6 +1340,8 @@ child Issue branch ──PR──┘
 ```
 
 - parent Issue branch 자체를 integration buffer로 사용할 수 있다.
+- parent/sub-issue 관계 자체만으로 integration branch를 만들지 않는다. parent Outcome이 여러 child change의 **atomic canonical activation**을 요구할 때 사용한다.
+- 단순 tracking/coordination parent, Investigation parent, 서로 독립적으로 canonical integration 가능한 child 집합은 각자 owning integration path를 유지한다.
 - child PR은 구현·review·child-level verification이 끝나면 integration branch로 merge해 open PR queue를 줄인다.
 - canonical branch를 대상으로 대기하는 PR은 parent integration PR 하나로 수렴시키는 편을 권장한다.
 - integration branch는 parent change/release/renewal이 끝나면 삭제하는 temporary coordination state이며 두 번째 canonical branch가 아니다.
@@ -1337,12 +1351,13 @@ child Issue branch ──PR──┘
 
 GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
 
-- child PR의 Development relation이 필요하면 GitHub의 manual link를 사용한다.
-- child Issue는 parent change가 canonical branch에 통합될 때까지 open/live planning state로 유지하는 것을 기본으로 한다.
-- final parent PR은 default branch를 대상으로 필요한 child Issue closing references를 가질 수 있다.
-- child Issue 자체의 Outcome이 buffer integration으로 명시적으로 끝나는 특수한 경우에만 더 이른 completion을 별도로 판단한다.
+- child PR의 Development relation이 필요하면 GitHub의 explicit relation을 사용한다.
+- child Issue의 완료 시점은 parent/child 관계 자체가 아니라 그 Issue의 Outcome/AC/Evidence가 요구하는 integration target으로 판단한다.
+- parent integration branch merge가 child Outcome의 최종 integration이면 그 시점에 `Done`이 될 수 있다.
+- child Outcome이 canonical/default branch 또는 production delivery를 요구한다면 parent buffer merge만으로 완료하지 않는다.
+- parent/sub, blocking, relates-to 관계는 PR topology와 context를 설명하지만 Status inheritance를 만들지 않는다.
 
-이 패턴의 목적은 **완료된 구현 PR을 오래 열어 두지 않으면서 canonical activation은 하나의 검토 가능한 integration unit으로 유지하는 것**이다.
+이 패턴의 목적은 **완료된 child work를 불필요하게 대기시키지 않으면서 각 Issue가 스스로 정의한 completion boundary를 보존하는 것**이다.
 
 ## POLICY — History and archive
 
@@ -1438,6 +1453,18 @@ Development relation은 actual work start를 관찰할 수 있는 **signal**이�
 - commitment와 work start가 동시에 확인되면 Iteration과 `In progress`를 함께 materialize할 수 있으며 `Todo` intermediate write를 강제하지 않는다.
 - work-start signal이 있는데 Iteration commitment가 없다면 arbitrary Iteration을 추론하지 않고 inconsistency로 드러낸다.
 - branch/Issue relation이 불명확하면 이름이나 타이밍만으로 임의 연결하지 않고 repository-local recovery가 소유한다.
+
+## Relationship materialization
+
+GitHub relationship은 planning context와 dependency를 materialize하는 source이며 lifecycle inheritance를 의미하지 않는다.
+
+- parent/sub-issue, blocks/blocked-by, relates-to는 GitHub가 제공하는 explicit relation을 source로 사용하고 title, branch name, timing만으로 관계를 추론하지 않는다.
+- related Item의 Status 변화만으로 다른 Item의 Status를 자동 변경하지 않는다.
+- Issue completion은 Planning Model (`docs/planning-model.md`)의 issue-local semantics를 따른다.
+- PR merge는 해당 Issue가 선언한 integration target과 AC에 부합할 때 completion Evidence가 될 수 있다. non-default integration branch에 merge됐다는 사실만으로 모든 Issue를 일률적으로 `Done` 처리하지 않는다.
+- terminal Status를 변경하려면 해당 Item 자신의 Outcome/AC/Evidence 변화 또는 명시적인 planning decision이 필요하다.
+
+Relationship별 automatic scheduling/propagation이 실제 반복 요구가 되기 전에는 common orchestration policy로 추가하지 않는다.
 
 ## Lifecycle reconciliation
 

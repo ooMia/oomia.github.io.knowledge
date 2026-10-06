@@ -65,6 +65,18 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
+## Issue-local completion and relationships
+
+Issue `Status`는 **각 Issue가 선언한 자기 scope의 Outcome / Acceptance Criteria / Evidence**로 판단한다.
+
+- parent/sub-issue, blocks/blocked-by, relates-to 같은 relationship은 context·composition·dependency를 표현하지만 descendant/related Issue의 Status를 자동 상속하거나 전파하지 않는다.
+- parent와 child는 각각 독립적인 completion unit이다. 따라서 `parent=In progress, child=Done` 또는 `parent=Cancelled, child=Done`은 각 Issue의 Outcome이 독립적으로 성립한다면 정상이다.
+- Issue가 어떤 integration target까지 포함해야 완료인지도 그 Issue의 Outcome/AC가 결정한다. parent integration branch merge가 충분한 Issue도 있고, canonical/default branch 또는 production delivery까지 요구하는 Issue도 있을 수 있다.
+- relationship의 변경이나 관련 Issue의 Status 변화만으로 terminal Issue를 자동 reopen/demote하지 않는다.
+- 기존 `Done` 판정을 바꾸려면 해당 Issue 자신의 Outcome/AC/Evidence가 더 이상 성립하지 않는다는 새 Evidence가 필요하다.
+
+Relationship 종류별 추가 scheduling/propagation semantics가 실제 운영상 필요해지면 별도 policy로 확장한다. 현재는 relationship을 lifecycle inheritance mechanism으로 사용하지 않는다.
+
 ## Iteration semantics
 
 Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **압축된 execution/commitment provenance**를 나타낸다.
