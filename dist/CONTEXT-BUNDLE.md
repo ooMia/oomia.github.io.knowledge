@@ -1037,21 +1037,17 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
-## Hierarchical completion
+## Issue-local completion and relationships
 
-Parent/sub-issue 관계가 있는 경우 `Done`은 **각 Item의 scope에서 평가하는 completion**이다.
+Issue `Status`는 **각 Issue가 선언한 자기 scope의 Outcome / Acceptance Criteria / Evidence**로 판단한다.
 
-- child Issue가 자신의 Outcome / Acceptance Criteria / Quality Requirements / Evidence를 충족하고, 선언된 parent integration branch에 linked child PR이 merge되어 해당 결과가 parent integration target에 포함되었다면 child는 `Done`이 될 수 있다.
-- child `Done`은 parent Outcome 전체가 canonical/default branch에 활성화되었다는 뜻이 아니다.
-- parent는 자기 Outcome / Acceptance Criteria / Evidence를 별도로 충족해야 하며, parent가 canonical/default branch를 integration target으로 삼는다면 그 integration까지 완료되어야 `Done`이다.
-- 따라서 `parent=In progress, child=Done`은 정상적인 상태다. parent가 여러 완료된 child를 포함한 채 아직 통합·검증 중이라는 뜻이다.
-- parent가 commitment를 잃어 `Todo` 또는 `Backlog`로 내려가면 아직 terminal이 아닌 descendant의 commitment와 Status를 함께 재평가한다.
-- parent가 `Cancelled`되면 아직 완료되지 않은 descendant도 더 이상 수행하지 않는 경우 `Cancelled`로 전환할 수 있다.
-- 이미 `Done`인 child는 ancestor Status 변화만으로 자동 reopen/demote하지 않는다. 완료된 child work와 상위 initiative의 채택 여부를 별도 사실로 보존한다.
-- `Done` child의 Outcome 자체가 무효화되었을 때만 terminal state를 재평가한다. 예: parent integration branch에서 해당 child merge가 revert/drop되었거나, accepted parent decision이 child 결과를 rejected/superseded로 명시하거나, 기존 Acceptance Criteria를 충족하지 않았음이 새 Evidence로 확인된 경우.
-- terminal child Outcome이 무효화된 뒤 더 이상 수행하지 않기로 했다면 `Cancelled`, 다시 수행하기로 commit했다면 실제 commitment/work-start에 맞춰 `Backlog / Todo / In progress`로 재진입한다.
+- parent/sub-issue, blocks/blocked-by, relates-to 같은 relationship은 context·composition·dependency를 표현하지만 descendant/related Issue의 Status를 자동 상속하거나 전파하지 않는다.
+- parent와 child는 각각 독립적인 completion unit이다. 따라서 `parent=In progress, child=Done` 또는 `parent=Cancelled, child=Done`은 각 Issue의 Outcome이 독립적으로 성립한다면 정상이다.
+- Issue가 어떤 integration target까지 포함해야 완료인지도 그 Issue의 Outcome/AC가 결정한다. parent integration branch merge가 충분한 Issue도 있고, canonical/default branch 또는 production delivery까지 요구하는 Issue도 있을 수 있다.
+- relationship의 변경이나 관련 Issue의 Status 변화만으로 terminal Issue를 자동 reopen/demote하지 않는다.
+- 기존 `Done` 판정을 바꾸려면 해당 Issue 자신의 Outcome/AC/Evidence가 더 이상 성립하지 않는다는 새 Evidence가 필요하다.
 
-이 모델은 **완료된 work의 throughput**과 **상위 initiative의 canonical adoption**을 분리한다. Parent issue / Sub-issue progress는 child completion을 집계할 수 있지만 parent Status와 parent-level DoD를 대체하지 않는다.
+Relationship 종류별 추가 scheduling/propagation semantics가 실제 운영상 필요해지면 별도 policy로 확장한다. 현재는 relationship을 lifecycle inheritance mechanism으로 사용하지 않는다.
 
 ## Iteration semantics
 
@@ -1355,14 +1351,13 @@ child Issue branch ──PR──┘
 
 GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
 
-- child PR의 Development relation이 필요하면 GitHub의 manual link를 사용한다.
-- child Issue의 Outcome/AC/Evidence가 충족되고 child PR이 선언된 parent integration branch에 merge되면 child Issue를 명시적으로 `closed / completed` 및 Project `Done`으로 materialize할 수 있다.
-- child `Done`은 parent의 canonical activation을 의미하지 않는다. parent는 자기 Outcome/AC/Evidence와 최종 integration을 별도로 완료한다.
-- final parent PR은 이미 완료된 child Issue를 다시 close하기 위한 surface가 아니라, child 결과들을 하나의 parent Outcome으로 통합·검증·활성화하는 surface다.
-- parent가 나중에 보류되거나 취소되어도 이미 `Done`인 child work를 자동으로 미완료 상태로 되돌리지 않는다. child 결과 자체가 revert/drop/reject/supersede되어 Outcome Evidence가 무효화된 경우에만 child lifecycle을 재평가한다.
-- 아직 완료되지 않은 child는 parent decommit/cancel decision에 따라 commitment나 Status를 함께 재평가할 수 있다.
+- child PR의 Development relation이 필요하면 GitHub의 explicit relation을 사용한다.
+- child Issue의 완료 시점은 parent/child 관계 자체가 아니라 그 Issue의 Outcome/AC/Evidence가 요구하는 integration target으로 판단한다.
+- parent integration branch merge가 child Outcome의 최종 integration이면 그 시점에 `Done`이 될 수 있다.
+- child Outcome이 canonical/default branch 또는 production delivery를 요구한다면 parent buffer merge만으로 완료하지 않는다.
+- parent/sub, blocking, relates-to 관계는 PR topology와 context를 설명하지만 Status inheritance를 만들지 않는다.
 
-이 패턴의 목적은 **완료된 child work의 throughput을 즉시 기록하면서, parent의 canonical activation은 별도의 검토 가능한 integration unit으로 유지하는 것**이다.
+이 패턴의 목적은 **완료된 child work를 불필요하게 대기시키지 않으면서 각 Issue가 스스로 정의한 completion boundary를 보존하는 것**이다.
 
 ## POLICY — History and archive
 
@@ -1459,19 +1454,17 @@ Development relation은 actual work start를 관찰할 수 있는 **signal**이�
 - work-start signal이 있는데 Iteration commitment가 없다면 arbitrary Iteration을 추론하지 않고 inconsistency로 드러낸다.
 - branch/Issue relation이 불명확하면 이름이나 타이밍만으로 임의 연결하지 않고 repository-local recovery가 소유한다.
 
-## Hierarchical materialization
+## Relationship materialization
 
-Parent/sub-issue relation과 scoped integration branch를 사용하는 경우 common orchestration은 Planning Model (`docs/planning-model.md`)의 scope-local completion semantics를 따른다.
+GitHub relationship은 planning context와 dependency를 materialize하는 source이며 lifecycle inheritance를 의미하지 않는다.
 
-- explicit GitHub parent/sub-issue relation을 hierarchy source로 사용한다. title, branch name, timing만으로 parent를 추론하지 않는다.
-- parent integration branch는 owning workflow/state가 명시적으로 선택한 ref를 사용한다. branch 이름 패턴만으로 integration target을 추론하지 않는다.
-- linked child PR이 선언된 parent integration branch에 merge된 사실은 child completion의 강한 integration Evidence가 될 수 있다.
-- PR merge 하나만으로 arbitrary child를 자동 `Done`으로 만들지 않는다. child Outcome/AC 검증과 repository Issue completion decision이 함께 있어야 한다.
-- non-default parent integration branch에서는 closing keyword auto-close에 의존하지 않는다. child Issue completion은 명시적으로 materialize한다.
-- parent의 decommit/cancel은 아직 terminal이 아닌 descendant에 propagation할 수 있다. 실제 commitment, active Development relation, parent decision을 함께 읽는다.
-- 이미 `Done`인 descendant는 parent Status 변화만으로 재작성하지 않는다.
-- terminal child를 다시 materialize하려면 child Outcome invalidation을 보여주는 explicit Evidence가 필요하다. merge revert/drop, explicit rejection/supersession, failed Acceptance Evidence 등이 이에 해당한다.
-- sub-issue completion ratio는 progress signal이지 parent Status의 source of truth가 아니다. parent `Done`은 parent-level Outcome/AC/Evidence에 따라 별도로 materialize한다.
+- parent/sub-issue, blocks/blocked-by, relates-to는 GitHub가 제공하는 explicit relation을 source로 사용하고 title, branch name, timing만으로 관계를 추론하지 않는다.
+- related Item의 Status 변화만으로 다른 Item의 Status를 자동 변경하지 않는다.
+- Issue completion은 Planning Model (`docs/planning-model.md`)의 issue-local semantics를 따른다.
+- PR merge는 해당 Issue가 선언한 integration target과 AC에 부합할 때 completion Evidence가 될 수 있다. non-default integration branch에 merge됐다는 사실만으로 모든 Issue를 일률적으로 `Done` 처리하지 않는다.
+- terminal Status를 변경하려면 해당 Item 자신의 Outcome/AC/Evidence 변화 또는 명시적인 planning decision이 필요하다.
+
+Relationship별 automatic scheduling/propagation이 실제 반복 요구가 되기 전에는 common orchestration policy로 추가하지 않는다.
 
 ## Lifecycle reconciliation
 
