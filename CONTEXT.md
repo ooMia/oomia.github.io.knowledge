@@ -16,7 +16,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 |---|---|
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | [Agent Conventions](docs/agent-conventions.md) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
-| Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
+| Issue 생성·수정·활성화 | [lifecycle·completion](docs/planning-model.md) → owning repository가 제공하는 `.github/ISSUE_TEMPLATE/`이 있으면 그 local authoring surface 적용 → [Work Type·Labels](docs/work-classification.md) → [activation·materialization](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-signals) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | [Implementation Practices](docs/implementation-practices.md) → owning repository contract/code/tests; branch/PR 경계가 필요하면 [Git Workflow](docs/git-workflow.md) |
 | PR 작성·검토·통합 | [Git Workflow](docs/git-workflow.md) → [완료·Evidence](docs/planning-model.md#completion-and-evidence) → 해당 Issue 및 구현 레포의 검증 방법 |

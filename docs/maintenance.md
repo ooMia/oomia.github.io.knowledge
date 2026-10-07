@@ -173,7 +173,8 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 
 ## Issue / PR
 
-- Repository Issue를 생성하거나 크게 수정할 때는 `.github/ISSUE_TEMPLATE/`에서 완료 모델에 맞는 template을 먼저 선택한다. repository state 변경은 [Change template](../.github/ISSUE_TEMPLATE/change.md), 결론과 Evidence 확보는 [Investigation template](../.github/ISSUE_TEMPLATE/investigation.md)을 사용한다.
+- Issue의 cross-repository completion semantics는 [Planning Model](planning-model.md)이 소유한다. 각 repository의 `.github/ISSUE_TEMPLATE/`은 그 semantics를 GitHub authoring surface로 materialize하는 repository-local implementation이다.
+- Knowledge repository의 현재 local implementation은 [Change template](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/.github/ISSUE_TEMPLATE/change.md)과 [Investigation template](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/.github/ISSUE_TEMPLATE/investigation.md)을 제공한다. 이 파일 형상·marker·section ordering을 다른 repository에 cross-repository contract로 강제하지 않는다.
 - Issue의 operational metadata는 GitHub Project/native fields가 소유하며 body에 현재값을 중복 기록하지 않는다.
 - branch/PR/lifecycle 의미는 [Planning Model](planning-model.md), [Project Orchestration](project-orchestration.md), [Git Workflow](git-workflow.md)을 따른다.
 
@@ -182,8 +183,10 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 `dist/CONTEXT-BUNDLE.md`는 canonical Knowledge 문서에서 재생성하는 **tracked but non-canonical generated transport artifact**다.
 
 - repository source에 직접 접근할 수 있으면 [CONTEXT](../CONTEXT.md) routing을 따라 필요한 canonical source를 직접 읽는다.
-- bundle은 repository 접근이 없거나 단일 파일로 Chat/context를 전달해야 할 때 사용하는 snapshot/transport이며, routing이나 live Project/Issue/PR state를 대체하지 않는다.
-- bundle 내부에서도 embedded `CONTEXT.md`를 entry point로 보고 필요한 source section만 사용한다.
+- bundle은 repository 접근이 없거나 단일 파일로 Chat/context를 전달해야 할 때 사용하는 **semantic context transport**이며, routing이나 live Project/Issue/PR state를 대체하지 않는다.
+- bundle은 `AGENTS.md`, embedded `CONTEXT.md`, 그리고 routed canonical specialist documents를 포함한다. repository browsing용 landing인 `README.md`는 bundle preamble/CONTEXT와 역할이 중복되므로 transport source에서 제외한다.
+- template, registry, workflow, schema, config 같은 non-bundled operational source를 bundle에 복제하지 않는다. bundled document가 exact operational artifact를 요구하면 relative pseudo-path가 아니라 owning repository의 explicit URL을 사용하고, exact lookup에는 repository access가 필요함을 전제로 한다.
+- bundle 내부에서도 embedded `CONTEXT.md`를 router로 사용하고 필요한 source section만 읽는다. `AGENTS.md`는 bundle-only Agent에게 pre-routing guard를 제공한다.
 - bundle을 직접 수정하지 않는다. 내용이 잘못되면 canonical source 또는 `scripts/bundle.py`를 수정한다.
 - same-repository PR에서 canonical Markdown 또는 generator가 바뀌면 GitHub-hosted automation이 bundle을 재생성한다. 결과가 달라지면 automation은 PR source branch의 `dist/CONTEXT-BUNDLE.md`만 GitHub-Verified commit으로 materialize한다.
 - `main`에서는 동일 generator를 read-only로 다시 실행해 committed bundle과 canonical sources의 일치를 검증한다.
