@@ -24,6 +24,7 @@ Issue-linked implementation의 첫 slice는 완성 구현보다 **실행 가능�
 
 - 생성 이후 수정이 어렵다면 필요한 context와 constraint를 먼저 확보하고 첫 결과의 정확도를 높인다.
 - 수정이 쉽다면 과도한 선행 설계보다 **generate → verify → feedback → revise**의 짧은 반복을 사용한다.
+- prototyping과 초기 integration slice에서 여러 합리적인 대안이 있다면, Agent는 구현·검증·수정이 쉬운 **개발 친화적이고 가역적인 선택**을 우선 추천한다. 이는 장기 architecture나 project-wide POLICY를 의미하지 않으며, 반복되는 필요와 Evidence가 생길 때만 durable rule로 승격한다.
 - 발견된 불일치에 실제 조치를 취할 수 없는 검사를 반복적으로 추가하지 않는다.
 - 주변 metadata 검사를 본 Outcome의 blocker로 만들지 않는다. 단, completion claim에 필요한 Evidence는 생략하지 않는다.
 - 검증 실패가 implementation assumption을 깨뜨리면 더 많은 코드를 쌓기 전에 owner contract와 boundary를 다시 확인한다.

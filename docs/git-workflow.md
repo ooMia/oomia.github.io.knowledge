@@ -19,12 +19,11 @@
 
 문서에 policy를 적었다고 실제 branch protection/ruleset/workflow가 변경된 것으로 간주하지 않는다. current enforcement는 owning repository의 live setting/workflow에서 확인한다.
 
-## POLICY — Verification and formatting
+## POLICY — Verification
 
 - 각 repository는 자기 Outcome과 trust boundary에 필요한 executable verification을 **MUST** 정의한다.
 - completion Evidence는 prose expectation이 아니라 실제 owning repository의 test/build/workflow/deployment result를 기준으로 한다.
-- **source-code repository의 CI는 formatting 차이만을 이유로 실패해서는 안 된다.** CI가 canonical formatting 자체를 materialize하는 것이 아니라면 formatter preference를 integration failure gate로 사용하지 않는다.
-- 문서/content처럼 formatting 자체가 canonical artifact의 일부인 repository는 owning workflow가 그 형식을 materialize/normalize하고 idempotence를 검증할 수 있다. 이는 “format check 실패”와 구분한다.
+- formatting/canonicalization의 필요 여부와 enforcement 방식은 owning repository가 자신의 artifact와 integration contract에 맞게 정의한다.
 - lint semantics, type checking, tests, build, artifact/runtime verification 등 실제 결과를 검증하는 gate는 repository risk에 맞게 유지한다.
 
 exact formatter command, bot implementation, check command와 job composition은 owning repository가 소유한다.
@@ -34,6 +33,9 @@ exact formatter command, bot implementation, check command와 job composition은
 아래는 공통 강제 정책이 아니라 CI profile을 설계할 때의 권고다.
 
 - 빠른 development feedback과 canonical/release integration은 필요하면 서로 다른 강도로 운영한다.
+- prototyping과 active development에서는 formatting-only 차이가 feedback loop를 불필요하게 막지 않는 verification profile을 우선한다.
+- canonical/release integration에서 formatting consistency가 실제 repository contract의 일부라면 owning repository가 이를 gate 또는 materialization/normalization 과정으로 선택할 수 있다.
+- 문서/content처럼 formatting 자체가 canonical artifact의 일부라면 normalization과 idempotence verification을 적용할 수 있다.
 - static checks, tests, build, artifact verification, cross-platform matrix는 실제 failure risk에 맞춘다.
 - runner 선택은 security, cost, platform dependency, local capability를 함께 고려한다.
 - self-hosted resource가 필요한 validation과 GitHub-hosted portability validation을 역할에 따라 나눌 수 있다.
