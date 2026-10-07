@@ -4,7 +4,7 @@
 > **Owner:** Work Type and Label selection semantics  
 > **Scope:** repository Issues represented in Publishing Platform Project #11 and repository-native labels  
 > **Read when:** classifying why an Issue exists or choosing durable searchable labels  
-> **Enforced by:** Project Work Type option set, `config/labels.json`, and live repository label registries where synchronized
+> **Enforced by:** Project Work Type option set, the Knowledge label registry, and live repository label registries where synchronized
 
 Project #11에서 repository는 작업의 1차 영역을 이미 제공한다. 추가 metadata는 repository를 가로질러 비교하거나 실제로 필터링할 가치가 있는 정보만 유지한다.
 
@@ -72,7 +72,7 @@ label을 과도하게 붙여 filtering 의미를 약화하지 않는다. 구체�
 
 ## Label registry
 
-실제 허용 label의 canonical registry는 [`config/labels.json`](../config/labels.json)이다.
+실제 허용 label의 canonical registry는 [Knowledge `config/labels.json`](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/config/labels.json)이다. 이 operational registry는 context bundle에 복제하지 않으며 exact lookup에는 Knowledge repository access가 필요하다.
 
 - 이 문서 → label을 언제 만들고 선택하는지에 대한 semantics
 - `config/labels.json` → 실제 label 이름, repository scope, color hint, GitHub description

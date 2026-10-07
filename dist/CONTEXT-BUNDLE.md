@@ -2,8 +2,31 @@
 
 GENERATED TRANSPORT SNAPSHOT — canonical 원본은 각 source 경계에 적힌 repository path입니다. 직접 수정하지 마세요.
 Repository source에 접근할 수 있으면 CONTEXT.md routing과 canonical owner를 직접 사용하세요. 이 bundle은 routing이나 live Project/Issue/PR state를 대체하지 않습니다.
+AGENTS.md는 pre-routing guard를, CONTEXT.md는 semantic routing을 제공합니다. Repository browsing용 README와 operational config/template/schema는 bundle에 복제하지 않습니다.
+Bundle 밖 operational artifact의 exact lookup은 문서에 적힌 owning repository URL을 사용합니다.
 Completed release/migration RECORD는 명시된 immutable Evidence scope에만 적용되며 current live state를 대체하지 않습니다.
-상대 링크는 원본 레포 기준입니다. 과거 변경 근거는 Git history와 연결된 immutable Evidence에서 추적합니다.
+
+
+---
+
+<!-- BEGIN SOURCE: AGENTS.md -->
+
+# Agent instructions
+
+> **Authority:** POLICY  
+> **Owner:** Knowledge Agent bootstrap  
+> **Scope:** Agent work performed in or from this repository  
+> **Read when:** before planning, editing, or operating on Publishing Platform state  
+> **Enforced by:** Agent behavior; provider/tool-specific authorization remains owned by the corresponding tool
+
+1. Start from CONTEXT (`CONTEXT.md`). Identify the task and read only the routed canonical sources needed for it.
+2. Treat routed owner documents as semantic sources. Do not create a second policy source by summarizing specialist rules into bootstrap files.
+3. Separate policy, live implementation/state, revision-bound Evidence, historical RECORD, and generated artifacts. Verify current claims against the live owning source when current state matters.
+4. Do not invent GitHub state, field IDs, links, implementation Evidence, release dates, completion, or tool outcomes.
+5. For approval, resume, decision boundaries, capability fallback, tool failure, remote-state reconciliation, communication, or user-owned security boundaries, follow Agent Conventions (`docs/agent-conventions.md`).
+6. When changing Knowledge documentation, follow Knowledge Maintenance (`docs/maintenance.md`), including its Authority/Owner/Scope rules and generated-bundle boundary.
+
+<!-- END SOURCE: AGENTS.md -->
 
 
 ---
@@ -28,7 +51,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 |---|---|
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | Agent Conventions (`docs/agent-conventions.md`) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
-| Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 완료 모델에 맞는 Change/Investigation template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
+| Issue 생성·수정·활성화 | lifecycle·completion (`docs/planning-model.md`) → owning repository가 제공하는 `.github/ISSUE_TEMPLATE/`이 있으면 그 local authoring surface 적용 → Work Type·Labels (`docs/work-classification.md`) → activation·materialization (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | Implementation Practices (`docs/implementation-practices.md`) → owning repository contract/code/tests; branch/PR 경계가 필요하면 Git Workflow (`docs/git-workflow.md`) |
 | PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
@@ -122,6 +145,8 @@ Historical reasoning comes from Git history and immutable Evidence, not a sessio
 
 Before handing a project operation back to the user as manual work, check whether a currently available project-capable tool, plugin, MCP integration, or skill can perform it directly.
 
+Prefer the narrowest currently connected capability that can complete the requested operation with the required authority and verifiable result. Do not redirect a bounded operation to a broader execution environment merely because that environment is available when an existing connected capability is sufficient.
+
 Do not infer a general capability limitation from one integration's unsupported operation or denial. Treat integration capabilities as runtime state rather than maintaining a static capability inventory in project policy.
 
 ## Tool failures
@@ -163,7 +188,9 @@ Likewise, an app-level permission does not override a connected tool or plugin's
 
 Do not request tool-specific approval until a live-state check shows that the corresponding write is still necessary.
 
-When a tool requires separate approval, explain only the minimum user action required by that tool. Do not present that requirement as a general limitation of the external service, ChatGPT, or other available integrations.
+When a tool requires separate approval, explain only the minimum user action required by that tool. When the integration exposes a canonical executable operator command, provide that exact command rather than only a request ID or abstract approval instruction. Do not invent an approval command that the integration has not established.
+
+Do not present that requirement as a general limitation of the external service, ChatGPT, or other available integrations.
 
 Do not generalize an approval requirement, denial, or unsupported operation from one tool to other tools without checking their capabilities.
 
@@ -401,7 +428,8 @@ optional Engine mutation → same Docs workspace
 > **Authority:** POLICY  
 > **Owner:** Publishing Platform product boundary and repository responsibility model  
 > **Scope:** canonical content flow and Engine / Docs / Site / Knowledge responsibility boundaries  
-> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries
+> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries  
+> **Enforced by:** owner-repository code/contracts and cross-repository review; current implementation claims are verified against the owning live sources
 
 
 ## 원칙
@@ -590,6 +618,9 @@ exact `uv` command, Python version, environment/CI setup은 owning repository가
 - 새 cross-repository common path가 필요하면 이 POLICY에서 의미를 먼저 정의한다.
 - framework-required subdirectory와 실제 package composition은 owning repository가 소유한다.
 - `ooMia/oomia.github.io.docs`라는 repository 이름과 각 repository의 `docs/` path는 별개다. content repository라는 이유로 `docs/` 의미를 canonical article tree로 바꾸지 않는다.
+- `.github/ISSUE_TEMPLATE/`을 사용하는 repository는 실제 template 파일, frontmatter, marker, section wording과 ordering을 **그 repository의 구현 책임**으로 소유한다.
+- cross-repository requirement는 특정 template 파일 형상이 아니라 Planning Model (`docs/planning-model.md`)의 Issue completion semantics다. 다른 repository의 template을 scaffold 시작점으로 복사할 수 있지만 materialize된 뒤에는 destination repository가 그 파일을 소유한다.
+- repository-local contract가 별도로 요구하지 않는 한 `.github/ISSUE_TEMPLATE/`의 부재 자체를 project-wide policy violation으로 해석하지 않는다.
 
 ## POLICY — Ownership boundaries
 
@@ -930,7 +961,8 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 
 ## Issue / PR
 
-- Repository Issue를 생성하거나 크게 수정할 때는 `.github/ISSUE_TEMPLATE/`에서 완료 모델에 맞는 template을 먼저 선택한다. repository state 변경은 Change template (`.github/ISSUE_TEMPLATE/change.md`), 결론과 Evidence 확보는 Investigation template (`.github/ISSUE_TEMPLATE/investigation.md`)을 사용한다.
+- Issue의 cross-repository completion semantics는 Planning Model (`docs/planning-model.md`)이 소유한다. 각 repository의 `.github/ISSUE_TEMPLATE/`은 그 semantics를 GitHub authoring surface로 materialize하는 repository-local implementation이다.
+- Knowledge repository의 현재 local implementation은 [Change template](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/.github/ISSUE_TEMPLATE/change.md)과 [Investigation template](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/.github/ISSUE_TEMPLATE/investigation.md)을 제공한다. 이 파일 형상·marker·section ordering을 다른 repository에 cross-repository contract로 강제하지 않는다.
 - Issue의 operational metadata는 GitHub Project/native fields가 소유하며 body에 현재값을 중복 기록하지 않는다.
 - branch/PR/lifecycle 의미는 Planning Model (`docs/planning-model.md`), Project Orchestration (`docs/project-orchestration.md`), Git Workflow (`docs/git-workflow.md`)을 따른다.
 
@@ -939,8 +971,10 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 `dist/CONTEXT-BUNDLE.md`는 canonical Knowledge 문서에서 재생성하는 **tracked but non-canonical generated transport artifact**다.
 
 - repository source에 직접 접근할 수 있으면 CONTEXT (`CONTEXT.md`) routing을 따라 필요한 canonical source를 직접 읽는다.
-- bundle은 repository 접근이 없거나 단일 파일로 Chat/context를 전달해야 할 때 사용하는 snapshot/transport이며, routing이나 live Project/Issue/PR state를 대체하지 않는다.
-- bundle 내부에서도 embedded `CONTEXT.md`를 entry point로 보고 필요한 source section만 사용한다.
+- bundle은 repository 접근이 없거나 단일 파일로 Chat/context를 전달해야 할 때 사용하는 **semantic context transport**이며, routing이나 live Project/Issue/PR state를 대체하지 않는다.
+- bundle은 `AGENTS.md`, embedded `CONTEXT.md`, 그리고 routed canonical specialist documents를 포함한다. repository browsing용 landing인 `README.md`는 bundle preamble/CONTEXT와 역할이 중복되므로 transport source에서 제외한다.
+- template, registry, workflow, schema, config 같은 non-bundled operational source를 bundle에 복제하지 않는다. bundled document가 exact operational artifact를 요구하면 relative pseudo-path가 아니라 owning repository의 explicit URL을 사용하고, exact lookup에는 repository access가 필요함을 전제로 한다.
+- bundle 내부에서도 embedded `CONTEXT.md`를 router로 사용하고 필요한 source section만 읽는다. `AGENTS.md`는 bundle-only Agent에게 pre-routing guard를 제공한다.
 - bundle을 직접 수정하지 않는다. 내용이 잘못되면 canonical source 또는 `scripts/bundle.py`를 수정한다.
 - same-repository PR에서 canonical Markdown 또는 generator가 바뀌면 GitHub-hosted automation이 bundle을 재생성한다. 결과가 달라지면 automation은 PR source branch의 `dist/CONTEXT-BUNDLE.md`만 GitHub-Verified commit으로 materialize한다.
 - `main`에서는 동일 generator를 read-only로 다시 실행해 committed bundle과 canonical sources의 일치를 검증한다.
@@ -999,14 +1033,22 @@ Project Item은 **Outcome / Acceptance Criteria / Evidence**로 완료 가능성
 
 불확실한 작업은 Draft로 포착한다. repository owner와 실행 범위가 분명한 작업은 Repository Issue로 구체화한다. cross-repository coordination 자체가 결과라면 억지로 하나의 repository에 귀속하지 않고 Project Item으로 유지할 수 있다.
 
-Repository Issue의 template은 Work Type이 아니라 **완료를 무엇으로 증명하는가**에 따라 선택한다.
+Repository Issue는 사용하는 GitHub template 형식과 무관하게 자신의 **completion contract**를 읽을 수 있게 해야 한다.
 
-| Template | Completion model |
+- **Outcome** — 이 Issue가 완료되면 무엇이 달라지거나 무엇을 알게 되는가.
+- **Acceptance Criteria** — Outcome 충족 여부를 관찰 가능하게 판정하는 기준.
+- **Evidence boundary** — 완료 주장을 어떤 code, test, PR/commit, workflow/deployment result, immutable document/permalink 등으로 검증할 것인가.
+
+완료 모델은 다음 두 유형으로 구분한다.
+
+| Completion model | Requirement |
 |---|---|
-| Change | canonical 또는 observable state가 의도대로 달라지고 검증된다. |
-| Investigation | 질문에 대한 결론과 재현 가능한 Evidence를 확보한다. |
+| Change | canonical 또는 observable state가 의도대로 달라지고 Acceptance Criteria와 Evidence로 검증된다. |
+| Investigation | 질문·불확실성에 대해 판단 기준과 재현 가능한 Evidence를 확보하고 결론을 남긴다. |
 
-Investigation에서 production 또는 normative change가 필요하다는 결론이 나오면 별도 Change Issue로 분리한다. 실제 template marker와 section shape는 `.github/ISSUE_TEMPLATE/`가 소유한다.
+Investigation에서 production 또는 normative change가 필요하다는 결론이 나오면 별도 Change Issue로 분리한다.
+
+`.github/ISSUE_TEMPLATE/`의 파일명, frontmatter, marker, section heading, ordering과 표현 방식은 **각 repository가 소유하는 GitHub authoring implementation**이다. Repository가 template을 제공한다면 위 completion semantics를 구현해야 하지만, Knowledge는 동일한 파일 형상이나 marker syntax를 cross-repository contract로 강제하지 않는다.
 
 ## Draft, commitment, and work start
 
@@ -1019,7 +1061,7 @@ Investigation에서 production 또는 normative change가 필요하다는 결론
 - branch/PR 없이 수행하는 Investigation, coordination, documentation도 실제 수행을 시작하면 `In progress`일 수 있다.
 - commitment와 work start가 동시에 일어나면 `Todo`를 의례적인 중간 write로 강제하지 않는다.
 
-Issue activation, `project-seed`, observable signal과 Project field materialization은 Project Orchestration (`docs/project-orchestration.md`)이 소유한다. 구현 시작 방식은 Implementation Practices (`docs/implementation-practices.md`)의 GUIDANCE를 참고한다.
+Issue activation, initial admission inputs, observable signal과 Project field materialization은 Project Orchestration (`docs/project-orchestration.md`)이 소유한다. 구현 시작 방식은 Implementation Practices (`docs/implementation-practices.md`)의 GUIDANCE를 참고한다.
 
 ## Project Status lifecycle
 
@@ -1171,7 +1213,7 @@ automation은 이 completeness policy를 소비할 수 있지만, historical Ite
 > **Owner:** Work Type and Label selection semantics  
 > **Scope:** repository Issues represented in Publishing Platform Project #11 and repository-native labels  
 > **Read when:** classifying why an Issue exists or choosing durable searchable labels  
-> **Enforced by:** Project Work Type option set, `config/labels.json`, and live repository label registries where synchronized
+> **Enforced by:** Project Work Type option set, the Knowledge label registry, and live repository label registries where synchronized
 
 Project #11에서 repository는 작업의 1차 영역을 이미 제공한다. 추가 metadata는 repository를 가로질러 비교하거나 실제로 필터링할 가치가 있는 정보만 유지한다.
 
@@ -1239,7 +1281,7 @@ label을 과도하게 붙여 filtering 의미를 약화하지 않는다. 구체�
 
 ## Label registry
 
-실제 허용 label의 canonical registry는 `config/labels.json` (`config/labels.json`)이다.
+실제 허용 label의 canonical registry는 [Knowledge `config/labels.json`](https://github.com/ooMia/oomia.github.io.knowledge/blob/main/config/labels.json)이다. 이 operational registry는 context bundle에 복제하지 않으며 exact lookup에는 Knowledge repository access가 필요하다.
 
 - 이 문서 → label을 언제 만들고 선택하는지에 대한 semantics
 - `config/labels.json` → 실제 label 이름, repository scope, color hint, GitHub description
@@ -1421,31 +1463,24 @@ Issue activation 자체는 actual work start나 Development relation을 의미�
 
 공통 admission implementation의 parser, API calls, field lookup, pagination, retries와 token handling은 Knowledge의 workflow/action/tests가 소유한다. 이 문서는 그 알고리즘을 복제하지 않는다.
 
-## Project seed
+## Admission inputs
 
-Repository Issue는 first admission을 위한 machine-readable `project-seed`를 제공할 수 있다.
-
-```md
-<!-- project-seed
-{
-  "iteration": null,
-  "workType": "Feature"
-}
--->
-```
+Repository Issue를 Project #11에 first admission할 때 implementation은 initial materialization에 필요한 입력을 machine-readable source에서 받을 수 있다.
 
 Common semantic inputs:
 
-- `iteration` → initial Iteration; commitment가 아직 없으면 `null`
-- `workType` → Issue Outcome의 Work Type
+- **Iteration** — initial commitment. 아직 commitment가 없으면 비어 있을 수 있다.
+- **Work Type** — Issue Outcome의 주된 delta를 Work Classification (`docs/work-classification.md`)에 따라 분류한 값.
 
-`status`는 authoritative seed input이 아니다. initial Status는 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 materialize한다.
+initial `Status`를 caller-provided authoritative input으로 취급하지 않는다. Iteration commitment가 없으면 `Backlog`, 있으면 `Todo`로 materialize하며 실제 work-start signal이 동시에 확인되면 Planning Model (`docs/planning-model.md`)의 의미에 따라 `In progress`를 직접 materialize할 수 있다.
 
-replay에서 existing live Project value를 stale seed로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated `workType`을 사용할 수 있지만 live/seed 모두 없으면 의미를 추론하지 않고 fail closed한다.
+Issue body metadata, HTML comment, JSON shape, workflow input, API payload 등 **입력의 transport와 encoding은 common admission implementation 또는 repository-local integration이 소유하는 implementation detail**이다. 이 POLICY는 `project-seed`라는 marker 이름이나 특정 JSON/document shape를 cross-repository authoring contract로 요구하지 않는다.
 
-branch name, Development start suppression 등 Project field가 아닌 repository-local hints가 같은 comment에 존재할 수 있지만, 그 의미는 해당 owning integration이 소유하며 이 공통 contract가 정의하지 않는다.
+replay에서는 existing live Project value를 stale admission input으로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated Work Type input을 사용할 수 있지만 live/input 모두 없으면 제목이나 repository 종류로 의미를 추론하지 않고 fail closed한다.
 
-seed 값은 Planning Model (`docs/planning-model.md`), Project Fields (`docs/fields.md`), Work Classification (`docs/work-classification.md`)의 semantics를 위반하지 않아야 한다.
+branch name, Development start suppression 같은 Project field가 아닌 repository-local hints가 함께 전달될 수 있지만 그 의미와 encoding은 해당 owning integration이 소유한다.
+
+admission input의 의미는 Planning Model (`docs/planning-model.md`), Project Fields (`docs/fields.md`), Work Classification (`docs/work-classification.md`)의 semantics를 위반하지 않아야 한다.
 
 ## Development signals
 

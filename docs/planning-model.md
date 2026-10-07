@@ -25,14 +25,22 @@ Project Item은 **Outcome / Acceptance Criteria / Evidence**로 완료 가능성
 
 불확실한 작업은 Draft로 포착한다. repository owner와 실행 범위가 분명한 작업은 Repository Issue로 구체화한다. cross-repository coordination 자체가 결과라면 억지로 하나의 repository에 귀속하지 않고 Project Item으로 유지할 수 있다.
 
-Repository Issue의 template은 Work Type이 아니라 **완료를 무엇으로 증명하는가**에 따라 선택한다.
+Repository Issue는 사용하는 GitHub template 형식과 무관하게 자신의 **completion contract**를 읽을 수 있게 해야 한다.
 
-| Template | Completion model |
+- **Outcome** — 이 Issue가 완료되면 무엇이 달라지거나 무엇을 알게 되는가.
+- **Acceptance Criteria** — Outcome 충족 여부를 관찰 가능하게 판정하는 기준.
+- **Evidence boundary** — 완료 주장을 어떤 code, test, PR/commit, workflow/deployment result, immutable document/permalink 등으로 검증할 것인가.
+
+완료 모델은 다음 두 유형으로 구분한다.
+
+| Completion model | Requirement |
 |---|---|
-| Change | canonical 또는 observable state가 의도대로 달라지고 검증된다. |
-| Investigation | 질문에 대한 결론과 재현 가능한 Evidence를 확보한다. |
+| Change | canonical 또는 observable state가 의도대로 달라지고 Acceptance Criteria와 Evidence로 검증된다. |
+| Investigation | 질문·불확실성에 대해 판단 기준과 재현 가능한 Evidence를 확보하고 결론을 남긴다. |
 
-Investigation에서 production 또는 normative change가 필요하다는 결론이 나오면 별도 Change Issue로 분리한다. 실제 template marker와 section shape는 `.github/ISSUE_TEMPLATE/`가 소유한다.
+Investigation에서 production 또는 normative change가 필요하다는 결론이 나오면 별도 Change Issue로 분리한다.
+
+`.github/ISSUE_TEMPLATE/`의 파일명, frontmatter, marker, section heading, ordering과 표현 방식은 **각 repository가 소유하는 GitHub authoring implementation**이다. Repository가 template을 제공한다면 위 completion semantics를 구현해야 하지만, Knowledge는 동일한 파일 형상이나 marker syntax를 cross-repository contract로 강제하지 않는다.
 
 ## Draft, commitment, and work start
 
@@ -45,7 +53,7 @@ Investigation에서 production 또는 normative change가 필요하다는 결론
 - branch/PR 없이 수행하는 Investigation, coordination, documentation도 실제 수행을 시작하면 `In progress`일 수 있다.
 - commitment와 work start가 동시에 일어나면 `Todo`를 의례적인 중간 write로 강제하지 않는다.
 
-Issue activation, `project-seed`, observable signal과 Project field materialization은 [Project Orchestration](project-orchestration.md)이 소유한다. 구현 시작 방식은 [Implementation Practices](implementation-practices.md)의 GUIDANCE를 참고한다.
+Issue activation, initial admission inputs, observable signal과 Project field materialization은 [Project Orchestration](project-orchestration.md)이 소유한다. 구현 시작 방식은 [Implementation Practices](implementation-practices.md)의 GUIDANCE를 참고한다.
 
 ## Project Status lifecycle
 

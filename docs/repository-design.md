@@ -31,6 +31,9 @@
 - 새 cross-repository common path가 필요하면 이 POLICY에서 의미를 먼저 정의한다.
 - framework-required subdirectory와 실제 package composition은 owning repository가 소유한다.
 - `ooMia/oomia.github.io.docs`라는 repository 이름과 각 repository의 `docs/` path는 별개다. content repository라는 이유로 `docs/` 의미를 canonical article tree로 바꾸지 않는다.
+- `.github/ISSUE_TEMPLATE/`을 사용하는 repository는 실제 template 파일, frontmatter, marker, section wording과 ordering을 **그 repository의 구현 책임**으로 소유한다.
+- cross-repository requirement는 특정 template 파일 형상이 아니라 [Planning Model](planning-model.md)의 Issue completion semantics다. 다른 repository의 template을 scaffold 시작점으로 복사할 수 있지만 materialize된 뒤에는 destination repository가 그 파일을 소유한다.
+- repository-local contract가 별도로 요구하지 않는 한 `.github/ISSUE_TEMPLATE/`의 부재 자체를 project-wide policy violation으로 해석하지 않는다.
 
 ## POLICY — Ownership boundaries
 

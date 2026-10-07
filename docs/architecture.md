@@ -3,7 +3,8 @@
 > **Authority:** POLICY  
 > **Owner:** Publishing Platform product boundary and repository responsibility model  
 > **Scope:** canonical content flow and Engine / Docs / Site / Knowledge responsibility boundaries  
-> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries
+> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries  
+> **Enforced by:** owner-repository code/contracts and cross-repository review; current implementation claims are verified against the owning live sources
 
 
 ## 원칙

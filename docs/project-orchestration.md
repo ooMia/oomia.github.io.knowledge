@@ -28,31 +28,24 @@ Issue activation 자체는 actual work start나 Development relation을 의미�
 
 공통 admission implementation의 parser, API calls, field lookup, pagination, retries와 token handling은 Knowledge의 workflow/action/tests가 소유한다. 이 문서는 그 알고리즘을 복제하지 않는다.
 
-## Project seed
+## Admission inputs
 
-Repository Issue는 first admission을 위한 machine-readable `project-seed`를 제공할 수 있다.
-
-```md
-<!-- project-seed
-{
-  "iteration": null,
-  "workType": "Feature"
-}
--->
-```
+Repository Issue를 Project #11에 first admission할 때 implementation은 initial materialization에 필요한 입력을 machine-readable source에서 받을 수 있다.
 
 Common semantic inputs:
 
-- `iteration` → initial Iteration; commitment가 아직 없으면 `null`
-- `workType` → Issue Outcome의 Work Type
+- **Iteration** — initial commitment. 아직 commitment가 없으면 비어 있을 수 있다.
+- **Work Type** — Issue Outcome의 주된 delta를 [Work Classification](work-classification.md)에 따라 분류한 값.
 
-`status`는 authoritative seed input이 아니다. initial Status는 Iteration이 없으면 `Backlog`, 있으면 `Todo`로 materialize한다.
+initial `Status`를 caller-provided authoritative input으로 취급하지 않는다. Iteration commitment가 없으면 `Backlog`, 있으면 `Todo`로 materialize하며 실제 work-start signal이 동시에 확인되면 [Planning Model](planning-model.md)의 의미에 따라 `In progress`를 직접 materialize할 수 있다.
 
-replay에서 existing live Project value를 stale seed로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated `workType`을 사용할 수 있지만 live/seed 모두 없으면 의미를 추론하지 않고 fail closed한다.
+Issue body metadata, HTML comment, JSON shape, workflow input, API payload 등 **입력의 transport와 encoding은 common admission implementation 또는 repository-local integration이 소유하는 implementation detail**이다. 이 POLICY는 `project-seed`라는 marker 이름이나 특정 JSON/document shape를 cross-repository authoring contract로 요구하지 않는다.
 
-branch name, Development start suppression 등 Project field가 아닌 repository-local hints가 같은 comment에 존재할 수 있지만, 그 의미는 해당 owning integration이 소유하며 이 공통 contract가 정의하지 않는다.
+replay에서는 existing live Project value를 stale admission input으로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated Work Type input을 사용할 수 있지만 live/input 모두 없으면 제목이나 repository 종류로 의미를 추론하지 않고 fail closed한다.
 
-seed 값은 [Planning Model](planning-model.md), [Project Fields](fields.md), [Work Classification](work-classification.md)의 semantics를 위반하지 않아야 한다.
+branch name, Development start suppression 같은 Project field가 아닌 repository-local hints가 함께 전달될 수 있지만 그 의미와 encoding은 해당 owning integration이 소유한다.
+
+admission input의 의미는 [Planning Model](planning-model.md), [Project Fields](fields.md), [Work Classification](work-classification.md)의 semantics를 위반하지 않아야 한다.
 
 ## Development signals
 
