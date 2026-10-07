@@ -22,8 +22,8 @@
 
 | 레포 | 책임 |
 |---|---|
-| `oomia.github.io.engine` | md-like document에 대한 선택적 in-place 수정·후처리 기능 |
-| `oomia.github.io.docs` | canonical content remote와 shared Git revision history |
+| `oomia.github.io.engine` | md-like document의 선택적 mutation과 Docs-owned derived data producer behavior |
+| `oomia.github.io.docs` | canonical content remote, shared Git revision history와 Site-consumed derived state의 preparation/persistence |
 | `oomia.github.io` | Docs 입력을 실제 구현 계약에 따라 소비·렌더링·검증하고 전달 |
 | `oomia.github.io.knowledge` | 공통 workflow·coordination·개발 기준·통합 목표·acceptance·Evidence linkage |
 
@@ -65,6 +65,8 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 
 문서 mutation의 기술 설계는 [Engine 수정 계약](https://github.com/ooMia/oomia.github.io.engine/blob/main/docs/content-modification-contract.md)이 소유한다. Agent 후처리를 포함한 선택 기능은 Docs commit이나 Site 소비의 필수 단계가 아니다.
 
+선택적 canonical mutation과 Docs-owned derived preparation은 서로 다른 책임이다. Engine은 derived producer behavior를 소유하고, 그 실행·저장·정합성 수렴은 Docs가 소유한다.
+
 ## Publishing boundary
 
 [Site 소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md)이 실제 입력·렌더링·component integration·publishability 검증을 소유한다.
@@ -73,6 +75,23 @@ Docs commit SHA가 공유·재현 가능한 canonical revision을 식별한다. 
 - Engine 후처리나 별도 projection은 공통 발행 선행 조건이 아니다.
 - 통합 검수는 Docs revision, Site revision과 delivery result를 연결한다.
 - Engine을 사용한 경우 실행 Evidence는 해당 Engine 기능 검수에 별도로 연결한다.
+
+## Docs authoring completion and production snapshot
+
+이 cross-repository invariant의 accepted change와 통합 Acceptance Criteria는 [Knowledge #67](https://github.com/ooMia/oomia.github.io.knowledge/issues/67)에서 추적한다. 이 규칙은 충돌하는 과거 release pin, manual preparation, all-success external-link batch 정책보다 우선한다. repository integrity, credential/security boundary와 canonical source 보존은 유지한다.
+
+- Obsidian 등 authoring client의 Docs `main` push를 authoring 완료 이벤트로 취급한다. self-hosted runner가 정상 동작하면 canonical normalization/validation 이후 Site가 실제 소비하는 Docs-owned derived state까지 정합하게 수렴해야 한다.
+- Docs는 실제 Site code/import/workflow로 소비를 증명한 artifact를 coverage한다. 구체적인 파일·schema·trigger·algorithm은 owning repository의 contract/code/tests가 소유하며 Knowledge에 복제하지 않는다.
+- derived process는 authored canonical Markdown/MDX bytes를 수정하지 않는다. canonical normalization과 선택적 mutation은 각자의 명시된 책임 경계를 유지한다.
+- 한 external-link candidate의 LilysAI processing/provider failure는 해당 candidate의 unavailable evidence로 격리한다. 다른 candidates를 계속 처리하고 successful records를 보존·저장하며 URL별 warning을 관찰할 수 있어야 한다.
+- authentication/protocol/schema/security/repository integrity와 artifact provenance 등의 systemic failure는 candidate fallback으로 숨기지 않는다. self-hosted runner unavailable과 provider candidate unavailable을 구분한다.
+- usable records와 candidate attempt evidence를 재사용하여 immediate repeat에서 불필요한 usage-bearing 작업을 피한다. unavailable retry의 trigger와 결과는 Engine/Docs가 명시한다.
+- source identity가 맞지 않는 derived metadata/assets를 current artifact로 소비하거나 다른 source snapshot의 결과를 concurrent Docs `main`에 commit하지 않는다. optional metadata가 unavailable이면 Site의 authored-link 또는 preview fallback을 유지한다.
+- Site production deployment는 시작 시 최신 Docs `main`을 하나의 immutable SHA로 한 번 resolve하고 그 exact snapshot의 canonical content와 Docs-owned metadata를 함께 build/deploy한다. snapshot이 consumer contract를 아직 만족하지 않으면 이를 성공으로 위장하거나 다른 SHA로 바꾸지 않는다.
+- Site에 저장된 과거 Docs gitlink는 latest Docs production consumption을 차단하지 않는다. build 중 moving `main`을 다시 따라가지 않으며, 재현성은 실제로 resolve하여 소비한 Docs SHA로 확보한다.
+- build cache identity, public `oomia:docs-revision`, CI/release Evidence는 실제 소비한 같은 Docs SHA를 가리킨다. Site build는 LilysAI/Ollama/외부 target page를 직접 호출하지 않는다.
+
+각 owner의 PR/test/Actions Evidence로 구현을 검증하며, PR 검증·canonical integration·Docs 자동 preparation·production deployment의 완료를 구분한다. 과거 release/migration Evidence는 당시 revision 범위의 RECORD로 보존한다.
 
 ## Contract surfaces
 
