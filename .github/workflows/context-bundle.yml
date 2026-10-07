@@ -5,6 +5,7 @@ on:
     paths:
       - "**/*.md"
       - "scripts/bundle.py"
+      - "scripts/validate_corpus.py"
       - ".github/workflows/context-bundle.yml"
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - "**/*.md"
       - "scripts/bundle.py"
+      - "scripts/validate_corpus.py"
       - ".github/workflows/context-bundle.yml"
 
 concurrency:
@@ -37,6 +39,9 @@ jobs:
           ref: ${{ env.HEAD_OID }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Validate canonical corpus
+        run: python3 scripts/validate_corpus.py
 
       - name: Regenerate context bundle
         run: python3 scripts/bundle.py
@@ -138,6 +143,7 @@ jobs:
             test "$(git rev-parse HEAD)" = "$MATERIALIZED_OID"
           fi
 
+          python3 scripts/validate_corpus.py
           python3 scripts/bundle.py
           git diff --exit-code -- dist/CONTEXT-BUNDLE.md
 
@@ -158,6 +164,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+      - name: Validate canonical corpus
+        run: python3 scripts/validate_corpus.py
       - name: Regenerate context bundle
         run: python3 scripts/bundle.py
       - name: Verify generated bundle is committed
