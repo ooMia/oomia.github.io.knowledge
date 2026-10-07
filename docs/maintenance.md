@@ -160,7 +160,7 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 
 1. [CONTEXT](../CONTEXT.md)에서 현재 작업에 필요한 canonical source를 찾는다.
 2. 규칙을 바꿀 때는 실제 owner 문서만 수정한다. 같은 정책을 다른 문서에 복제하지 않는다.
-3. 아직 확정되지 않은 제품/cross-repository 판단은 현재 [Open Questions](open-questions.md) 또는 연결된 planning surface에서 추적한다. interest-management model 자체는 별도 renewal Change가 소유한다.
+3. 아직 실행 범위가 약하지만 다시 볼 가치가 있는 제품/cross-repository 관심사는 Project #11 Draft Item으로, Evidence가 필요한 불확실성은 Investigation Issue로, accepted delta는 Change Issue로 추적한다. 별도 prose ledger를 두 번째 lifecycle owner로 만들지 않는다.
 4. 구현 상태나 완료 Evidence를 바꾸려면 owning repository의 live code, Issue, PR, workflow/deployment 결과를 확인한다.
 5. 필요하면 로컬에서 `python3 scripts/bundle.py`를 preflight로 실행한다. PR에서는 repository automation이 동일 generator로 tracked bundle을 materialize하고 재현성을 검증한다.
 6. 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.

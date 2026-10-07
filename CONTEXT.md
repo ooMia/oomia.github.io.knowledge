@@ -15,7 +15,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | [Agent Conventions](docs/agent-conventions.md) → 필요한 canonical/live owner |
-| 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 [Open Questions](docs/open-questions.md) |
+| 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
 | Issue 생성·수정·활성화 | [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE/)에서 완료 모델에 맞는 Change/Investigation template 선택 → [Work Type·Labels](docs/work-classification.md) → [lifecycle·DoD](docs/planning-model.md) → [activation·Project seed](docs/project-orchestration.md) |
 | 작업 branch 시작 | [Git Workflow](docs/git-workflow.md) → [Development relation](docs/project-orchestration.md#development-signals) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | [Implementation Practices](docs/implementation-practices.md) → owning repository contract/code/tests; branch/PR 경계가 필요하면 [Git Workflow](docs/git-workflow.md) |
@@ -25,8 +25,8 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 code·Issue·tests |
 | Knowledge 문서 수정 | [Knowledge Maintenance](docs/maintenance.md) → 해당 semantic owner |
 | 계획·분류·완료 검토 | [Work Classification](docs/work-classification.md) → [Planning](docs/planning-model.md) → [Fields](docs/fields.md) → 실제 Item의 Outcome/AC/Evidence |
-| 기록·발표·주간 회고 | [Operating Rhythm](docs/operating-rhythm.md) → 실제 Project Status Update·Evidence |
-| 제품/cross-repository 미결 사항 | [Open Questions](docs/open-questions.md) |
+| 기록·발표·주간 회고 | live Project #11 Status Update → owning Issue/PR/commit/workflow/deployment Evidence |
+| 제품/cross-repository 미결 사항 | live Project #11 → [Planning](docs/planning-model.md)의 readiness/completion 의미에 따라 Draft Item / Investigation / Change |
 
 ## 레포별 원본 참조
 
@@ -44,7 +44,6 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 - [Feature Change Protocol](docs/change-protocol.md): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
 - [Architecture Transition](docs/architecture-transition.md): 완료된 DB-backed CMS → Git-backed workspace 전환의 historical provenance
 - [Release 1.0](docs/release-1.0.md): 완료된 1.0 목표·수용 기준·immutable Evidence archive
-- [Open Questions](docs/open-questions.md): 현재 별도 lifecycle로 승격되지 않은 제품/cross-repository 관심사
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 원본을 만들지 않는다.
 

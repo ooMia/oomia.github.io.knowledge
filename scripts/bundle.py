@@ -12,8 +12,6 @@ ORDER = [
     'docs/planning-model.md', 'docs/fields.md', 'docs/work-classification.md',
     'docs/git-workflow.md',
     'docs/project-orchestration.md', 'docs/release-1.0.md',
-    'docs/operating-rhythm.md',
-    'docs/open-questions.md',
 ]
 
 def main():
