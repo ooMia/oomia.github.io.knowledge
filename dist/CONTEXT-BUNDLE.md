@@ -122,6 +122,8 @@ Historical reasoning comes from Git history and immutable Evidence, not a sessio
 
 Before handing a project operation back to the user as manual work, check whether a currently available project-capable tool, plugin, MCP integration, or skill can perform it directly.
 
+Prefer the narrowest currently connected capability that can complete the requested operation with the required authority and verifiable result. Do not redirect a bounded operation to a broader execution environment merely because that environment is available when an existing connected capability is sufficient.
+
 Do not infer a general capability limitation from one integration's unsupported operation or denial. Treat integration capabilities as runtime state rather than maintaining a static capability inventory in project policy.
 
 ## Tool failures
@@ -163,7 +165,9 @@ Likewise, an app-level permission does not override a connected tool or plugin's
 
 Do not request tool-specific approval until a live-state check shows that the corresponding write is still necessary.
 
-When a tool requires separate approval, explain only the minimum user action required by that tool. Do not present that requirement as a general limitation of the external service, ChatGPT, or other available integrations.
+When a tool requires separate approval, explain only the minimum user action required by that tool. When the integration exposes a canonical executable operator command, provide that exact command rather than only a request ID or abstract approval instruction. Do not invent an approval command that the integration has not established.
+
+Do not present that requirement as a general limitation of the external service, ChatGPT, or other available integrations.
 
 Do not generalize an approval requirement, denial, or unsupported operation from one tool to other tools without checking their capabilities.
 
@@ -401,7 +405,8 @@ optional Engine mutation → same Docs workspace
 > **Authority:** POLICY  
 > **Owner:** Publishing Platform product boundary and repository responsibility model  
 > **Scope:** canonical content flow and Engine / Docs / Site / Knowledge responsibility boundaries  
-> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries
+> **Read when:** deciding product-level ownership, canonical content flow, or cross-repository contract boundaries  
+> **Enforced by:** owner-repository code/contracts and cross-repository review; current implementation claims are verified against the owning live sources
 
 
 ## 원칙
