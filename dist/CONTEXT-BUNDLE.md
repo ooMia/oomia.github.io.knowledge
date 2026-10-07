@@ -27,7 +27,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 작업 | 참조 순서 |
 |---|---|
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | Agent Conventions (`docs/agent-conventions.md`) → 필요한 canonical/live owner |
-| 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 Open Questions (`docs/open-questions.md`) |
+| 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
 | Issue 생성·수정·활성화 | .github/ISSUE_TEMPLATE (`.github/ISSUE_TEMPLATE`)에서 완료 모델에 맞는 Change/Investigation template 선택 → Work Type·Labels (`docs/work-classification.md`) → lifecycle·DoD (`docs/planning-model.md`) → activation·Project seed (`docs/project-orchestration.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | Implementation Practices (`docs/implementation-practices.md`) → owning repository contract/code/tests; branch/PR 경계가 필요하면 Git Workflow (`docs/git-workflow.md`) |
@@ -37,8 +37,8 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 code·Issue·tests |
 | Knowledge 문서 수정 | Knowledge Maintenance (`docs/maintenance.md`) → 해당 semantic owner |
 | 계획·분류·완료 검토 | Work Classification (`docs/work-classification.md`) → Planning (`docs/planning-model.md`) → Fields (`docs/fields.md`) → 실제 Item의 Outcome/AC/Evidence |
-| 기록·발표·주간 회고 | Operating Rhythm (`docs/operating-rhythm.md`) → 실제 Project Status Update·Evidence |
-| 제품/cross-repository 미결 사항 | Open Questions (`docs/open-questions.md`) |
+| 기록·발표·주간 회고 | live Project #11 Status Update → owning Issue/PR/commit/workflow/deployment Evidence |
+| 제품/cross-repository 미결 사항 | live Project #11 → Planning (`docs/planning-model.md`)의 readiness/completion 의미에 따라 Draft Item / Investigation / Change |
 
 ## 레포별 원본 참조
 
@@ -56,7 +56,6 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 - Feature Change Protocol (`docs/change-protocol.md`): 새 기능·의미 있는 동작 변경의 ownership·contract·side-effect routing
 - Architecture Transition (`docs/architecture-transition.md`): 완료된 DB-backed CMS → Git-backed workspace 전환의 historical provenance
 - Release 1.0 (`docs/release-1.0.md`): 완료된 1.0 목표·수용 기준·immutable Evidence archive
-- Open Questions (`docs/open-questions.md`): 현재 별도 lifecycle로 승격되지 않은 제품/cross-repository 관심사
 
 component 종류, editor 구현, parser/schema 세부사항, package API, adapter shape 같은 구현 정보는 Knowledge에 복제하지 않는다. 실제 code/package가 계약을 충분히 설명하면 별도의 Knowledge 원본을 만들지 않는다.
 
@@ -218,7 +217,7 @@ Do not request secret values or assume responsibility for those operations. When
 | external network, paid API, remote mutation 등 side effect가 생김 | owning repository의 기술 계약·trigger policy·tests |
 | build/publish 재현성이나 release boundary가 바뀜 | owning repository 검증 + Git Workflow (`docs/git-workflow.md`) + release lifecycle (`docs/planning-model.md`) + 해당 version-scoped release document |
 | 둘 이상의 repository가 같은 semantics를 소비함 | semantics의 단일 owner를 정하고 다른 repository는 원본을 참조 |
-| 제품/cross-repository 결정이 아직 남음 | Open Questions (`docs/open-questions.md`) |
+| 제품/cross-repository 결정이 아직 남음 | live Project #11에서 readiness에 따라 Draft Item / Investigation / Change로 관리; lifecycle 의미는 Planning Model (`docs/planning-model.md`) |
 | package/module/API 내부 선택처럼 owner 안에서 결정 가능한 구현 세부사항 | Knowledge에 복제하지 않고 owning repository code/docs에서 결정 |
 
 소유권이 불분명하면 구현 전에 먼저 owner를 정한다. 단순히 여러 repository가 관련된다는 이유만으로 Knowledge가 기술 계약의 owner가 되지는 않는다.
@@ -232,7 +231,7 @@ Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 �
 - **Persistent state:** 새로 생기거나 변경되는 durable state
 - **External effects:** network, paid call, remote mutation, credential boundary 등
 - **Cross-repository dependency:** producer/consumer 또는 shared semantics
-- **Open questions:** 구현 전에 남아 있는 Knowledge-level OQ
+- **Unresolved decisions:** 구현 전에 남아 있는 제품/cross-repository 판단
 
 이 목록은 Issue body에 그대로 복제하는 필수 form이 아니다. 작업 수행이나 검증에 필요한 정보만 Change Issue의 optional `Context`에 남기고, 결정된 규칙과 장기 semantics는 실제 owner 문서를 참조한다. 해당 없는 항목을 채우기 위해 내용을 만들지 않는다.
 
@@ -245,10 +244,12 @@ Repository Issue를 만들기 전에 의미 있는 영향이 있는 surface만 �
 | 오래 유지되는 공통 invariant·coordination rule | Knowledge의 해당 canonical 문서 |
 | repository가 외부에 보장하는 기술 contract | owning repository docs/schema/tests |
 | 현재 구현 방식 | owning repository code/tests |
-| 아직 결정하지 않았거나 Evidence가 부족한 제품/cross-repo 문제 | Open Questions (`docs/open-questions.md`) |
+| 아직 실행 범위가 약한 관심사 | Project #11 Draft Item — 다시 볼 가치가 있을 때만 유지 |
+| Evidence가 필요한 제품/cross-repo 불확실성 | Investigation Issue |
+| accepted normative/production delta | Change Issue |
 | 작업 결과·AC·Evidence | 실제 Project Item / Repository Issue / PR |
 
-결정이 끝난 Open Question은 실제 canonical source로 이동하고, Open Question 자체를 두 번째 원본으로 유지하지 않는다.
+결정이 끝난 미결 사항은 실제 canonical source 또는 owning work로 이동하고 별도 prose ledger를 두 번째 원본으로 유지하지 않는다.
 
 ## 5. 구현 진입 기준
 
@@ -916,7 +917,7 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 
 1. CONTEXT (`CONTEXT.md`)에서 현재 작업에 필요한 canonical source를 찾는다.
 2. 규칙을 바꿀 때는 실제 owner 문서만 수정한다. 같은 정책을 다른 문서에 복제하지 않는다.
-3. 아직 확정되지 않은 제품/cross-repository 판단은 현재 Open Questions (`docs/open-questions.md`) 또는 연결된 planning surface에서 추적한다. interest-management model 자체는 별도 renewal Change가 소유한다.
+3. 아직 실행 범위가 약하지만 다시 볼 가치가 있는 제품/cross-repository 관심사는 Project #11 Draft Item으로, Evidence가 필요한 불확실성은 Investigation Issue로, accepted delta는 Change Issue로 추적한다. 별도 prose ledger를 두 번째 lifecycle owner로 만들지 않는다.
 4. 구현 상태나 완료 Evidence를 바꾸려면 owning repository의 live code, Issue, PR, workflow/deployment 결과를 확인한다.
 5. 필요하면 로컬에서 `python3 scripts/bundle.py`를 preflight로 실행한다. PR에서는 repository automation이 동일 generator로 tracked bundle을 materialize하고 재현성을 검증한다.
 6. 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.
@@ -1580,70 +1581,3 @@ editor 종류, component manifest, package layout도 release-level 필수 조건
 - 현재 제품/implementation 판단에는 Architecture (`docs/architecture.md`)와 owning repository의 live code/docs/state를 사용한다.
 
 <!-- END SOURCE: docs/release-1.0.md -->
-
-
----
-
-<!-- BEGIN SOURCE: docs/operating-rhythm.md -->
-
-# Operating Rhythm
-
-## 목표와 리듬
-
-Publishing Platform 완성과 계획·실행 습관을 중심에 둔다. 앰버서더 활동과 포트폴리오 개발의 기록을 하나의 흐름으로 연결한다.
-
-- 매주 작은 발표, 매 4주 큰 발표 또는 working system review를 기본 cadence로 둔다.
-- Daily는 짧은 Evidence capture에 집중하고, 주말 review에서 한 주의 결과를 재구성한다.
-- Daily 기록은 비공개 작업 기록으로 두고, 공개할 가치가 있는 결과는 주간 review에서 별도 산출물로 만든다.
-
-## Evidence → Story
-
-매일 목표, 실제 결과, screenshot/GIF/video/voice/commit 등 Evidence, 배운 점, 다음 행동을 남긴다. Evidence는 나중에 다시 열 수 있는 durable link나 immutable revision에 연결한다.
-
-주말에는 일별 기록을 목표 → 시도 → 장애·판단 → 결과 → 다음 행동의 A-Z 스토리로 재구성한다. Agent/LilysAI는 정리 부담을 낮추는 도구이며 모든 개발을 Agent가 수행한다고 가정하지 않는다. 공개 결과물은 발표·블로그 등 목적에 맞는 채널로 발행하되, 특정 플랫폼 선택을 이 공통 리듬의 정책으로 고정하지 않는다.
-
-## 기능 실험 참조
-
-기능 실험의 활성/폐기 상태와 AC는 책임 구현 repository의 live Issue/Project에서 관리한다. 완료되거나 `not_planned`로 종료된 실험 목록을 이 문서에 별도 catalog로 복제하지 않는다.
-
-현재 반복 가능한 automation Evidence가 필요하면 Engine/Docs의 최신 Issue·PR·workflow run을 직접 확인한다. 이 문서는 활동 리듬과 Evidence → Story 원칙만 유지한다.
-
-자료 수집 → 요약·통합 → 발표/글 초안 → 플랫폼 발행의 흐름에서 실제 정리 부담이 큰 단계를 선택해 활용한다.
-
-<!-- END SOURCE: docs/operating-rhythm.md -->
-
-
----
-
-<!-- BEGIN SOURCE: docs/open-questions.md -->
-
-# Open Questions / Verification Gaps
-
-현재 canonical 정책에서 **제품 경계·release acceptance·공통 Project 운영 수준에서 실제 결정이 필요한 항목**만 유지한다. 구현 repository가 code로 결정할 수 있는 세부사항은 이 목록에 올리지 않는다.
-
-| ID | 항목 | 현재 처리 |
-|---|---|---|
-| Q010 | 미디어 공개 범위·asset 저장 정책 | public/private와 large/binary policy가 제품 운영에 필요해질 때 결정 |
-| Q014 | raw HTML 및 executable MDX public publish policy | public publish security boundary가 필요해질 때 결정 |
-| Q025 | stable document identity / sidecar linkage | path-independent identity가 제품 수준 요구가 될 때 결정 |
-| Q026 | Wiki / public reference graph layer | 불변에 가까운 공개 설명을 GitHub Wiki 등으로 분리할 가치가 생기면 source/docs와의 ownership·linking·local clone 정책을 결정 |
-
-## Knowledge-level Open Question이 아닌 것
-
-다음은 책임 구현 repository와 code가 결정한다.
-
-- Obsidian/Fumadocs/기타 editor 중 어떤 구현을 사용하는지
-- editor를 Site 내부 app으로 둘지 별도 app으로 둘지
-- docs layout / consumer discovery convention
-- 지원 component 종류·props·children model
-- component manifest/catalog 존재 여부와 editor adapter 형식
-- Site의 Astro/Fumadocs integration 방식과 Turbo retirement
-- Engine container/runtime, workspace mount, Git credential 방식
-- metadata field 추가 시점, timestamp 계산, prepare input surface, formatting/normalization
-- 구현 package/module boundary와 내부 API
-
-여러 repository가 같은 component를 사용해야 하면 가능한 한 동일 package/codebase를 소비한다. editor integration이 별도 형식의 metadata를 요구해도 그 adapter는 owning implementation에서 관리하며 Knowledge가 별도 semantics 원본을 만들지 않는다.
-
-구현 과정에서 반복되는 제약이 실제 제품 또는 cross-repository coordination 문제로 승격될 때만 새 Knowledge decision을 만든다.
-
-<!-- END SOURCE: docs/open-questions.md -->
