@@ -18,6 +18,8 @@ Approval is limited to the scope of that proposal.
 
 When the user says `작업 재개` or otherwise asks to resume work, recover the task from canonical sources, live Project/Issue/PR state, and owning-repository Evidence routed by CONTEXT.
 
+Read live state when the requested operation or conclusion depends on that state. A document-only explanation does not require unrelated Project metadata to be reverified.
+
 Do not ask the user to restate information that can be recovered from those sources. Do not maintain a session handoff file or transcript as a parallel current-state ledger.
 
 ## Decision boundary
@@ -27,6 +29,14 @@ When existing policy and context are sufficient, make routine and reversible dec
 Ask the user only when a meaningful product, policy, ownership, or other non-derivable decision remains. Resolve factual uncertainty from canonical or live sources before asking.
 
 Work in small, verifiable deltas. Do not make surrounding metadata verification a blocker when it does not affect the requested operation or conclusion.
+
+## Policy mismatch and recovery
+
+When observed behavior or live state conflicts with the working understanding, re-enter through [CONTEXT](../CONTEXT.md), reload the relevant owning source, and reconcile before continuing work that depends on the discrepancy.
+
+Use [Repository Design](repository-design.md#policy--policy-discovery-and-interpretation) to distinguish policy scope, local specialization, guidance, implementation facts, and historical Evidence. Use its [policy change boundary](repository-design.md#policy--policy-changes) when adding, changing, or removing a rule.
+
+Resolve recoverable facts before asking. If a meaningful user decision remains, identify the exact unresolved choice and its dependent work; continue independent work within the existing authorization. A request to review a proposal does not itself approve its normative changes. Do not ask again for approval already given for the same scope.
 
 ## Communication
 

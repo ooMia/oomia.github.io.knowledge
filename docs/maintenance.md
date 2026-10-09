@@ -2,32 +2,23 @@
 
 > **Authority:** POLICY  
 > **Owner:** Knowledge repository maintenance  
-> **Scope:** canonical Knowledge documents, repository bootstrap/routing surfaces, and generated context maintenance  
+> **Scope:** canonical Knowledge documents, Knowledge bootstrap/routing surfaces, and generated context maintenance  
 > **Read when:** creating, editing, reviewing, or restructuring Knowledge documentation  
 > **Enforced by:** document review, owner-source discipline, repository automation, and live GitHub integration rules where applicable
 
-이 문서는 `ooMia/oomia.github.io.knowledge` **자체를 수정·유지하는 방법과 canonical document의 semantic quality 기준**을 소유한다. 외부 contributor를 위한 기여 정책이 아니며, 제품·planning·Git workflow 같은 다른 concern의 의미를 다시 정의하지 않는다.
+이 문서는 `ooMia/oomia.github.io.knowledge` **자체를 수정·유지하는 방법과 Knowledge canonical document의 semantic quality 기준**을 소유한다. 공통 Authority 의미·정책 해석·변경 절차는 [Repository Design](repository-design.md#policy--document-authority)을 따른다. 아래의 문서 형식과 materialization 절차는 Knowledge 전용이며, 제품·planning·Git workflow 같은 다른 concern의 의미를 다시 정의하지 않는다.
 
 이 문서에서 대문자 `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`는 [BCP 14 / RFC 2119](https://www.rfc-editor.org/rfc/rfc2119)와 [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)에 따른 requirement level로 사용한다. 해당 의미는 대문자로 표기한 경우에만 적용한다.
 
 ## Document authority
 
-Canonical 문서는 주된 역할에 따라 하나의 **Authority**를 가진다.
-
-| Authority | 의미 | 작성 원칙 |
-|---|---|---|
-| `POLICY` | project/repository가 준수해야 하는 invariant, contract, normative meaning | requirement를 명확히 하고 예제는 경계 해석에 필요한 경우로 제한한다. |
-| `GUIDANCE` | 공통적으로 적용되는 default, best practice, caution, heuristic | 구체적 이유가 있으면 일탈할 수 있으며 rationale·trade-off·example을 적극적으로 사용할 수 있다. |
-| `REFERENCE` | 사용법, 현재 interface, 상세 설명, lookup material | 독립적인 normative force를 만들지 않고 실제 behavior의 source of truth를 명시한다. |
-| `RECORD` | revision-scoped Evidence, historical provenance, completed migration/release snapshot | 무엇이 언제 어떤 범위에서 사실이었거나 검증됐는지 보존하며 현재 정책을 정의하지 않는다. |
-
-Machine-readable schema, workflow/action/test, code/config, live GitHub Project/Issue/PR state는 prose Authority와 별개의 operational source다. 문서는 이들을 설명하거나 연결할 수 있지만 실제 live state나 executable behavior를 대신하지 않는다.
+Authority의 기본 의미와 operational source의 경계는 [Repository Design의 Document authority](repository-design.md#policy--document-authority)가 소유한다.
 
 문서는 주된 Authority 하나를 **MUST** 가진다. Authority purity 자체는 문서 분리 기준이 아니다. 문서 경계는 아래의 **reference unit** 원칙을 우선하며, 같은 작업에서 함께 소비되는 짧은 subordinate 내용은 다른 Authority라도 같은 문서에 둘 수 있다. 주된 Authority와 다른 subordinate section은 heading에서 그 강도를 명시한다(예: `## GUIDANCE — Package boundaries`).
 
 ## Document contract
 
-Canonical specialist document는 제목 바로 아래에 다음 4줄 semantic header를 **MUST** 사용한다. 이것이 renewal에서 의도적으로 고정하는 최소 Markdown syntax다.
+Knowledge canonical specialist document는 제목 바로 아래에 다음 4줄 semantic header를 **MUST** 사용한다. 이것이 renewal에서 의도적으로 고정하는 최소 Markdown syntax다.
 
 ```md
 > **Authority:** POLICY
@@ -52,7 +43,7 @@ Canonical specialist document는 제목 바로 아래에 다음 4줄 semantic he
 - `RECORD`: 검증·역사 범위를 고정하기 위해 **Evidence scope** 또는 동등한 revision/time boundary를 둔다.
 - `GUIDANCE`: 별도 필수 확장 field는 없다.
 
-README, AGENTS, CONTEXT 같은 root surface도 이 4줄 header를 사용한다. root surface의 본문은 routing 비용을 낮추는 것이 우선이며 specialist policy를 재서술하지 않는다.
+Knowledge의 README, AGENTS, CONTEXT 같은 root surface도 이 4줄 header를 사용한다. root surface의 본문은 routing 비용을 낮추는 것이 우선이며 specialist policy를 재서술하지 않는다.
 
 ## Renewal migration
 
@@ -159,11 +150,11 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 ## 수정 절차
 
 1. [CONTEXT](../CONTEXT.md)에서 현재 작업에 필요한 canonical source를 찾는다.
-2. 규칙을 바꿀 때는 실제 owner 문서만 수정한다. 같은 정책을 다른 문서에 복제하지 않는다.
+2. 정책을 추가·수정·삭제할 때는 [Repository Design의 Policy changes](repository-design.md#policy--policy-changes)를 따른다. Knowledge 원본의 Authority/Owner/Scope와 위 semantic quality 기준을 함께 검토한다.
 3. 아직 실행 범위가 약하지만 다시 볼 가치가 있는 제품/cross-repository 관심사는 Project #11 Draft Item으로, Evidence가 필요한 불확실성은 Investigation Issue로, accepted delta는 Change Issue로 추적한다. 별도 prose ledger를 두 번째 lifecycle owner로 만들지 않는다.
 4. 구현 상태나 완료 Evidence를 바꾸려면 owning repository의 live code, Issue, PR, workflow/deployment 결과를 확인한다.
 5. 필요하면 로컬에서 `python3 scripts/bundle.py`를 preflight로 실행한다. PR에서는 repository automation이 동일 generator로 tracked bundle을 materialize하고 재현성을 검증한다.
-6. 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.
+6. 영향을 받는 Knowledge routing·참조·폐기 문장과 generated bundle을 확인하고, 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.
 
 ## 작업 상태
 
