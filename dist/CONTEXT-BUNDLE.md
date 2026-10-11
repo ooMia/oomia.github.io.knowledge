@@ -23,7 +23,7 @@ Completed release/migration RECORD는 명시된 immutable Evidence scope에만 �
 2. Treat routed owner documents as semantic sources. Do not create a second policy source by summarizing specialist rules into bootstrap files.
 3. Separate policy, live implementation/state, revision-bound Evidence, historical RECORD, and generated artifacts. Verify current claims against the live owning source when current state matters.
 4. Do not invent GitHub state, field IDs, links, implementation Evidence, release dates, completion, or tool outcomes.
-5. For approval, resume, decision boundaries, capability fallback, tool failure, remote-state reconciliation, communication, or user-owned security boundaries, follow Agent Conventions (`docs/agent-conventions.md`).
+5. For approval, resume, policy mismatch, decision boundaries, capability fallback, tool failure, remote-state reconciliation, communication, or user-owned security boundaries, follow Agent Conventions (`docs/agent-conventions.md`).
 6. When changing Knowledge documentation, follow Knowledge Maintenance (`docs/maintenance.md`), including its Authority/Owner/Scope rules and generated-bundle boundary.
 
 <!-- END SOURCE: AGENTS.md -->
@@ -43,12 +43,14 @@ Completed release/migration RECORD는 명시된 immutable Evidence scope에만 �
 
 Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 canonical router다. 먼저 현재 작업 유형을 식별하고 필요한 최소 원본만 읽는다. 이 문서가 specialist policy를 다시 정의하지 않는다.
 
-작업을 이어받을 때는 여기서 필요한 원본을 찾은 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
+작업을 이어받을 때는 여기서 필요한 원본을 찾는다. 현재 실행 상태에 의존하는 판단이면 live GitHub Project #11과 관련 Issue/PR, owning repository의 code/workflow/Evidence를 조회해 상태를 복구한다. 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
 
 ## 자주 하는 작업
 
 | 작업 | 참조 순서 |
 |---|---|
+| 공통·로컬 정책의 적용 범위·강도·충돌 해석 | Repository Design — Policy discovery and interpretation (`docs/repository-design.md`) → 해당 semantic owner; 사용자 결정·진행 범위는 Agent Conventions (`docs/agent-conventions.md`) |
+| 정책 추가·수정·삭제 | Repository Design — Policy changes (`docs/repository-design.md`) → 실제 owner와 영향받는 consumer; Knowledge 문서이면 Knowledge Maintenance (`docs/maintenance.md`) |
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | Agent Conventions (`docs/agent-conventions.md`) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
 | Issue 생성·수정·활성화 | lifecycle·completion (`docs/planning-model.md`) → owning repository가 제공하는 `.github/ISSUE_TEMPLATE/`이 있으면 그 local authoring surface 적용 → Work Type·Labels (`docs/work-classification.md`) → activation·materialization (`docs/project-orchestration.md`) |
@@ -71,7 +73,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인한다. 완료된 1.0의 historical integration Evidence만 Publishing Platform 1.0 (`docs/release-1.0.md`) RECORD의 pinned scope를 사용한다.
+각 repository에서 작업할 때는 그 repository의 `AGENTS.md`와 README를 통해 필요한 local owner를 찾는다. 수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인한다. 완료된 1.0의 historical integration Evidence만 Publishing Platform 1.0 (`docs/release-1.0.md`) RECORD의 pinned scope를 사용한다.
 
 ## PM-level 원본
 
@@ -84,7 +86,7 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 
 ## 문서 사용
 
-Repository source에 직접 접근할 수 있으면 이 routing을 따라 canonical owner를 직접 읽는다. Knowledge Maintenance (`docs/maintenance.md`)가 문서 Authority/구조와 generated bundle 규칙을 소유한다.
+Repository source에 직접 접근할 수 있으면 이 routing을 따라 canonical owner를 직접 읽는다. 공통 문서 Authority와 정책 해석은 Repository Design (`docs/repository-design.md`), Knowledge 문서 작성·구조와 generated bundle 규칙은 Knowledge Maintenance (`docs/maintenance.md`)가 소유한다.
 
 `dist/CONTEXT-BUNDLE.md`를 사용하는 환경에서도 embedded `CONTEXT.md`를 router로 사용하고 필요한 source section만 읽는다. bundle은 canonical source나 live Project/Issue/PR state를 대체하지 않는다.
 
@@ -115,6 +117,8 @@ Approval is limited to the scope of that proposal.
 
 When the user says `작업 재개` or otherwise asks to resume work, recover the task from canonical sources, live Project/Issue/PR state, and owning-repository Evidence routed by CONTEXT.
 
+Read live state when the requested operation or conclusion depends on that state. A document-only explanation does not require unrelated Project metadata to be reverified.
+
 Do not ask the user to restate information that can be recovered from those sources. Do not maintain a session handoff file or transcript as a parallel current-state ledger.
 
 ## Decision boundary
@@ -124,6 +128,14 @@ When existing policy and context are sufficient, make routine and reversible dec
 Ask the user only when a meaningful product, policy, ownership, or other non-derivable decision remains. Resolve factual uncertainty from canonical or live sources before asking.
 
 Work in small, verifiable deltas. Do not make surrounding metadata verification a blocker when it does not affect the requested operation or conclusion.
+
+## Policy mismatch and recovery
+
+When observed behavior or live state conflicts with the working understanding, re-enter through CONTEXT (`CONTEXT.md`), reload the relevant owning source, and reconcile before continuing work that depends on the discrepancy.
+
+Use Repository Design (`docs/repository-design.md`) to distinguish policy scope, local specialization, guidance, implementation facts, and historical Evidence. Use its policy change boundary (`docs/repository-design.md`) when adding, changing, or removing a rule.
+
+Resolve recoverable facts before asking. If a meaningful user decision remains, identify the exact unresolved choice and its dependent work; continue independent work within the existing authorization. A request to review a proposal does not itself approve its normative changes. Do not ask again for approval already given for the same scope.
 
 ## Communication
 
@@ -607,12 +619,12 @@ exact `uv` command, Python version, environment/CI setup은 owning repository가
 # Repository Design
 
 > **Authority:** POLICY  
-> **Owner:** cross-repository path semantics, repository/document ownership boundaries, and source/generated-state boundaries  
-> **Scope:** Publishing Platform repositories when choosing or interpreting repository structure  
-> **Read when:** creating a repository, introducing a directory/package/config boundary, or reviewing repository structure  
+> **Owner:** cross-repository path semantics, repository/document ownership, policy interpretation and change coordination, and source/generated-state boundaries  
+> **Scope:** Publishing Platform repository structure, canonical policy ownership, and policy discovery/change  
+> **Read when:** choosing repository structure, finding or interpreting policy, or adding/changing/removing a canonical rule  
 > **Enforced by:** repository review and owning repository code/config; exact framework/package layout remains repository-local
 
-이 문서는 repository마다 같은 경로 이름이 서로 다른 의미를 갖거나, 같은 concern의 owner가 여러 위치로 분산되는 것을 방지한다. 구조 선택에 대한 best practice는 같은 reference unit에서 **GUIDANCE**로 구분한다.
+이 문서는 repository마다 같은 경로 이름이 서로 다른 의미를 갖거나, 같은 concern의 owner가 여러 위치로 분산되는 것을 방지한다. 정책을 발견·해석·변경할 때도 같은 ownership 경계를 사용한다. 구조 선택에 대한 best practice는 같은 reference unit에서 **GUIDANCE**로 구분한다.
 
 ## POLICY — Common repository scheme
 
@@ -651,6 +663,43 @@ exact `uv` command, Python version, environment/CI setup은 owning repository가
 - repository-specific runtime, command, branch topology, tool version, framework API는 owning repository가 소유한다.
 
 작업별 canonical source routing은 CONTEXT (`CONTEXT.md`), toolchain defaults는 Development Toolchain (`docs/development-toolchain.md`), integration rules는 Git Workflow (`docs/git-workflow.md`)이 소유한다.
+
+## POLICY — Document authority
+
+문서의 Authority는 내용을 어떤 강도로 해석하는지 나타낸다. 파일 위치나 이름만으로 적용 범위와 우선순위를 정하지 않는다.
+
+| Authority | 의미 |
+|---|---|
+| `POLICY` | project/repository가 해당 Scope에서 준수해야 하는 invariant, contract, normative meaning |
+| `GUIDANCE` | 공통적으로 적용되는 default, best practice, caution, heuristic; 구체적 이유가 있으면 일탈할 수 있음 |
+| `REFERENCE` | 사용법, 현재 interface, 상세 설명, lookup material; 독립적인 normative force를 만들지 않음 |
+| `RECORD` | revision-scoped Evidence, historical provenance, completed migration/release snapshot; 현재 정책을 정의하지 않음 |
+
+Machine-readable schema, workflow/action/test, code/config, live GitHub Project/Issue/PR state는 prose Authority와 별개의 operational source다. 문서는 이들을 설명하거나 연결할 수 있지만 실제 live state나 executable behavior를 대신하지 않는다.
+
+Knowledge 문서의 header·작성 형식·renewal과 generated bundle은 Knowledge Maintenance (`docs/maintenance.md`)가 소유한다. 해당 repository-local 형식을 다른 repository의 필수 문서 형식으로 확대하지 않는다.
+
+## POLICY — Policy discovery and interpretation
+
+- repository-local Agent 지침은 Knowledge CONTEXT (`CONTEXT.md`)와 해당 repository의 local 원본으로 연결한다. 공통 specialist policy나 변하기 쉬운 기능·작업 상태를 진입점에 복제하지 않는다.
+- 작업에 필요한 규칙은 Authority, 적용 Scope와 semantic owner를 함께 확인한다. Knowledge의 공통 `POLICY`가 정한 경계 안에서 owning repository가 local contract와 구현 방법을 구체화한다.
+- local 구체화는 공통 `POLICY`와 모순되는 규칙을 암묵적으로 허용하지 않는다. 반대로 공통 문서의 존재만으로 repository-local 구현 재량이나 `GUIDANCE`를 의무로 바꾸지 않는다.
+- `GUIDANCE`에서 벗어나는 선택에 별도 예외 승인을 요구하지 않는다. 이유와 영향이 작업 판단에 중요하면 기존 Issue·PR 등에서 설명한다.
+- 코드와 계약이 다르면 현재 동작과 의도된 동작의 불일치로 구분한다. 구현의 존재나 배포 사실 자체를 정책 변경의 승인 근거로 해석하지 않는다.
+- 과거 `RECORD`, 미병합 제안, generated bundle이나 배포 사본의 설명은 현재 canonical policy와 구분한다. 현재 상태에 의존하는 판단에는 해당 owning source와 필요한 live state를 확인한다.
+- 같은 Scope의 `POLICY`가 충돌하거나 적용 의미가 불명확하면 현재 원본과 승인된 변경 범위를 확인한다. 그 뒤에도 남는 사용자 결정과 진행 가능한 범위를 나누는 행동은 Agent Conventions (`docs/agent-conventions.md`)을 따른다.
+
+## POLICY — Policy changes
+
+정책을 추가·수정·삭제할 때는 원본 문장뿐 아니라 영향을 받는 consumer와 참조까지 같은 변경 범위로 검토한다.
+
+1. **변경 의미와 승인 범위:** 설명·링크·중복 정리인지 의무·계약·소유권이 달라지는 변경인지 구분한다. 검토 요청이나 Agent 제안을 확정 정책으로 승격하지 않는다. 이미 승인된 범위는 진행하며, 기존 정책과 승인으로 결정할 수 없는 의미 있는 선택만 Agent Conventions (`docs/agent-conventions.md`)에 따라 확인한다.
+2. **원본과 영향:** 실제 semantic owner를 수정한다. 영향을 받는 참조 문서와 소비하는 contract/schema/code/config/test/automation을 필요한 범위에서 찾는다. 여러 repository가 관련된다는 이유만으로 기술 계약을 Knowledge로 옮기거나 복제하지 않는다.
+3. **적용과 전환:** owner와 영향을 받는 consumer를 맞춘다. 동시에 적용할 수 없으면 적용 범위·전환 조건·남은 작업을 기존 Issue·PR 등 owning work에 명시하고 완료된 범위를 구분한다.
+4. **폐기와 생성물:** 더 이상 현재 규칙이 아닌 문장·중복·진입 링크를 정리하고, 영향을 받는 generated artifact는 해당 owner의 생성 절차로 갱신한다. 필요한 과거 근거는 Git history와 revision이 고정된 Evidence로 찾을 수 있게 한다. 삭제된 정책을 다른 문서에서 계속 현재 규칙으로 안내하지 않는다.
+5. **검증:** 변경에 맞는 문서·링크·생성물 검증과 영향을 받은 동작 검증을 구분한다. 설명 정리만으로 runtime 검증이나 모든 repository 조사를 요구하지 않는다. 완료·Evidence의 의미는 Planning Model (`docs/planning-model.md`)을 따른다.
+
+이 절차는 별도 정책 목록·결정 원장이나 일괄 형식 변경을 요구하지 않는다. canonical owner, 기존 Issue·PR와 Git history의 역할을 유지한다.
 
 ## GUIDANCE — Package and directory boundaries
 
@@ -739,8 +788,10 @@ root `tests/` 하나에 모든 레벨의 test를 모으거나 실제 content cor
 
 ## Composition
 
-이 문서는 **repository structure** 판단의 reference unit이다.
+이 문서는 **repository structure와 canonical policy ownership/해석/변경** 판단의 reference unit이다. 필요한 section부터 읽는다.
 
+- Knowledge 전용 문서 형식·bootstrap guard·bundle materialization은 Knowledge Maintenance (`docs/maintenance.md`)를 읽는다.
+- 정책 불일치에서의 사용자 결정·진행 범위는 Agent Conventions (`docs/agent-conventions.md`)를 읽는다.
 - toolchain 선택만 필요하면 Development Toolchain (`docs/development-toolchain.md`)을 직접 읽는다.
 - 이미 구조가 정해진 Issue 구현을 시작할 때는 Implementation Practices (`docs/implementation-practices.md`)를 직접 읽는다.
 - branch/PR/release integration은 Git Workflow (`docs/git-workflow.md`)을 직접 읽는다.
@@ -809,32 +860,23 @@ Issue-linked implementation의 첫 slice는 완성 구현보다 **실행 가능�
 
 > **Authority:** POLICY  
 > **Owner:** Knowledge repository maintenance  
-> **Scope:** canonical Knowledge documents, repository bootstrap/routing surfaces, and generated context maintenance  
+> **Scope:** canonical Knowledge documents, Knowledge bootstrap/routing surfaces, and generated context maintenance  
 > **Read when:** creating, editing, reviewing, or restructuring Knowledge documentation  
 > **Enforced by:** document review, owner-source discipline, repository automation, and live GitHub integration rules where applicable
 
-이 문서는 `ooMia/oomia.github.io.knowledge` **자체를 수정·유지하는 방법과 canonical document의 semantic quality 기준**을 소유한다. 외부 contributor를 위한 기여 정책이 아니며, 제품·planning·Git workflow 같은 다른 concern의 의미를 다시 정의하지 않는다.
+이 문서는 `ooMia/oomia.github.io.knowledge` **자체를 수정·유지하는 방법과 Knowledge canonical document의 semantic quality 기준**을 소유한다. 공통 Authority 의미·정책 해석·변경 절차는 Repository Design (`docs/repository-design.md`)을 따른다. 아래의 문서 형식과 materialization 절차는 Knowledge 전용이며, 제품·planning·Git workflow 같은 다른 concern의 의미를 다시 정의하지 않는다.
 
 이 문서에서 대문자 `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`는 [BCP 14 / RFC 2119](https://www.rfc-editor.org/rfc/rfc2119)와 [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)에 따른 requirement level로 사용한다. 해당 의미는 대문자로 표기한 경우에만 적용한다.
 
 ## Document authority
 
-Canonical 문서는 주된 역할에 따라 하나의 **Authority**를 가진다.
-
-| Authority | 의미 | 작성 원칙 |
-|---|---|---|
-| `POLICY` | project/repository가 준수해야 하는 invariant, contract, normative meaning | requirement를 명확히 하고 예제는 경계 해석에 필요한 경우로 제한한다. |
-| `GUIDANCE` | 공통적으로 적용되는 default, best practice, caution, heuristic | 구체적 이유가 있으면 일탈할 수 있으며 rationale·trade-off·example을 적극적으로 사용할 수 있다. |
-| `REFERENCE` | 사용법, 현재 interface, 상세 설명, lookup material | 독립적인 normative force를 만들지 않고 실제 behavior의 source of truth를 명시한다. |
-| `RECORD` | revision-scoped Evidence, historical provenance, completed migration/release snapshot | 무엇이 언제 어떤 범위에서 사실이었거나 검증됐는지 보존하며 현재 정책을 정의하지 않는다. |
-
-Machine-readable schema, workflow/action/test, code/config, live GitHub Project/Issue/PR state는 prose Authority와 별개의 operational source다. 문서는 이들을 설명하거나 연결할 수 있지만 실제 live state나 executable behavior를 대신하지 않는다.
+Authority의 기본 의미와 operational source의 경계는 Repository Design의 Document authority (`docs/repository-design.md`)가 소유한다.
 
 문서는 주된 Authority 하나를 **MUST** 가진다. Authority purity 자체는 문서 분리 기준이 아니다. 문서 경계는 아래의 **reference unit** 원칙을 우선하며, 같은 작업에서 함께 소비되는 짧은 subordinate 내용은 다른 Authority라도 같은 문서에 둘 수 있다. 주된 Authority와 다른 subordinate section은 heading에서 그 강도를 명시한다(예: `## GUIDANCE — Package boundaries`).
 
 ## Document contract
 
-Canonical specialist document는 제목 바로 아래에 다음 4줄 semantic header를 **MUST** 사용한다. 이것이 renewal에서 의도적으로 고정하는 최소 Markdown syntax다.
+Knowledge canonical specialist document는 제목 바로 아래에 다음 4줄 semantic header를 **MUST** 사용한다. 이것이 renewal에서 의도적으로 고정하는 최소 Markdown syntax다.
 
 ```md
 > **Authority:** POLICY
@@ -859,7 +901,7 @@ Canonical specialist document는 제목 바로 아래에 다음 4줄 semantic he
 - `RECORD`: 검증·역사 범위를 고정하기 위해 **Evidence scope** 또는 동등한 revision/time boundary를 둔다.
 - `GUIDANCE`: 별도 필수 확장 field는 없다.
 
-README, AGENTS, CONTEXT 같은 root surface도 이 4줄 header를 사용한다. root surface의 본문은 routing 비용을 낮추는 것이 우선이며 specialist policy를 재서술하지 않는다.
+Knowledge의 README, AGENTS, CONTEXT 같은 root surface도 이 4줄 header를 사용한다. root surface의 본문은 routing 비용을 낮추는 것이 우선이며 specialist policy를 재서술하지 않는다.
 
 ## Renewal migration
 
@@ -966,11 +1008,11 @@ Knowledge 문서를 만들거나 수정할 때 다음 질문으로 내용 경계
 ## 수정 절차
 
 1. CONTEXT (`CONTEXT.md`)에서 현재 작업에 필요한 canonical source를 찾는다.
-2. 규칙을 바꿀 때는 실제 owner 문서만 수정한다. 같은 정책을 다른 문서에 복제하지 않는다.
+2. 정책을 추가·수정·삭제할 때는 Repository Design의 Policy changes (`docs/repository-design.md`)를 따른다. Knowledge 원본의 Authority/Owner/Scope와 위 semantic quality 기준을 함께 검토한다.
 3. 아직 실행 범위가 약하지만 다시 볼 가치가 있는 제품/cross-repository 관심사는 Project #11 Draft Item으로, Evidence가 필요한 불확실성은 Investigation Issue로, accepted delta는 Change Issue로 추적한다. 별도 prose ledger를 두 번째 lifecycle owner로 만들지 않는다.
 4. 구현 상태나 완료 Evidence를 바꾸려면 owning repository의 live code, Issue, PR, workflow/deployment 결과를 확인한다.
 5. 필요하면 로컬에서 `python3 scripts/bundle.py`를 preflight로 실행한다. PR에서는 repository automation이 동일 generator로 tracked bundle을 materialize하고 재현성을 검증한다.
-6. 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.
+6. 영향을 받는 Knowledge routing·참조·폐기 문장과 generated bundle을 확인하고, 최종 diff가 하나의 명확한 semantic 변화로 읽히며 위 Authority/Owner/Scope 경계를 보존하는지 확인한다.
 
 ## 작업 상태
 

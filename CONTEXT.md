@@ -8,12 +8,14 @@
 
 Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서는 Agent/Chat 작업의 canonical router다. 먼저 현재 작업 유형을 식별하고 필요한 최소 원본만 읽는다. 이 문서가 specialist policy를 다시 정의하지 않는다.
 
-작업을 이어받을 때는 여기서 필요한 원본을 찾은 뒤 **live GitHub Project #11과 관련 Issue/PR를 조회해 현재 실행 상태를 복구한다.** 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
+작업을 이어받을 때는 여기서 필요한 원본을 찾는다. 현재 실행 상태에 의존하는 판단이면 live GitHub Project #11과 관련 Issue/PR, owning repository의 code/workflow/Evidence를 조회해 상태를 복구한다. 세션별 handoff 문서를 별도 상태 원장으로 유지하지 않는다.
 
 ## 자주 하는 작업
 
 | 작업 | 참조 순서 |
 |---|---|
+| 공통·로컬 정책의 적용 범위·강도·충돌 해석 | [Repository Design — Policy discovery and interpretation](docs/repository-design.md#policy--policy-discovery-and-interpretation) → 해당 semantic owner; 사용자 결정·진행 범위는 [Agent Conventions](docs/agent-conventions.md#policy-mismatch-and-recovery) |
+| 정책 추가·수정·삭제 | [Repository Design — Policy changes](docs/repository-design.md#policy--policy-changes) → 실제 owner와 영향받는 consumer; Knowledge 문서이면 [Knowledge Maintenance](docs/maintenance.md) |
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | [Agent Conventions](docs/agent-conventions.md) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | [Feature Change Protocol](docs/change-protocol.md) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
 | Issue 생성·수정·활성화 | [lifecycle·completion](docs/planning-model.md) → owning repository가 제공하는 `.github/ISSUE_TEMPLATE/`이 있으면 그 local authoring surface 적용 → [Work Type·Labels](docs/work-classification.md) → [activation·materialization](docs/project-orchestration.md) |
@@ -36,7 +38,7 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Site | [README](https://github.com/ooMia/oomia.github.io/blob/main/README.md), [소비 계약](https://github.com/ooMia/oomia.github.io/blob/main/docs/content-consumption-contract.md), [Issues](https://github.com/ooMia/oomia.github.io/issues) |
 | Docs 콘텐츠 remote | [Repository](https://github.com/ooMia/oomia.github.io.docs) |
 
-수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인한다. 완료된 1.0의 historical integration Evidence만 [Publishing Platform 1.0](docs/release-1.0.md) RECORD의 pinned scope를 사용한다.
+각 repository에서 작업할 때는 그 repository의 `AGENTS.md`와 README를 통해 필요한 local owner를 찾는다. 수정·소비 계약은 각각 owning repository가 소유한다. current implementation은 owner code/docs에서 확인한다. 완료된 1.0의 historical integration Evidence만 [Publishing Platform 1.0](docs/release-1.0.md) RECORD의 pinned scope를 사용한다.
 
 ## PM-level 원본
 
@@ -49,6 +51,6 @@ component 종류, editor 구현, parser/schema 세부사항, package API, adapte
 
 ## 문서 사용
 
-Repository source에 직접 접근할 수 있으면 이 routing을 따라 canonical owner를 직접 읽는다. [Knowledge Maintenance](docs/maintenance.md)가 문서 Authority/구조와 generated bundle 규칙을 소유한다.
+Repository source에 직접 접근할 수 있으면 이 routing을 따라 canonical owner를 직접 읽는다. 공통 문서 Authority와 정책 해석은 [Repository Design](docs/repository-design.md#policy--document-authority), Knowledge 문서 작성·구조와 generated bundle 규칙은 [Knowledge Maintenance](docs/maintenance.md)가 소유한다.
 
 `dist/CONTEXT-BUNDLE.md`를 사용하는 환경에서도 embedded `CONTEXT.md`를 router로 사용하고 필요한 source section만 읽는다. bundle은 canonical source나 live Project/Issue/PR state를 대체하지 않는다.
