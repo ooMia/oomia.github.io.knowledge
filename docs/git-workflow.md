@@ -52,6 +52,28 @@ Issue lifecycle은 [Planning Model](planning-model.md), Project activation/mater
 - 여러 commit을 사용해도 final diff는 하나의 검토 가능한 변화로 읽히는 편을 우선한다.
 - implementation-start 방식은 [Implementation Practices](implementation-practices.md)의 GUIDANCE를 참고한다.
 
+## POLICY — Issue reference and completion convention
+
+Issue는 하나의 completion unit이고 PR은 검토·통합 단위다. 한 Issue의 여러 PR과 한 PR의 여러 Issue 기여를 허용하되 각 Issue의 Outcome / AC / Evidence 경계를 보존한다.
+
+- 부분 기여·후속 작업이 남은 PR body와 commit message에는 **`Refs #71`**처럼 reference를 사용한다. 다른 repository의 Issue는 **`Refs ooMia/oomia.github.io.engine#122`** 또는 explicit Issue URL을 사용한다. `Refs`는 project convention이며 GitHub의 closing keyword나 native Development relation을 생성하는 syntax가 아니다.
+- default branch로의 integration이 해당 Issue의 최종 completion 조건을 충족하는 PR만 body에 **`Closes #71`**을 사용한다. 다른 repository는 **`Closes ooMia/oomia.github.io.engine#122`**로 쓴다. 여러 Issue를 닫을 때는 각 Issue마다 완전한 closing syntax를 쓴다.
+- final merge 뒤 runtime/deployment 검증 등 AC가 남으면 `Refs`로 연결하고, 실제 Evidence를 확인한 뒤 명시적으로 Issue를 닫는다. PR merge 자체로 완료를 강제하는 automation을 추가하지 않는다.
+- commit은 기본적으로 `Refs`를 사용한다. closing intent는 review 가능한 final PR body에 둔다. commit message의 closing keyword도 default branch 편입 때 Issue를 닫을 수 있으므로 부분 slice나 squash/rebase commit message에 남기지 않는다.
+- native Development link는 GitHub가 default-branch merge에서 Issue를 auto-close할 수 있는 association이다. 부분 기여의 text reference와 이 association을 혼동하지 않는다. 수동 연결·closing keyword를 적용하기 전에 Issue의 completion boundary를 확인한다.
+- Issue body/comment의 `Closes` 문구를 Issue 상태 변경 API로 사용하지 않는다. keyword placement와 실제 default-branch merge/close event를 확인하며, 관련 Issue가 자동으로 닫혔을 것으로 추정하지 않고 native Issue state를 읽는다.
+
+GitHub의 supported closing keyword는 PR description과 commit message에서 동작한다. PR description의 keyword는 PR이 repository default branch를 대상으로 할 때 해석되며, non-default target에서는 linkage/auto-close를 만들지 않는다. commit keyword는 해당 commit이 default branch에 들어갈 때 Issue를 닫지만 그 commit을 담은 PR의 linked-PR metadata를 만들지 않는다. 정확한 GitHub 동작은 [GitHub Docs — Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)를 참조한다.
+
+## GUIDANCE — Trunk-Based Development slices
+
+기본 방식은 각 owning repository의 canonical trunk에서 짧은 Issue-linked branch를 만들고, 독립적으로 검증 가능한 작은 delta를 PR로 계속 통합하는 것이다.
+
+- 하나의 Work 세션이 여러 Issue·repository를 다루어도 하나의 branch·PR로 묶을 필요는 없다. 정책과 구현처럼 owner와 verification이 다르면 각자 owning PR을 유지한다.
+- 하나의 Issue가 여러 slice를 필요로 하면 앞선 PR은 `Refs`, 최종 completion 조건을 충족한 PR은 `Closes`를 사용한다. 큰 변화의 incomplete slice는 기존 behavior를 깨뜨리지 않도록 owning repository가 검증 가능한 integration boundary를 정한다.
+- trunk를 기준으로 branch를 갱신하고 coherent slice가 준비되면 조기 Draft PR을 만든다. repository gate를 통과해 통합한 branch는 작업이 끝나면 정리한다.
+- permanent `develop`이나 long-lived feature branch를 기본값으로 요구하지 않는다. 아래의 scoped integration은 atomic canonical activation이 실제 필요한 경우에만 사용한다.
+
 ## GUIDANCE — Early Draft PR and scoped integration
 
 ### Early Draft PR
@@ -82,9 +104,9 @@ child Issue branch ──PR──┘
 - child work가 다른 child change에 의존하면 그 dependency를 branch base/PR 관계에서 명시하고, 독립적인 work는 불필요하게 서로 stack하지 않는다.
 - child PR과 parent PR에 필요한 validation이 실제 base branch에서 실행되는지는 owning repository workflow가 보장해야 한다. integration branch를 사용한다는 이유로 child-level verification을 생략하지 않는다.
 
-GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
+PR description의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR은 `Refs`를 사용하며, commit에도 후속 default-branch 편입 때 조기 close를 일으킬 keyword를 남기지 않는다.
 
-- child PR의 Development relation이 필요하면 GitHub의 explicit relation을 사용한다.
+- child PR의 관계는 explicit reference 또는 적절한 GitHub native relation으로 보존하며, default-branch integration의 auto-close 의미를 함께 확인한다.
 - child Issue의 완료 시점은 parent/child 관계 자체가 아니라 그 Issue의 Outcome/AC/Evidence가 요구하는 integration target으로 판단한다.
 - parent integration branch merge가 child Outcome의 최종 integration이면 그 시점에 `Done`이 될 수 있다.
 - child Outcome이 canonical/default branch 또는 production delivery를 요구한다면 parent buffer merge만으로 완료하지 않는다.

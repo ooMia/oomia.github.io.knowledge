@@ -30,6 +30,8 @@ Ask the user only when a meaningful product, policy, ownership, or other non-der
 
 Work in small, verifiable deltas. Do not make surrounding metadata verification a blocker when it does not affect the requested operation or conclusion.
 
+For Issue/PR/Project operations, apply the Invariant / Default and normal-event boundary in [Project Orchestration](project-orchestration.md). Reopen, historical recovery, conflicting state, and intentional empty Iteration are Agent judgment boundaries. Read the relevant Knowledge owner and live Evidence, decide within existing authorization, and apply only the explicit remaining delta rather than inventing an automatic exception transition.
+
 ## Policy mismatch and recovery
 
 When observed behavior or live state conflicts with the working understanding, re-enter through [CONTEXT](../CONTEXT.md), reload the relevant owning source, and reconcile before continuing work that depends on the discrepancy.
