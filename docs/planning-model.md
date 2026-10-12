@@ -55,6 +55,17 @@ Investigation에서 production 또는 normative change가 필요하다는 결론
 
 Issue activation, initial admission inputs, observable signal과 Project field materialization은 [Project Orchestration](project-orchestration.md)이 소유한다. 구현 시작 방식은 [Implementation Practices](implementation-practices.md)의 GUIDANCE를 참고한다.
 
+## Normal Issue lifecycle
+
+정상 경로는 **Issue 생성 → 실제 작업 시작 → 진행 → 명시적 Issue 완료**다. 시스템은 명확한 Invariant / Default와 이 경로의 관찰 가능한 event만 집행한다.
+
+- Issue 생성·activation은 후보를 등록한다. Iteration commitment가 없으면 `Backlog`, 명시 commitment가 있고 아직 시작하지 않았으면 `Todo`다.
+- 최초 실제 작업 시작은 시작 시점이 속한 Project #11의 유효 Iteration에 귀속한 뒤 `In progress`로 materialize한다. 미리 지정한 commitment가 다른 기간이면 실제 시작 기간으로 바꾼다. 유효 기간이 없거나 모호하면 임의 Iteration이나 `In progress`를 쓰지 않고 판단 대상으로 남긴다.
+- 진행 중에는 새 GitHub 활동이 없어도 Iteration 경계에서 자동 Recommitment한다. 대상은 `In progress`와 유효한 non-empty Iteration을 유지하는 open Issue이며, 경계 판단·재검증은 [Project Orchestration](project-orchestration.md#iteration-boundary-recommitment)을 따른다.
+- 완료는 Issue 자신의 Outcome / Acceptance Criteria / Evidence를 충족한 뒤 명시적으로 Issue를 닫는 경계다. `closed / completed`는 `Done`, 명시 cancellation의 `closed / not_planned`는 `Cancelled`로 materialize한다. GitHub의 closing keyword로 발생한 native close도 명시적 완료 event로 취급하므로 그 keyword는 완료 조건을 충족할 변경에만 사용한다.
+- Reconciliation에서 이미 Iteration이 비어 있으면 원인과 무관하게 의도적 변경으로 취급한다. 자동 보충이나 Status를 포함한 metadata 재정규화를 하지 않는다. 최초 정상 work-start의 Iteration 설정 책임과 이 관찰 경계는 별개다.
+- Reopen, terminal Status와 native Issue state 충돌, 과거 작업의 귀속 복구, 사용자 변경의 의미처럼 정상 경로 밖의 선택은 Knowledge를 읽는 Agent가 직접 판단한다. 이를 새로운 자동 FSM 전이로 추론하지 않는다.
+
 ## Project Status lifecycle
 
 Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
@@ -69,7 +80,7 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
 - `Cancelled`는 실제 planning decision이며 repository state나 automation convenience 때문에 임의로 사용하지 않는다.
-- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. commitment가 제거되면 active Development relation과 실제 실행 상태를 함께 재검토한다.
+- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. commitment가 제거되면 Agent가 active Development relation과 실제 실행 상태를 함께 재검토하며, automation은 빈 Iteration을 발견했다는 이유로 Status를 바꾸지 않는다.
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
@@ -82,17 +93,19 @@ Issue `Status`는 **각 Issue가 선언한 자기 scope의 Outcome / Acceptance 
 - Issue가 어떤 integration target까지 포함해야 완료인지도 그 Issue의 Outcome/AC가 결정한다. parent integration branch merge가 충분한 Issue도 있고, canonical/default branch 또는 production delivery까지 요구하는 Issue도 있을 수 있다.
 - relationship의 변경이나 관련 Issue의 Status 변화만으로 terminal Issue를 자동 reopen/demote하지 않는다.
 - 기존 `Done` 판정을 바꾸려면 해당 Issue 자신의 Outcome/AC/Evidence가 더 이상 성립하지 않는다는 새 Evidence가 필요하다.
+- 하나의 Issue를 여러 PR이 나누어 실현할 수 있고 하나의 PR이 여러 Issue에 기여할 수 있다. PR merge는 관련 Issue의 AC/Evidence 검토 계기이며 자체로 Issue completion을 강제하지 않는다. 부분 기여와 최종 완료의 `Refs / Closes` 경계는 [Git Workflow](git-workflow.md#policy--issue-reference-and-completion-convention)를 따른다.
 
 Relationship 종류별 추가 scheduling/propagation semantics가 실제 운영상 필요해지면 별도 policy로 확장한다. 현재는 relationship을 lifecycle inheritance mechanism으로 사용하지 않는다.
 
 ## Iteration semantics
 
-Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **압축된 execution/commitment provenance**를 나타낸다.
+Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **최종 execution/commitment 귀속**을 나타낸다.
 
-- 명시적으로 Iteration에 commit된 Item은 결과가 `Done` 또는 `Cancelled`여도 그 Iteration을 유지한다.
-- 명시 commitment가 없어도 Item에 귀속되는 durable product/platform Git tree에 실제 구현이 남았다면 Iteration은 필요하다. 값은 close/merge 시점이 아니라 실제 work-start 기간을 기준으로 한다.
-- 독립 branch에서만 수행되고 durable product/platform Git tree에 편입되지 않은 채 폐기된 작업은 당시 Iteration을 기록할 수 있지만 필수는 아니다.
-- substantive reopen은 새로운 live-planning decision이다. 새 Iteration에 즉시 recommit하지 않는다면 기존 Iteration을 비우고 `Backlog`로 재평가하는 것이 기본이다. 단순 metadata 정리를 위한 임시 reopen에는 이 규칙을 적용하지 않는다.
+- 정상 최초 work-start는 실제 시작 시점이 속한 Iteration을 설정한다. Issue 생성·branch 생성 날짜나 Iteration title의 week number로 기간을 대체하지 않는다.
+- 진행 중 정상 Recommitment는 마지막 commitment를 갱신한다. 명시적 close/cancel event는 완료 시점이 속한 유효 Iteration으로 최종 귀속하고 그 값을 terminal 상태에서 유지한다. 기존 값이 비어 있거나 유효한 완료 기간이 없으면 자동 귀속하지 않는다.
+- 일반 Reconciliation은 non-empty terminal Iteration을 현재 기간으로 이동하지 않는다. 재생·복구에 필요한 시작·완료 event Evidence가 없으면 과거 기간을 추측하지 않는다.
+- 빈 Iteration은 자동 변경을 억제하는 의도적 상태다. durable Git-tree 구현이나 다른 field와의 불일치가 있어도 보충하지 않고 Agent가 필요한 Evidence와 사용자의 변경 의도를 판단한다.
+- substantive reopen은 새로운 live-planning decision이다. Agent가 새 commitment, 빈 Iteration으로의 해제, 실제 work start와 Status를 판단한다. 단순 metadata 정리를 위한 임시 reopen을 새로운 실행으로 간주하지 않는다.
 - Iteration은 single-value field이므로 여러 Iteration에 걸친 전체 carry-over/recommit history를 표현하지 않는다. 나머지 이력은 Project Status Updates와 Issue/PR/Git Evidence가 보완한다.
 - Iteration Goal과 회고는 Project Status Update가 소유한다.
 

@@ -54,9 +54,10 @@ Knowledge는 Publishing Platform의 **PM/coordination layer**이며, 이 문서�
 | Agent/Chat approval·resume·tool failure·capability fallback·remote-state operation | Agent Conventions (`docs/agent-conventions.md`) → 필요한 canonical/live owner |
 | 새 기능·의미 있는 동작 변경 | Feature Change Protocol (`docs/change-protocol.md`) → 해당 owner의 contract/code → 필요한 경우 live Project/Issue lifecycle |
 | Issue 생성·수정·활성화 | lifecycle·completion (`docs/planning-model.md`) → owning repository가 제공하는 `.github/ISSUE_TEMPLATE/`이 있으면 그 local authoring surface 적용 → Work Type·Labels (`docs/work-classification.md`) → activation·materialization (`docs/project-orchestration.md`) |
+| 정상 시작·완료 event, Iteration 경계·빈 값, webhook·startup 검사·예외 | 정상 Lifecycle (`docs/planning-model.md`) → Orchestration (`docs/project-orchestration.md`) → Fields (`docs/fields.md`); 예외의 직접 판단은 Agent Conventions (`docs/agent-conventions.md`) |
 | 작업 branch 시작 | Git Workflow (`docs/git-workflow.md`) → Development relation (`docs/project-orchestration.md`) → 해당 Issue와 owning repository 운영 |
 | Issue 구현 시작·첫 integration slice | Implementation Practices (`docs/implementation-practices.md`) → owning repository contract/code/tests; branch/PR 경계가 필요하면 Git Workflow (`docs/git-workflow.md`) |
-| PR 작성·검토·통합 | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
+| PR 작성·검토·통합, TBD slice와 `Refs / Closes` | Git Workflow (`docs/git-workflow.md`) → 완료·Evidence (`docs/planning-model.md`) → 해당 Issue 및 구현 레포의 검증 방법 |
 | major/minor release | Release lifecycle (`docs/planning-model.md`) → live Project #11 roadmap → 해당 version-scoped release document → Git Workflow (`docs/git-workflow.md`) |
 | 새 레포 scaffolding·디렉토리 역할 | Repository Design (`docs/repository-design.md`) → Node/JS/TS 또는 Python이면 Development Toolchain (`docs/development-toolchain.md`) |
 | 기술 설계·구현 조사 | 아래 레포별 참조 → 해당 레포 `/docs/`와 code·Issue·tests |
@@ -128,6 +129,8 @@ When existing policy and context are sufficient, make routine and reversible dec
 Ask the user only when a meaningful product, policy, ownership, or other non-derivable decision remains. Resolve factual uncertainty from canonical or live sources before asking.
 
 Work in small, verifiable deltas. Do not make surrounding metadata verification a blocker when it does not affect the requested operation or conclusion.
+
+For Issue/PR/Project operations, apply the Invariant / Default and normal-event boundary in Project Orchestration (`docs/project-orchestration.md`). Reopen, historical recovery, conflicting state, and intentional empty Iteration are Agent judgment boundaries. Read the relevant Knowledge owner and live Evidence, decide within existing authorization, and apply only the explicit remaining delta rather than inventing an automatic exception transition.
 
 ## Policy mismatch and recovery
 
@@ -1124,6 +1127,17 @@ Investigation에서 production 또는 normative change가 필요하다는 결론
 
 Issue activation, initial admission inputs, observable signal과 Project field materialization은 Project Orchestration (`docs/project-orchestration.md`)이 소유한다. 구현 시작 방식은 Implementation Practices (`docs/implementation-practices.md`)의 GUIDANCE를 참고한다.
 
+## Normal Issue lifecycle
+
+정상 경로는 **Issue 생성 → 실제 작업 시작 → 진행 → 명시적 Issue 완료**다. 시스템은 명확한 Invariant / Default와 이 경로의 관찰 가능한 event만 집행한다.
+
+- Issue 생성·activation은 후보를 등록한다. Iteration commitment가 없으면 `Backlog`, 명시 commitment가 있고 아직 시작하지 않았으면 `Todo`다.
+- 최초 실제 작업 시작은 시작 시점이 속한 Project #11의 유효 Iteration에 귀속한 뒤 `In progress`로 materialize한다. 미리 지정한 commitment가 다른 기간이면 실제 시작 기간으로 바꾼다. 유효 기간이 없거나 모호하면 임의 Iteration이나 `In progress`를 쓰지 않고 판단 대상으로 남긴다.
+- 진행 중에는 새 GitHub 활동이 없어도 Iteration 경계에서 자동 Recommitment한다. 대상은 `In progress`와 유효한 non-empty Iteration을 유지하는 open Issue이며, 경계 판단·재검증은 Project Orchestration (`docs/project-orchestration.md`)을 따른다.
+- 완료는 Issue 자신의 Outcome / Acceptance Criteria / Evidence를 충족한 뒤 명시적으로 Issue를 닫는 경계다. `closed / completed`는 `Done`, 명시 cancellation의 `closed / not_planned`는 `Cancelled`로 materialize한다. GitHub의 closing keyword로 발생한 native close도 명시적 완료 event로 취급하므로 그 keyword는 완료 조건을 충족할 변경에만 사용한다.
+- Reconciliation에서 이미 Iteration이 비어 있으면 원인과 무관하게 의도적 변경으로 취급한다. 자동 보충이나 Status를 포함한 metadata 재정규화를 하지 않는다. 최초 정상 work-start의 Iteration 설정 책임과 이 관찰 경계는 별개다.
+- Reopen, terminal Status와 native Issue state 충돌, 과거 작업의 귀속 복구, 사용자 변경의 의미처럼 정상 경로 밖의 선택은 Knowledge를 읽는 Agent가 직접 판단한다. 이를 새로운 자동 FSM 전이로 추론하지 않는다.
+
 ## Project Status lifecycle
 
 Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않고 **실행 상태와 결과 의미**를 나타낸다.
@@ -1138,7 +1152,7 @@ Project `Status`는 repository Issue의 open/closed 여부를 복제하지 않�
 
 - repository Issue의 `closed / completed`는 일반적으로 `Done`, `closed / not_planned`는 `Cancelled`와 대응한다.
 - `Cancelled`는 실제 planning decision이며 repository state나 automation convenience 때문에 임의로 사용하지 않는다.
-- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. commitment가 제거되면 active Development relation과 실제 실행 상태를 함께 재검토한다.
+- `Todo`와 `In progress`는 Iteration commitment를 전제로 한다. commitment가 제거되면 Agent가 active Development relation과 실제 실행 상태를 함께 재검토하며, automation은 빈 Iteration을 발견했다는 이유로 Status를 바꾸지 않는다.
 - `Backlog → Todo → In progress`는 의미 관계이지 모든 UI/API write가 중간 상태를 반드시 순차 기록해야 한다는 뜻이 아니다.
 - Project field의 current `Status`가 lifecycle state의 source of truth다. observable event를 어떤 Status로 materialize하는지는 Orchestration이 이 의미를 소비해 정의한다.
 
@@ -1151,17 +1165,19 @@ Issue `Status`는 **각 Issue가 선언한 자기 scope의 Outcome / Acceptance 
 - Issue가 어떤 integration target까지 포함해야 완료인지도 그 Issue의 Outcome/AC가 결정한다. parent integration branch merge가 충분한 Issue도 있고, canonical/default branch 또는 production delivery까지 요구하는 Issue도 있을 수 있다.
 - relationship의 변경이나 관련 Issue의 Status 변화만으로 terminal Issue를 자동 reopen/demote하지 않는다.
 - 기존 `Done` 판정을 바꾸려면 해당 Issue 자신의 Outcome/AC/Evidence가 더 이상 성립하지 않는다는 새 Evidence가 필요하다.
+- 하나의 Issue를 여러 PR이 나누어 실현할 수 있고 하나의 PR이 여러 Issue에 기여할 수 있다. PR merge는 관련 Issue의 AC/Evidence 검토 계기이며 자체로 Issue completion을 강제하지 않는다. 부분 기여와 최종 완료의 `Refs / Closes` 경계는 Git Workflow (`docs/git-workflow.md`)를 따른다.
 
 Relationship 종류별 추가 scheduling/propagation semantics가 실제 운영상 필요해지면 별도 policy로 확장한다. 현재는 relationship을 lifecycle inheritance mechanism으로 사용하지 않는다.
 
 ## Iteration semantics
 
-Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **압축된 execution/commitment provenance**를 나타낸다.
+Iteration은 active Item에서는 **current commitment**, terminal Item에서는 **최종 execution/commitment 귀속**을 나타낸다.
 
-- 명시적으로 Iteration에 commit된 Item은 결과가 `Done` 또는 `Cancelled`여도 그 Iteration을 유지한다.
-- 명시 commitment가 없어도 Item에 귀속되는 durable product/platform Git tree에 실제 구현이 남았다면 Iteration은 필요하다. 값은 close/merge 시점이 아니라 실제 work-start 기간을 기준으로 한다.
-- 독립 branch에서만 수행되고 durable product/platform Git tree에 편입되지 않은 채 폐기된 작업은 당시 Iteration을 기록할 수 있지만 필수는 아니다.
-- substantive reopen은 새로운 live-planning decision이다. 새 Iteration에 즉시 recommit하지 않는다면 기존 Iteration을 비우고 `Backlog`로 재평가하는 것이 기본이다. 단순 metadata 정리를 위한 임시 reopen에는 이 규칙을 적용하지 않는다.
+- 정상 최초 work-start는 실제 시작 시점이 속한 Iteration을 설정한다. Issue 생성·branch 생성 날짜나 Iteration title의 week number로 기간을 대체하지 않는다.
+- 진행 중 정상 Recommitment는 마지막 commitment를 갱신한다. 명시적 close/cancel event는 완료 시점이 속한 유효 Iteration으로 최종 귀속하고 그 값을 terminal 상태에서 유지한다. 기존 값이 비어 있거나 유효한 완료 기간이 없으면 자동 귀속하지 않는다.
+- 일반 Reconciliation은 non-empty terminal Iteration을 현재 기간으로 이동하지 않는다. 재생·복구에 필요한 시작·완료 event Evidence가 없으면 과거 기간을 추측하지 않는다.
+- 빈 Iteration은 자동 변경을 억제하는 의도적 상태다. durable Git-tree 구현이나 다른 field와의 불일치가 있어도 보충하지 않고 Agent가 필요한 Evidence와 사용자의 변경 의도를 판단한다.
+- substantive reopen은 새로운 live-planning decision이다. Agent가 새 commitment, 빈 Iteration으로의 해제, 실제 work start와 Status를 판단한다. 단순 metadata 정리를 위한 임시 reopen을 새로운 실행으로 간주하지 않는다.
 - Iteration은 single-value field이므로 여러 Iteration에 걸친 전체 carry-over/recommit history를 표현하지 않는다. 나머지 이력은 Project Status Updates와 Issue/PR/Git Evidence가 보완한다.
 - Iteration Goal과 회고는 Project Status Update가 소유한다.
 
@@ -1228,7 +1244,7 @@ Project #11은 repository가 이미 제공하는 1차 분류를 반복하지 않
 | 이름 | 질문 | Cardinality / completeness |
 |---|---|---|
 | Status | 지금 어떤 실행 상태인가? | Project Item이면 정확히 하나 |
-| Iteration | 언제 수행하는가? | lifecycle 의미상 필요한 경우 하나 |
+| Iteration | 언제 수행·완료에 귀속되는가? | 정상 lifecycle에서는 유효한 period 하나; intentional empty 허용 |
 | Work Type | 왜 이 Issue가 존재하는가? | executable Repository Issue이면 정확히 하나 |
 
 Repository, Labels, Linked pull requests, Parent issue, Sub-issues progress, Assignees 등은 GitHub native field를 그대로 사용한다.
@@ -1248,18 +1264,21 @@ Objective, Scope, Target Release, Deadline, Estimate custom field는 repository�
 
 Field completeness는 “모든 칸을 채운다”가 아니라 **해당 lifecycle과 execution state에 필요한 값이 비어 있지 않게 한다**는 뜻이다.
 
-- `Status`: Project Item이면 항상 하나의 유효한 option이 있어야 한다.
-- `Work Type`: executable Repository Issue이면 정확히 하나여야 한다.
-- `Iteration`:
-  - `Todo / In progress`에는 current commitment가 있어야 한다.
-  - explicit commitment가 있었거나 durable product/platform Git tree에 실제 구현이 남았다면 terminal Item에서도 Planning Model의 historical Iteration rule을 따른다.
-  - 아직 commit되지 않았고 실제 구현도 없는 `Backlog`/Draft는 비운다.
-  - substantive reopen 후 새 commitment가 없으면 Planning Model의 reopen rule에 따라 기존 historical Iteration을 비운다.
-- `Assignees`: 실제 작업 책임자가 정해진 executable Item에는 native field를 사용한다. 현재 개인 프로젝트의 executable Repository Issue는 별도 owner가 없으면 `ooMia`를 기본 책임자로 materialize할 수 있다.
-- `Linked pull requests`: 구현 PR이 존재하면 GitHub native Development relation을 우선한다. historical relation을 복구할 수 없으면 실제 Issue/PR Evidence 링크로 사실을 보존하고 임의 metadata를 만들지 않는다.
-- Labels, Milestone, Parent/Sub-issues 등 optional native field는 실제 의미가 있을 때만 채운다.
+### Invariant, Default, and optional metadata
 
-automation은 이 completeness policy를 소비할 수 있지만, historical Iteration이나 classification처럼 Evidence/문맥 해석이 필요한 값을 날짜나 제목만으로 추론하지 않는다.
+| Kind | Fields / requirement | Materialization boundary |
+|---|---|---|
+| Invariant | Project Item의 `Status`는 유효 option 하나; executable Repository Issue의 `Work Type`은 유효 option 하나 | live schema와 explicit input으로 검증한다. 의미를 추론하거나 intentional empty Iteration gate를 우회하여 자동 repair하지 않는다. |
+| Normal lifecycle | `Iteration`은 Planning Model의 시작·진행·완료 기간 귀속 | 실제 period 선택과 빈 값의 suppression은 Project Orchestration을 따른다. |
+| Default | 별도 책임자가 없는 executable Repository Issue의 native `Assignees`는 `ooMia` | admission 또는 허용된 reconciliation에서 빈 값만 채운다. 명시 owner를 교체하지 않는다. |
+| Optional | Labels, Milestone, Reviewers, Issue type, Parent/Sub-issues, blocking 관계 등 | 실제 의미·요청·Evidence가 있을 때만 사용한다. 필수 completeness로 승격하거나 자동 생성하지 않는다. |
+
+- 정상 `Todo / In progress`는 current commitment를 가지며, 명시적 close/cancel은 유효한 완료 period로 최종 귀속한다. 아직 commit되지 않은 `Backlog`/Draft는 Iteration을 비워둘 수 있다.
+- existing Item의 empty Iteration은 자동 write를 억제하는 의도적 상태다. 다른 Invariant/Default가 불완전해 보여도 Status·Work Type·Assignees 등을 일반 reconciliation으로 채우지 않는다. 필요한 explicit correction은 Agent가 canonical context와 live Evidence를 읽고 판단한다.
+- 구현 PR의 관계는 native Development relation 또는 명시적인 Issue/PR Evidence reference로 보존한다. 부분 기여 PR에 closing relation을 강제하지 않는다. historical relation을 복구할 수 없으면 실제 Evidence 링크를 사용하며 임의 metadata를 만들지 않는다. native auto-close와 `Refs / Closes`는 Git Workflow (`docs/git-workflow.md`)를 따른다.
+- Labels는 Work Classification (`docs/work-classification.md`)의 registry와 의미를 사용하며, 필요하지 않은 Label/Milestone/Reviewer를 자동 추가·생성하지 않는다.
+
+Invariant는 필요한 의미를 정의하지만 불확실한 값을 overwrite할 권한을 뜻하지 않는다. automation은 분류·historical recovery·reopen처럼 Evidence/문맥 해석이 필요한 선택을 제목·날짜·repository 종류만으로 추론하지 않는다.
 
 <!-- END SOURCE: docs/fields.md -->
 
@@ -1426,6 +1445,28 @@ Issue lifecycle은 Planning Model (`docs/planning-model.md`), Project activation
 - 여러 commit을 사용해도 final diff는 하나의 검토 가능한 변화로 읽히는 편을 우선한다.
 - implementation-start 방식은 Implementation Practices (`docs/implementation-practices.md`)의 GUIDANCE를 참고한다.
 
+## POLICY — Issue reference and completion convention
+
+Issue는 하나의 completion unit이고 PR은 검토·통합 단위다. 한 Issue의 여러 PR과 한 PR의 여러 Issue 기여를 허용하되 각 Issue의 Outcome / AC / Evidence 경계를 보존한다.
+
+- 부분 기여·후속 작업이 남은 PR body와 commit message에는 **`Refs #71`**처럼 reference를 사용한다. 다른 repository의 Issue는 **`Refs ooMia/oomia.github.io.engine#122`** 또는 explicit Issue URL을 사용한다. `Refs`는 project convention이며 GitHub의 closing keyword나 native Development relation을 생성하는 syntax가 아니다.
+- default branch로의 integration이 해당 Issue의 최종 completion 조건을 충족하는 PR만 body에 **`Closes #71`**을 사용한다. 다른 repository는 **`Closes ooMia/oomia.github.io.engine#122`**로 쓴다. 여러 Issue를 닫을 때는 각 Issue마다 완전한 closing syntax를 쓴다.
+- final merge 뒤 runtime/deployment 검증 등 AC가 남으면 `Refs`로 연결하고, 실제 Evidence를 확인한 뒤 명시적으로 Issue를 닫는다. PR merge 자체로 완료를 강제하는 automation을 추가하지 않는다.
+- commit은 기본적으로 `Refs`를 사용한다. closing intent는 review 가능한 final PR body에 둔다. commit message의 closing keyword도 default branch 편입 때 Issue를 닫을 수 있으므로 부분 slice나 squash/rebase commit message에 남기지 않는다.
+- native Development link는 GitHub가 default-branch merge에서 Issue를 auto-close할 수 있는 association이다. 부분 기여의 text reference와 이 association을 혼동하지 않는다. 수동 연결·closing keyword를 적용하기 전에 Issue의 completion boundary를 확인한다.
+- Issue body/comment의 `Closes` 문구를 Issue 상태 변경 API로 사용하지 않는다. keyword placement와 실제 default-branch merge/close event를 확인하며, 관련 Issue가 자동으로 닫혔을 것으로 추정하지 않고 native Issue state를 읽는다.
+
+GitHub의 supported closing keyword는 PR description과 commit message에서 동작한다. PR description의 keyword는 PR이 repository default branch를 대상으로 할 때 해석되며, non-default target에서는 linkage/auto-close를 만들지 않는다. commit keyword는 해당 commit이 default branch에 들어갈 때 Issue를 닫지만 그 commit을 담은 PR의 linked-PR metadata를 만들지 않는다. 정확한 GitHub 동작은 [GitHub Docs — Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)를 참조한다.
+
+## GUIDANCE — Trunk-Based Development slices
+
+기본 방식은 각 owning repository의 canonical trunk에서 짧은 Issue-linked branch를 만들고, 독립적으로 검증 가능한 작은 delta를 PR로 계속 통합하는 것이다.
+
+- 하나의 Work 세션이 여러 Issue·repository를 다루어도 하나의 branch·PR로 묶을 필요는 없다. 정책과 구현처럼 owner와 verification이 다르면 각자 owning PR을 유지한다.
+- 하나의 Issue가 여러 slice를 필요로 하면 앞선 PR은 `Refs`, 최종 completion 조건을 충족한 PR은 `Closes`를 사용한다. 큰 변화의 incomplete slice는 기존 behavior를 깨뜨리지 않도록 owning repository가 검증 가능한 integration boundary를 정한다.
+- trunk를 기준으로 branch를 갱신하고 coherent slice가 준비되면 조기 Draft PR을 만든다. repository gate를 통과해 통합한 branch는 작업이 끝나면 정리한다.
+- permanent `develop`이나 long-lived feature branch를 기본값으로 요구하지 않는다. 아래의 scoped integration은 atomic canonical activation이 실제 필요한 경우에만 사용한다.
+
 ## GUIDANCE — Early Draft PR and scoped integration
 
 ### Early Draft PR
@@ -1456,9 +1497,9 @@ child Issue branch ──PR──┘
 - child work가 다른 child change에 의존하면 그 dependency를 branch base/PR 관계에서 명시하고, 독립적인 work는 불필요하게 서로 stack하지 않는다.
 - child PR과 parent PR에 필요한 validation이 실제 base branch에서 실행되는지는 owning repository workflow가 보장해야 한다. integration branch를 사용한다는 이유로 child-level verification을 생략하지 않는다.
 
-GitHub의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR에서 `Closes #...`에 completion semantics를 의존하지 않는다.
+PR description의 closing keyword는 PR이 repository default branch를 대상으로 할 때만 Issue linkage/auto-close를 만든다. 따라서 integration branch를 base로 하는 child PR은 `Refs`를 사용하며, commit에도 후속 default-branch 편입 때 조기 close를 일으킬 keyword를 남기지 않는다.
 
-- child PR의 Development relation이 필요하면 GitHub의 explicit relation을 사용한다.
+- child PR의 관계는 explicit reference 또는 적절한 GitHub native relation으로 보존하며, default-branch integration의 auto-close 의미를 함께 확인한다.
 - child Issue의 완료 시점은 parent/child 관계 자체가 아니라 그 Issue의 Outcome/AC/Evidence가 요구하는 integration target으로 판단한다.
 - parent integration branch merge가 child Outcome의 최종 integration이면 그 시점에 `Done`이 될 수 있다.
 - child Outcome이 canonical/default branch 또는 production delivery를 요구한다면 parent buffer merge만으로 완료하지 않는다.
@@ -1497,105 +1538,106 @@ repository-local 차이가 반복되어 여러 repository에 적용되는 invari
 # Project Orchestration
 
 > **Authority:** POLICY  
-> **Owner:** Repository Issue activation, observable-signal materialization, and Project #11 reconciliation semantics  
-> **Scope:** common coordination between Issue-driven Publishing Platform repositories and Project #11  
-> **Read when:** admitting/replaying an Issue, interpreting Development signals, or reconciling Project state  
-> **Enforced by:** Knowledge shared Project-admission workflow/action and repository-local integrations where implemented
+> **Owner:** Repository Issue activation, normal-event materialization, and Project #11 reconciliation semantics
+> **Scope:** Issue/PR/native metadata coordination between Publishing Platform repositories and Project #11
+> **Read when:** admitting an Issue, observing actual work start or close, reconciling related work, or judging recovery and runtime boundaries
+> **Enforced by:** Engine GitHub integration/runtime where implemented; repository workflows remain transition consumers until verified cutover
 
-이 문서는 Planning Model (`docs/planning-model.md`)이 정의한 lifecycle **meaning**을 Project/native state에 materialize하는 공통 contract를 소유한다. 실제 Project field 값은 Project #11, Issue/PR relation은 GitHub repository native state가 소유한다.
+이 문서는 Planning Model (`docs/planning-model.md`)의 lifecycle **meaning**을 materialize하는 공통 contract를 소유한다. 실제 Project field 값은 Project #11, Issue/PR relation과 Issue open/closed 상태는 GitHub native state가 소유한다. Python/MCP/Webhook/DB/Timer/API의 실제 구현은 Engine의 code/docs/tests가 소유한다.
 
 ## Scope and ownership
 
-- Repository Issue가 활성화되면 Project #11 Item과 필요한 initial fields를 materialize할 수 있다.
-- activation 이후 current state는 live Project fields와 repository-native Issue/PR relation이 source of truth다.
-- Docs처럼 Issue-driven implementation이 중심이 아닌 repository에는 동일 orchestration을 강제하지 않는다.
-- branch/PR integration invariant는 Git Workflow (`docs/git-workflow.md`)이 소유한다.
-- caller event wiring, branch base/name, token/runner/runtime, webhook process 같은 implementation detail은 owning repository가 소유한다.
+- 활성 Repository Issue는 Project #11 membership과 initial fields를 materialize한다. Draft candidate는 repository owner와 실행 범위가 확정되어 활성화될 때 admission하며, Draft 자체를 work-start signal로 사용하지 않는다.
+- activation 이후 live Project/native state를 authoritative input으로 사용한다. stale Issue body seed나 local snapshot으로 사용자 변경을 덮어쓰지 않는다.
+- Docs처럼 Issue-driven implementation이 중심이 아닌 repository에는 같은 activation을 강제하지 않는다.
+- branch/PR integration과 `Refs / Closes` completion convention은 Git Workflow (`docs/git-workflow.md`)이 소유한다.
+- webhook process, event transport, persistence, timer, pagination, token/runner, branch naming과 API shape는 Engine 또는 해당 repository-local consumer가 소유한다. Knowledge는 그 알고리즘을 복제하지 않는다.
 
-## Issue activation
+## Admission and metadata
 
-Common admission은 활성 Repository Issue에 대해 다음 결과를 materialize할 수 있다.
+최초 admission은 Project #11 membership, 유효한 `Status / Work Type`, 필요한 initial `Iteration`과 Fields (`docs/fields.md`)의 Default를 적용한다.
 
-1. Project #11 Item membership
-2. initial Iteration / Work Type
-3. Iteration 존재 여부에 따른 initial Status
-
-Issue activation 자체는 actual work start나 Development relation을 의미하지 않는다. Draft 또는 실행 범위가 아직 확정되지 않은 candidate의 planning meaning은 Planning Model (`docs/planning-model.md`)을 따른다.
-
-공통 admission implementation의 parser, API calls, field lookup, pagination, retries와 token handling은 Knowledge의 workflow/action/tests가 소유한다. 이 문서는 그 알고리즘을 복제하지 않는다.
-
-## Admission inputs
-
-Repository Issue를 Project #11에 first admission할 때 implementation은 initial materialization에 필요한 입력을 machine-readable source에서 받을 수 있다.
-
-Common semantic inputs:
-
-- **Iteration** — initial commitment. 아직 commitment가 없으면 비어 있을 수 있다.
-- **Work Type** — Issue Outcome의 주된 delta를 Work Classification (`docs/work-classification.md`)에 따라 분류한 값.
-
-initial `Status`를 caller-provided authoritative input으로 취급하지 않는다. Iteration commitment가 없으면 `Backlog`, 있으면 `Todo`로 materialize하며 실제 work-start signal이 동시에 확인되면 Planning Model (`docs/planning-model.md`)의 의미에 따라 `In progress`를 직접 materialize할 수 있다.
-
-Issue body metadata, HTML comment, JSON shape, workflow input, API payload 등 **입력의 transport와 encoding은 common admission implementation 또는 repository-local integration이 소유하는 implementation detail**이다. 이 POLICY는 `project-seed`라는 marker 이름이나 특정 JSON/document shape를 cross-repository authoring contract로 요구하지 않는다.
-
-replay에서는 existing live Project value를 stale admission input으로 덮어쓰지 않는다. live Work Type이 비어 있을 때 validated Work Type input을 사용할 수 있지만 live/input 모두 없으면 제목이나 repository 종류로 의미를 추론하지 않고 fail closed한다.
-
-branch name, Development start suppression 같은 Project field가 아닌 repository-local hints가 함께 전달될 수 있지만 그 의미와 encoding은 해당 owning integration이 소유한다.
-
-admission input의 의미는 Planning Model (`docs/planning-model.md`), Project Fields (`docs/fields.md`), Work Classification (`docs/work-classification.md`)의 semantics를 위반하지 않아야 한다.
+- initial Iteration은 명시 commitment가 있으면 validated input을 사용하고, 없으면 비운다. Iteration이 없으면 `Backlog`, 있으면 `Todo`이며 최초 실제 work-start가 동시에 확인되면 아래의 시작 event를 적용할 수 있다.
+- executable Repository Issue의 Work Type은 live value 또는 validated explicit admission input을 사용한다. 둘 다 없거나 유효하지 않으면 제목·repository·file type으로 추론하지 않고 fail closed한다.
+- initial Status는 caller-provided authoritative input으로 받지 않는다. admission input의 transport/encoding, Issue body marker와 JSON shape는 구현 owner가 결정한다.
+- 이미 존재하는 Item의 빈 Iteration은 아래 suppression 규칙을 먼저 적용한다. membership이 있다는 이유로 first admission을 반복해 Default를 재적용하지 않는다.
+- native Assignees의 기본 책임자와 optional Labels/Milestone/Reviewers 등의 의미는 Fields (`docs/fields.md`)를 따른다. 선택적 metadata를 절차 충족만을 위해 채우거나 새 category를 자동 생성하지 않는다.
 
 ## Development signals
 
-Development relation은 actual work start를 관찰할 수 있는 **signal**이다. `Backlog / Todo / In progress`의 의미 자체는 Planning Model (`docs/planning-model.md`)이 소유한다.
+Development relation은 actual work start를 관찰할 수 있는 **signal**이며 lifecycle 의미 자체를 정의하지 않는다.
 
-- 새 linked PR은 open Item의 work-start signal로 사용해 `In progress`를 materialize할 수 있다.
-- Development branch도 owning integration이 relation을 신뢰성 있게 관찰할 수 있을 때 같은 signal로 사용할 수 있다.
-- branch/PR 없이 진행되는 Investigation, coordination, documentation은 사람 또는 해당 execution interface가 work start를 명시적으로 materialize할 수 있다.
-- commitment와 work start가 동시에 확인되면 Iteration과 `In progress`를 함께 materialize할 수 있으며 `Todo` intermediate write를 강제하지 않는다.
-- work-start signal이 있는데 Iteration commitment가 없다면 arbitrary Iteration을 추론하지 않고 inconsistency로 드러낸다.
-- branch/Issue relation이 불명확하면 이름이나 타이밍만으로 임의 연결하지 않고 repository-local recovery가 소유한다.
+- 최초 Issue-linked branch 또는 open linked/explicitly referenced PR은 신뢰성 있게 Issue와 연결되고 실제 작업 시작을 나타낼 때 work-start event로 사용할 수 있다. relation의 종류와 native auto-close 의미는 Git Workflow를 따른다.
+- branch/PR 없이 진행되는 Investigation, coordination, documentation은 사람 또는 execution interface가 실제 시작 event를 명시적으로 제공한다.
+- 최초 정상 work-start는 **event 발생 시각**이 속한 유효 Iteration을 먼저 설정한 뒤 `In progress`를 materialize한다. 재시도·지연 처리 시각으로 시작 기간을 이동하지 않으며 `Todo` intermediate write를 강제하지 않는다.
+- unknown/ambiguous relation은 branch name, title, timing으로 임의 연결하지 않는다. terminal Issue, reopen 또는 이미 진행 중인 Item의 새 PR을 최초 시작으로 추론하지 않고 Agent 판단 또는 related-event 검사로 처리한다.
+- 동일 event의 중복 delivery나 과거 event replay를 새로운 work-start로 적용해 사용자가 비운 Iteration을 다시 채우지 않는다.
 
-## Relationship materialization
+## Iteration period selection
 
-GitHub relationship은 planning context와 dependency를 materialize하는 source이며 lifecycle inheritance를 의미하지 않는다.
+Project #11의 live Iteration definition에 있는 실제 `startDate / duration`으로 기간을 판정한다. upcoming/completed definition을 포함한 완전한 조회가 필요하며 title, week number, Issue 생성 날짜나 일률적인 7일 주기를 사용하지 않는다.
 
-- parent/sub-issue, blocks/blocked-by, relates-to는 GitHub가 제공하는 explicit relation을 source로 사용하고 title, branch name, timing만으로 관계를 추론하지 않는다.
-- related Item의 Status 변화만으로 다른 Item의 Status를 자동 변경하지 않는다.
-- Issue completion은 Planning Model (`docs/planning-model.md`)의 issue-local semantics를 따른다.
-- PR merge는 해당 Issue가 선언한 integration target과 AC에 부합할 때 completion Evidence가 될 수 있다. non-default integration branch에 merge됐다는 사실만으로 모든 Issue를 일률적으로 `Done` 처리하지 않는다.
-- terminal Status를 변경하려면 해당 Item 자신의 Outcome/AC/Evidence 변화 또는 명시적인 planning decision이 필요하다.
+- `startDate`는 UTC `00:00:00`의 날짜 경계로 해석하고 `duration`은 양의 정수 calendar day다. 기간은 half-open **`[startDate, startDate + duration)`**다. 이는 project의 결정적 machine interpretation이며 사용자 화면의 locale로 경계를 바꾸지 않는다.
+- 대상 event 시각을 포함하는 유효 기간이 정확히 하나일 때만 그 Iteration을 선택한다. 실제 기간을 포함한 정의가 없거나 malformed, 겹침, gap, 불완전 조회 때문에 선택이 모호하면 field를 임의 변경하지 않고 review 대상으로 남긴다.
+- future commitment처럼 아직 끝나지 않은 유효 Iteration을 현재 기간이라는 이유만으로 일반 검사에서 옮기지 않는다.
 
-Relationship별 automatic scheduling/propagation이 실제 반복 요구가 되기 전에는 common orchestration policy로 추가하지 않는다.
+## Iteration Boundary Recommitment
 
-## Lifecycle reconciliation
+Iteration boundary는 현재 valid Iteration의 exclusive end 시각이다. event가 없더라도 이 경계의 trigger로 Recommitment를 수행한다.
 
-Reconciliation은 canonical meaning을 새로 정의하지 않고 명확한 invariant와 관찰 가능한 event를 live state에 반영한다.
+- 대상은 boundary 처리 직전 live state를 다시 읽었을 때 **open Issue + `In progress` + non-empty valid Iteration**인 Item이다. `Todo`, `Backlog`, terminal/archived Item, 비어 있거나 invalid한 Iteration은 대상이 아니다.
+- stored Iteration의 end를 지났고 그 경계 시각을 포함하는 다음 유효 Iteration이 정확히 하나이면 Iteration만 갱신한다. `In progress`는 유지한다. gap/overlap/unknown definition을 건너뛰어 임의로 가장 가까운 Iteration에 귀속하지 않는다.
+- 재시작 등으로 경계를 놓쳤으면 동일 eligibility를 재검증하며 지난 경계를 시간순으로 따라잡는다. 현재 기간까지의 경로 중 유효한 다음 기간이 없으면 중단하고 판단 대상으로 남긴다. past boundary를 처리하기 위해 이전 Item 상태를 추측하거나 terminal Issue를 다시 활성화하지 않는다.
+- 준비와 적용 사이에 Status, Iteration, Issue state 또는 기간 정의가 바뀌면 기존 intent를 중단하고 다시 읽는다. 재검증 실패를 stale 값으로 강제 적용하지 않는다.
 
-- uncommitted candidate가 Iteration commitment를 얻고 더 강한 work-start signal이 없으면 `Todo`를 materialize할 수 있다.
-- existing `In progress`를 replay convenience만으로 `Todo`로 낮추지 않는다.
-- 실제로 관찰된 work-start signal은 `In progress`를 materialize할 수 있다.
-- `Todo / In progress`에서 commitment가 제거되면 `Backlog` invariant를 복구하되 남아 있는 active Development relation은 별도 inconsistency로 드러낸다.
-- `closed / completed`는 `Done`, `closed / not_planned` 또는 명확한 cancellation은 `Cancelled`로 materialize할 수 있다.
-- close/cancel transition만으로 기존 Iteration을 지우지 않는다.
-- durable product/platform Git-tree implementation이 확인되는데 Iteration이 비어 있으면 reconciliation 대상으로 드러낸다. historical Iteration은 Issue 생성/종료 날짜만으로 자동 추론하지 않는다.
-- substantive reopen과 administrative reopen을 automation이 신뢰성 있게 구분할 수 없다면 Iteration을 일괄 clear하지 않고 review 대상으로 남긴다.
-- unknown/conflicting state나 concurrent change는 임의 overwrite보다 fail/re-read/review를 우선한다.
+## Completion and related work
 
-Work Type, historical Iteration처럼 semantic interpretation이 필요한 값을 automation이 제목·날짜·repository 종류만으로 추론하지 않는다. field completeness 자체는 Project Fields (`docs/fields.md`)가 소유한다.
+- 하나의 Issue에 여러 PR이 기여할 수 있다. PR event는 native Development/closing relation과 명시적 Issue references로 확인되는 관련 Issue만 검사한다. PR merge 자체로 Issue를 닫거나 모든 related Item에 `Done`을 전파하지 않는다.
+- 최초의 명시적 `closed / completed` event는 `Done`, `closed / not_planned` event는 `Cancelled`를 materialize할 수 있다. GitHub closing keyword의 native auto-close도 이 close event 경계를 따른다.
+- close event를 처리할 때 existing Iteration이 non-empty이고 유효한 완료 기간을 선택할 수 있으면 **event의 완료 시각**이 속한 Iteration으로 최종 귀속한 뒤 terminal Status를 쓴다. 완료 기간이 없거나 모호하면 전체 transition을 판단 대상으로 남긴다.
+- empty Iteration을 발견한 close 처리에는 아래 suppression 규칙을 적용한다. 완료 event라는 이유로 의도적 empty 값을 보충하지 않는다.
+- parent/sub-issue, blocks/blocked-by, relates-to는 explicit GitHub relation의 planning context다. related Issue의 Status를 상속·전파하지 않는다. completion은 각 Issue 자신의 Outcome / AC / Evidence가 결정한다.
+
+## Reconciliation and exception boundary
+
+Reconciliation은 정상 event와 명확한 Invariant / Default를 검사하며 의미적 선택을 대신하지 않는다.
+
+- **existing Item의 Iteration이 비어 있으면 원인과 무관하게 의도적 변경으로 취급해 자동 보충과 모든 metadata normalization을 억제한다.** Status, Work Type, native Defaults도 자동 write하지 않는다. 이 gate는 최초 admission과 최초 정상 work-start의 explicit 설정 경로와 구분한다.
+- non-empty 상태에서는 live Invariant / Default와 정상 경로가 확정하는 delta만 계산한다. 이미 충족한 상태는 no-op이며, replay 편의로 `In progress`를 `Todo`로 낮추거나 terminal Iteration을 현재 기간으로 옮기지 않는다.
+- Reopen, state/Status 충돌, historical Iteration 복구, Work Type의 의미 선택, cancellation 여부, 관계의 scheduling 의미와 unknown event는 Knowledge를 읽는 Agent가 직접 판단한다. 예외를 자동 FSM 전이로 확장하지 않는다.
+- write 전에 canonical state와 schema를 읽고 delta를 검증한다. 적용 직전에 기대 state를 재검증하며, 적용 뒤에는 독립적인 canonical read-back으로 결과를 확인한다. 중복 delivery, event 유실, concurrent change, ambiguous write 결과를 새로운 사용자 의도나 완료 Evidence로 추론하지 않는다.
+- 명시적 Agent/사용자 변경은 요청된 정확한 field만 검증·적용하고 read-back한다. 빈 Iteration suppression은 사용자가 지시한 explicit field write를 금지하는 규칙이 아니다.
+
+## Runtime triggers and recovery
+
+공통 실행 책임은 **Engine의 단일 GitHub reconciliation runtime**에 둔다. Plugin의 semantic mutation, webhook processing과 timer가 같은 validation/write boundary를 재사용하며 caller repository에 lifecycle 구현을 복제하지 않는다.
+
+- Repository Issue event는 해당 Issue만 대상으로 한다. PR event는 확인 가능한 관련 Issue만 targeted reconciliation한다.
+- 서버 시작 후 **최초 idle에서 전체 검사 1회**를 수행한다. webhook 처리와 안전한 iteration boundary 작업이 끝나 runtime이 idle인 시점의 live snapshot으로 검사한다. 프로세스 재시작은 새 startup 검사 경계다.
+- 이후 정상 운영은 webhook과 Iteration Boundary Trigger를 사용한다. 기존 5분 주기 전체 스캔은 폐기 대상이며 정상 trigger로 유지하지 않는다.
+- event 유실·중복·재시작의 recovery는 durable delivery/처리 Evidence와 current live state를 사용한다. 이미 처리된 event나 startup 검사를 무조건 재실행하지 않는다. full rescan은 startup 1회 또는 명시적인 복구 요청으로 수행한다.
+- user-owned Project #11의 UI field 변경은 repository webhook으로 직접 감지되지 않는다. GitHub의 [`projects_v2_item` webhook](https://docs.github.com/en/webhooks/webhook-events-and-payloads#projects_v2_item)은 organization-level Project event다. Plugin을 통한 field 변경은 즉시 read-back하고, UI 변경 뒤의 전체 상태 확인은 다음 startup 검사 또는 명시적 재검사 경로를 사용한다. Repository event가 없는 UI 변경에 실시간 관찰을 보장한다고 주장하지 않는다.
+
+## Transition and verification boundary
+
+이 정책의 완료 Evidence는 canonical 문서 변경·검증이며 Engine runtime의 구현·배포·remote mutation Evidence와 구분한다.
+
+- [Engine #122](https://github.com/ooMia/oomia.github.io.engine/issues/122)가 admission/metadata/targeted reconciliation을, [Engine #123](https://github.com/ooMia/oomia.github.io.engine/issues/123)이 startup idle/iteration boundary/recovery를 소유한다. 실제 supported interface와 verification은 Engine 원본을 읽는다.
+- 기존 Knowledge shared Project-admission action, development-state script와 repository별 activation/native workflow는 이 정책으로 구현 완료되었다고 간주하지 않는다. 새 경로의 검증과 repository별 cutover 판단 전에는 기존 code/config를 이 문서 변경만으로 삭제·활성화하지 않는다.
+- cutover에는 남아 있는 conflicting writer와 native Project workflows를 함께 확인하고 실행 책임이 중복되지 않음을 검증한다. 폐기·설정 변경과 남은 작업은 owning Issue/PR에 기록한다. credentials, secrets, account/permission 변경은 Agent Conventions (`docs/agent-conventions.md`)의 사용자 경계를 따른다.
 
 ## Ownership boundary
 
 | Concern | Owner |
 |---|---|
 | Status/Iteration lifecycle meaning, DoD, Evidence | Planning Model (`docs/planning-model.md`) |
-| field schema/cardinality/completeness | Project Fields (`docs/fields.md`) |
+| field Invariant / Default / optional metadata | Project Fields (`docs/fields.md`) |
 | Work Type / Label meaning | Work Classification (`docs/work-classification.md`) |
-| activation / signal / reconciliation materialization contract | 이 문서 |
+| normal-event materialization, trigger and exception semantics | 이 문서 |
 | live Project field values | GitHub Project #11 |
-| Issue / PR / Development relation | GitHub repository native state |
-| common Project admission implementation | Knowledge workflow/action/tests |
-| caller wiring / branch implementation / runtime | executing owning repository |
-
-공통 implementation은 하나의 owner에 두고 caller repository에 복제하지 않는다. 여러 repository-local 차이가 반복되어 실제 coordination invariant가 될 때만 이 POLICY를 확장한다.
+| native Issue / PR / Development relation | GitHub repository native state |
+| common admission/reconciliation implementation and runtime | Engine code/docs/tests |
+| repository-local wiring and verified cutover | 해당 owning repository |
 
 <!-- END SOURCE: docs/project-orchestration.md -->
 
